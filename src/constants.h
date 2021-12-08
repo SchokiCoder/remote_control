@@ -25,10 +25,13 @@
 #define APP_MINOR 0
 
 #ifdef _WIN32
-    #define PATH_SAVES "C:\\"
+    #define SLASH "\\"
 #else
-    #define PATH_SAVES "/home/" getenv("HOME") "/." APP_NAME "/"
+    #define SLASH "/"
 #endif
+
+#define DIR_BASE ("." APP_NAME)
+#define DIR_TOWNS "towns"
 
 #define FILETYPE_TOWN "twn"
 
@@ -37,6 +40,14 @@
 #define MSG_ERR_ARG_MIN (MSG_ERR "Too few arguments passed.\nStopped.\n")
 #define MSG_WARN_ARG_MAX (MSG_WARN "Too many arguments passed.\nAdditional arguments will be ignored.\n")
 #define MSG_ERR_FILE_SAVE (MSG_ERR "File could not be saved.\nMake sure you have permissions to write and read.\n")
+#define MSG_ERR_FILE_LOAD (MSG_ERR "File could not be loaded.\nMake sure the file exists and permissions to read are given.\n")
+#define MSG_ERR_DIR_BASE (MSG_ERR "Game file directory does not exist and could not be created.\n")
+#define MSG_ERR_DIR_TOWN (MSG_ERR "Town file directory does not exist and could not be created.\n")
+#define MSG_ERR_FILE_TOWN_CORRUPT (MSG_ERR "Town file has corrupt information.\n")
+#define MSG_ERR_FILE_TOWN_SAVE (MSG_ERR "New town was not successfully created.\n")
+#define MSG_FILE_TOWN_SAVE "New town was successfully created and is awaiting your commands.\n" 
+#define MSG_ERR_FILE_TOWN_LOAD (MSG_ERR "Town could not be loaded.\n")
+#define MSG_FILE_TOWN_LOAD "Town loaded.\n"
 
 #define CMD_HELP "h"                        /* context dependent: behaving different in-game and outside of game */
 #define CMD_HELP_LONG "help"

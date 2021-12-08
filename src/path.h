@@ -16,15 +16,12 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef TOOLS_H
-#define TOOLS_H
+#ifndef PATH_H
+#define PATH_H
 
 #include <stdint.h>
 
-struct Town;
-
-void print_town(char* p_town_name, struct Town* p_in);
-int32_t save_town(char* p_town_name, struct Town* p_in);
-int32_t load_town(char* p_town_name, struct Town* p_out);
+int32_t get_base_path(char* p_out);
+int32_t get_town_path(char* p_out);
 
 #endif

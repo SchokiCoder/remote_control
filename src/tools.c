@@ -20,11 +20,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <dirent.h>
-#include <errno.h>
-#include <sys/stat.h>
 #include "town.h"
 #include "constants.h"
+#include "path.h"
 #include "tools.h"
 
 void print_town(char* p_town_name, struct Town* p_in)
@@ -33,9 +31,9 @@ void print_town(char* p_town_name, struct Town* p_in)
     printf("%s\n\n", p_town_name);
     
     //exposure
-    for (uint32_t x = 0; x < 15; x++)
+    for (uint32_t x = 0; x < TOWN_WIDTH; x++)
     {
-        for (uint32_t y = 0; y < 15; y++)
+        for (uint32_t y = 0; y < TOWN_DEPTH; y++)
         {
             printf("%i", p_in->area_hidden[x][y]);
         }
@@ -46,9 +44,9 @@ void print_town(char* p_town_name, struct Town* p_in)
     printf("\n");
 
     //content
-    for (uint32_t x = 0; x < 15; x++)
+    for (uint32_t x = 0; x < TOWN_WIDTH; x++)
     {
-        for (uint32_t y = 0; y < 15; y++)
+        for (uint32_t y = 0; y < TOWN_DEPTH; y++)
         {
             printf("%i", p_in->area_content[x][y]);
         }
@@ -57,32 +55,17 @@ void print_town(char* p_town_name, struct Town* p_in)
     }
 }
 
-void save_town(char* p_town_name, struct Town* p_in)
+int32_t save_town(char* p_town_name, struct Town* p_in)
 {
     char filepath[1024] = "";
     FILE* f;
-    DIR* dir;
+    uint32_t town_width = TOWN_WIDTH;
+    uint32_t town_depth = TOWN_DEPTH;
 
-    //glue path to save dir
-    strcat(filepath, getenv("HOME"));
-    strcat(filepath, "/.remote_control/");
-
-    //check if save dir exists
-    dir = opendir(filepath);
-
-    if (dir)
-        closedir(dir);
-    else if (ENOENT == errno)
-    {
-        //create dir
-        mkdir(filepath, S_IRWXU);
-    }
-    else
-    {
-        printf("Directory to saves is not available.\nMake sure you have enough permissions.\n");
-        return;
-    }
-
+    //get path
+    if (get_town_path(filepath) != 0)
+        return 1;
+    
     //glue file part to path
     strcat(filepath, p_town_name);
     strcat(filepath, ".");
@@ -94,19 +77,99 @@ void save_town(char* p_town_name, struct Town* p_in)
     if (f == NULL)
     {
         printf(MSG_ERR_FILE_SAVE);
-        return;
+        return 2;
     }
 
+    //write header
+    fwrite(&town_width, sizeof(town_width), 1, f);
+    fwrite(&town_depth, sizeof(town_depth), 1, f);
+    fputc('\n', f);
+
     //write exposure data
-    fputc(1, f);
-    fputc(0, f);
-    fputc(2000000000, f);
+    for (uint32_t x = 0; x < TOWN_WIDTH; x++)
+    {
+        fwrite(p_in->area_hidden[x], sizeof(p_in->area_hidden[x][0]), TOWN_DEPTH, f);
+    }
 
     //write content data
+    for (uint32_t x = 0; x < TOWN_WIDTH; x++)
+    {
+        fwrite(p_in->area_content[x], sizeof(p_in->area_content[x][0]), TOWN_DEPTH, f);
+    }
 
-
+    //check and done
+    if (ferror(f))
+    {
+        printf(MSG_ERR_FILE_TOWN_SAVE);
+        fclose(f);
+        return 3;
+    }
+    
+    printf(MSG_FILE_TOWN_SAVE);
     fclose(f);
+    return 0;
 }
 
-void load_town(char* p_town_name, struct Town* p_out)
-{}
+int32_t load_town(char* p_town_name, struct Town* p_out)
+{
+    FILE *f;
+    char filepath[1024] = "";
+    uint32_t town_width, town_depth;
+    
+    //get path
+    if (get_town_path(filepath) != 0)
+        return 1;
+
+    //glue file part to path
+    strcat(filepath, p_town_name);
+    strcat(filepath, ".");
+    strcat(filepath, FILETYPE_TOWN);
+
+    //open
+    f = fopen(filepath, "r");
+
+    if (f == NULL)
+    {
+        printf(MSG_ERR_FILE_LOAD);
+        return 2;
+    }
+
+    //read header
+    fread(&town_width, sizeof(town_width), 1, f);
+    fread(&town_depth, sizeof(town_depth), 1, f);
+    fgetc(f);
+
+    //check header info
+    if (
+        !((town_width == TOWN_WIDTH) &
+        (town_depth == TOWN_DEPTH))
+       )
+    {
+        printf(MSG_ERR_FILE_TOWN_CORRUPT);
+        return 3;
+    }
+
+    //read exposure data
+    for (uint32_t x = 0; x < TOWN_WIDTH; x++)
+    {
+        fread(p_out->area_hidden[x], sizeof(p_out->area_hidden[x][0]), TOWN_DEPTH, f);
+    }
+
+    //read content data
+    for (uint32_t x = 0; x < TOWN_WIDTH; x++)
+    {
+        fread(p_out->area_content[x], sizeof(p_out->area_content[x][0]), TOWN_DEPTH, f);
+    }
+
+    //check and done
+    if (ferror(f))
+    {
+        printf(MSG_ERR_FILE_TOWN_LOAD);
+        fclose(f);
+        return 4;
+    }
+    
+    printf(MSG_FILE_TOWN_LOAD);
+    fclose(f);
+    return 0;
+}
