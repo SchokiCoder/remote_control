@@ -37,6 +37,8 @@
 
 #define MSG_ERR "ERROR: "
 #define MSG_WARN "WARNING: "
+#define MSG_SDL_ERR "SDL-Err: %s\n"
+#define MSG_GL_ERR "GL-Err: %s\n"
 #define MSG_ERR_ARG_MIN (MSG_ERR "Too few arguments passed.\nStopped.\n")
 #define MSG_WARN_ARG_MAX (MSG_WARN "Too many arguments passed.\nAdditional arguments will be ignored.\n")
 #define MSG_ERR_FILE_SAVE (MSG_ERR "File could not be saved.\nMake sure you have permissions to write and read.\n")
@@ -52,7 +54,13 @@
 #define MSG_WARN_FILE_TOWN_EXIST (MSG_WARN "The town already exists, type 'y' if you are sure to proceed.\n")
 #define MSG_ERR_ADMIN_ID (MSG_ERR "Given admin id does not exist.\nUse \"" CMD_LIST_ADMINS_LONG "\" command to make your decision.\n")
 #define MSG_TOWN_CREATION_STOPPED "Town creation stopped.\n"
-#define MSG_ERR_SDL_INIT (MSG_ERR "SDL could not be initialized.\nSDL-Err: %s\n")
+#define MSG_ERR_SDL_INIT (MSG_ERR "SDL could not be initialized.\n" MSG_SDL_ERR)
+#define MSG_ERR_SDL_WINDOW (MSG_ERR "SDL could not open a window.\n" MSG_SDL_ERR)
+#define MSG_ERR_SDL_RENDERER (MSG_ERR "SDL could not create a renderer.\n" MSG_SDL_ERR)
+#define MSG_ERR_GL_CONTEXT (MSG_ERR "OpenGL context could not be created.\n" MSG_GL_ERR)
+#define MSG_ERR_GL_PROJECTION_MATRIX (MSG_ERR "OpenGL projection matrix failed to set up.\n" MSG_GL_ERR)
+#define MSG_ERR_GL_MODELVIEW_MATRIX (MSG_ERR "OpenGL modelview matrix failed to set up.\n" MSG_GL_ERR)
+#define MSG_ERR_GL_CLEAR_COLOR (MSG_ERR "OpenGL clear color could not be set.\n" MSG_GL_ERR)
 
 #define CMD_HELP "h"                        /* context dependent: behaving different in-game and outside of game */
 #define CMD_HELP_LONG "help"
@@ -96,5 +104,12 @@
 "\n" \
 "  connect to a towns administrator and get to work:\n" \
 "  " CMD_CONNECT ",\t" CMD_CONNECT_LONG "\t\tTOWN_NAME\n"
+
+#define WINDOW_WIDTH 640
+#define WINDOW_HEIGHT 480
+
+#define COLOR_BG_RED    0.05f
+#define COLOR_BG_GREEN  0.05f
+#define COLOR_BG_BLUE   0.2f
 
 #endif

@@ -28,6 +28,7 @@
 #include "town.h"
 #include "tools.h"
 #include "path.h"
+#include "game.h"
 #include "commands.h"
 
 void cmd_help_outgame()
@@ -170,112 +171,6 @@ void cmd_list_towns()
     closedir(dir);
 
     printf("\n");
-}
-
-/* 
-  This is the part where the real game begins.
-  I did not watch too many MittenSquad videos.
-*/
-
-enum GameCmd
-{
-    GCMD_NONE
-};
-
-enum GameResponse
-{
-    GRSP_NONE,
-    GRSP_STOPPED
-};
-
-struct GameData
-{
-    char* window_title;
-    struct Town* town;
-    enum GameCmd cmd;           /* 1-way stream to inform gfx-window what to do */
-    enum GameResponse rsp;      /* 1-way stream to provide feedback from the gfx-window */
-};
-
-int32_t gfx_game(void* p_data)
-{
-    bool active = true;
-    SDL_Window* window;
-    SDL_Event event;
-    struct GameData* data = (struct GameData*) (p_data);
-    
-    //init SDL
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
-    {
-        printf(MSG_ERR_SDL_INIT, SDL_GetError());
-        return 1;
-    }
-    
-    //create window
-    window = SDL_CreateWindow(
-        data->window_title,
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
-        640,
-        480,
-        0);
-
-    //mainloop
-    while (active)
-    {
-        //handle terminal command-signals
-        switch (data->cmd)
-        {
-        case GCMD_NONE:
-        break;
-        }
-
-        //handle sdl-events
-        while (SDL_PollEvent(&event))
-        {
-            switch (event.type)
-            {
-            //window closed
-            case SDL_QUIT:
-                //stop gfx mainloop
-                active = false;
-            break;
-            }
-        }
-    }
-
-    //send stop response
-    data->rsp = GRSP_STOPPED;
-
-    //destroy window
-    SDL_DestroyWindow(window);
-
-    //quit sdl
-    SDL_Quit();
-
-    return 0;
-}
-
-int32_t terminal_game(struct GameData* data)
-{
-    bool active = true;
-    
-    //mainloop
-    while (active)
-    {
-        switch (data->rsp)
-        {
-        case GRSP_NONE:
-        break;
-
-        //gfx window stopped
-        case GRSP_STOPPED:
-            //stop
-            active = false;
-        break;
-        }
-    }
-
-    return 0;
 }
 
 void cmd_connect(char* p_town_name)
