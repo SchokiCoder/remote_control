@@ -20,10 +20,14 @@
 #include <stdint.h>
 #include <time.h>
 #include <stdlib.h>
+#include <string.h>
+#include <dirent.h>
+#include <SDL2/SDL.h>
 #include "constants.h"
 #include "administrators.h"
 #include "town.h"
 #include "tools.h"
+#include "path.h"
 #include "commands.h"
 
 void cmd_help_outgame()
@@ -49,6 +53,9 @@ void cmd_hire_admin(int32_t p_admin_id, char* p_town_name)
     struct Town new_game;
     float tree_chance;
     time_t rng_seed;
+    char filepath[1024] = "";
+    FILE* f;
+    char confirmation;
     
     time(&rng_seed);
     srand(rng_seed);
@@ -58,14 +65,34 @@ void cmd_hire_admin(int32_t p_admin_id, char* p_town_name)
         (p_admin_id != ADMIN_2_ID) &
         (p_admin_id != ADMIN_3_ID))
     {
-        printf("Given admin id does not exist.\nUse \"" CMD_LIST_ADMINS_LONG "\" command to make your decision.\n");
+        printf(MSG_ERR_ADMIN_ID);
         return;
     }
 
-    //check if town already exists
-    if (true)
+    //check if town file already exists (by trying to read it)
+    if (get_town_path(filepath) != 0)
+        return;
+
+    strcat(filepath, p_town_name);
+    strcat(filepath, ".");
+    strcat(filepath, FILETYPE_TOWN);
+
+    f = fopen(filepath, "r");
+
+    if (f != NULL)
     {
-        printf("resolve me %s");
+        printf(MSG_WARN_FILE_TOWN_EXIST);
+        confirmation = getchar();
+    }
+    else
+    {
+        confirmation = 'y';
+    }
+
+    if (confirmation != 'y')
+    {
+        printf(MSG_TOWN_CREATION_STOPPED);
+        return;
     }
 
     //get values
@@ -110,14 +137,171 @@ void cmd_hire_admin(int32_t p_admin_id, char* p_town_name)
 
 void cmd_list_towns()
 {
+    char path[1024] = "";
+    DIR* dir;
+    struct dirent* d_ent;
+    char* substr = NULL;
 
+    //open town dir
+    if (get_town_path(path) != 0)
+        return;
+
+    dir = opendir(path);
+
+    if (dir == NULL)
+    {
+        printf(MSG_ERR_DIR_TOWNS);
+    }
+
+    //for all dirents
+    while ((d_ent = readdir(dir)) != NULL)
+    {
+        //see if name contains filetype
+        substr = strstr(d_ent->d_name, FILETYPE_TOWN);
+
+        //if so, print and reset substr
+        if (substr != NULL)
+        {
+            printf("%s\n", d_ent->d_name);
+            substr = NULL;
+        }
+    }
+
+    closedir(dir);
+
+    printf("\n");
+}
+
+/* 
+  This is the part where the real game begins.
+  I did not watch too many MittenSquad videos.
+*/
+
+enum GameCmd
+{
+    GCMD_NONE
+};
+
+enum GameResponse
+{
+    GRSP_NONE,
+    GRSP_STOPPED
+};
+
+struct GameData
+{
+    char* window_title;
+    struct Town* town;
+    enum GameCmd cmd;           /* 1-way stream to inform gfx-window what to do */
+    enum GameResponse rsp;      /* 1-way stream to provide feedback from the gfx-window */
+};
+
+int32_t gfx_game(void* p_data)
+{
+    bool active = true;
+    SDL_Window* window;
+    SDL_Event event;
+    struct GameData* data = (struct GameData*) (p_data);
+    
+    //init SDL
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+    {
+        printf(MSG_ERR_SDL_INIT, SDL_GetError());
+        return 1;
+    }
+    
+    //create window
+    window = SDL_CreateWindow(
+        data->window_title,
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        640,
+        480,
+        0);
+
+    //mainloop
+    while (active)
+    {
+        //handle terminal command-signals
+        switch (data->cmd)
+        {
+        case GCMD_NONE:
+        break;
+        }
+
+        //handle sdl-events
+        while (SDL_PollEvent(&event))
+        {
+            switch (event.type)
+            {
+            //window closed
+            case SDL_QUIT:
+                //stop gfx mainloop
+                active = false;
+            break;
+            }
+        }
+    }
+
+    //send stop response
+    data->rsp = GRSP_STOPPED;
+
+    //destroy window
+    SDL_DestroyWindow(window);
+
+    //quit sdl
+    SDL_Quit();
+
+    return 0;
+}
+
+int32_t terminal_game(struct GameData* data)
+{
+    bool active = true;
+    
+    //mainloop
+    while (active)
+    {
+        switch (data->rsp)
+        {
+        case GRSP_NONE:
+        break;
+
+        //gfx window stopped
+        case GRSP_STOPPED:
+            //stop
+            active = false;
+        break;
+        }
+    }
+
+    return 0;
 }
 
 void cmd_connect(char* p_town_name)
 {
+    struct Town town;
+    struct GameData game_data;
+    SDL_Thread* gfx_thread;
+    int32_t gfx_rc;
+    
     //load game
+    if (load_town(p_town_name, &town) != 0)
+        return;
 
-    //init systems
+    //prepare data of gfx part
+    game_data.window_title = p_town_name;
+    game_data.town = &town;
+    game_data.cmd = GCMD_NONE;
+    game_data.rsp = GRSP_NONE;
 
-    //mainloop
+    //start gfx part in seperate thread
+    gfx_thread = SDL_CreateThread(gfx_game, "thread_gfx", &game_data);
+
+    //start terminal game part
+    terminal_game(&game_data);
+
+    //wait for gfx thread to finish
+    SDL_WaitThread(gfx_thread, &gfx_rc);
+    gfx_thread = NULL;
 }

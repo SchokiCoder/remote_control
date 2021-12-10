@@ -76,6 +76,35 @@ int main(int argc, char *argv[])
         
         cmd_hire_admin(admin_id, argv[3]);
     }
+    else if ((strcmp(argv[1], CMD_LIST_TOWNS) == 0) |
+        (strcmp(argv[1], CMD_LIST_TOWNS_LONG) == 0))
+    {
+        //check argc max
+        if (argc > 2)
+        {
+            printf(MSG_WARN_ARG_MAX);
+        }
+
+        cmd_list_towns();
+    }
+    else if ((strcmp(argv[1], CMD_CONNECT) == 0) |
+        (strcmp(argv[1], CMD_CONNECT_LONG) == 0))
+    {
+        //check argc min
+        if (argc < 3)
+        {
+            printf(MSG_ERR_ARG_MIN);
+            return 0;
+        }
+
+        //check argc max
+        if (argc > 3)
+        {
+            printf(MSG_WARN_ARG_MAX);
+        }
+
+        cmd_connect(argv[2]);
+    }
     else
     {
         printf("Command not recognised.\nUse \"%s\" command for information on usage.\n", CMD_HELP_LONG);

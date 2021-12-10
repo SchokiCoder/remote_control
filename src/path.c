@@ -72,7 +72,7 @@ int32_t get_town_path(char* p_out)
     {
         if (errno != EEXIST)
         {
-            printf(MSG_ERR_DIR_TOWN);
+            printf(MSG_ERR_DIR_TOWNS_CREATE);
             return 1;
         }
     }

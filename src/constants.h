@@ -42,12 +42,17 @@
 #define MSG_ERR_FILE_SAVE (MSG_ERR "File could not be saved.\nMake sure you have permissions to write and read.\n")
 #define MSG_ERR_FILE_LOAD (MSG_ERR "File could not be loaded.\nMake sure the file exists and permissions to read are given.\n")
 #define MSG_ERR_DIR_BASE (MSG_ERR "Game file directory does not exist and could not be created.\n")
-#define MSG_ERR_DIR_TOWN (MSG_ERR "Town file directory does not exist and could not be created.\n")
+#define MSG_ERR_DIR_TOWNS_CREATE (MSG_ERR "Town file directory does not exist and could not be created.\n")
+#define MSG_ERR_DIR_TOWNS (MSG_ERR "Town file directory does not exist.\n")
 #define MSG_ERR_FILE_TOWN_CORRUPT (MSG_ERR "Town file has corrupt information.\n")
 #define MSG_ERR_FILE_TOWN_SAVE (MSG_ERR "New town was not successfully created.\n")
 #define MSG_FILE_TOWN_SAVE "New town was successfully created and is awaiting your commands.\n" 
 #define MSG_ERR_FILE_TOWN_LOAD (MSG_ERR "Town could not be loaded.\n")
 #define MSG_FILE_TOWN_LOAD "Town loaded.\n"
+#define MSG_WARN_FILE_TOWN_EXIST (MSG_WARN "The town already exists, type 'y' if you are sure to proceed.\n")
+#define MSG_ERR_ADMIN_ID (MSG_ERR "Given admin id does not exist.\nUse \"" CMD_LIST_ADMINS_LONG "\" command to make your decision.\n")
+#define MSG_TOWN_CREATION_STOPPED "Town creation stopped.\n"
+#define MSG_ERR_SDL_INIT (MSG_ERR "SDL could not be initialized.\nSDL-Err: %s\n")
 
 #define CMD_HELP "h"                        /* context dependent: behaving different in-game and outside of game */
 #define CMD_HELP_LONG "help"
