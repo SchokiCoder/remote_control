@@ -105,8 +105,8 @@
 "  connect to a towns administrator and get to work:\n" \
 "  " CMD_CONNECT ",\t" CMD_CONNECT_LONG "\t\tTOWN_NAME\n"
 
-#define WINDOW_WIDTH 640
-#define WINDOW_HEIGHT 480
+#define WINDOW_WIDTH 600.0f
+#define WINDOW_HEIGHT 600.0f
 
 #define COLOR_BG_RED    0.05f
 #define COLOR_BG_GREEN  0.05f

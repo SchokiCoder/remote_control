@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "constants.h"
+#include "town.h"
 #include "game.h"
 
 int32_t gfx_game(void* p_data)
@@ -31,7 +32,11 @@ int32_t gfx_game(void* p_data)
     GLenum gl_err = GL_NO_ERROR;
     SDL_Event event;
     struct GameData* data = (struct GameData*) (p_data);
-    
+    float area_scale_x, area_scale_y;
+    float field_size_x, field_size_y;
+    struct Vertex verts[TOWN_WIDTH][TOWN_DEPTH];
+    struct Color colrs[TOWN_WIDTH][TOWN_DEPTH];
+
     //init SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
@@ -96,7 +101,7 @@ int32_t gfx_game(void* p_data)
         return 5;
     }
 
-    //init gl clear color
+    //set gl clear color
     glClearColor(COLOR_BG_RED, COLOR_BG_GREEN, COLOR_BG_BLUE, 1.0f);
 
     gl_err = glGetError();
@@ -107,6 +112,55 @@ int32_t gfx_game(void* p_data)
         return 6;
     }
 
+    //set perspective
+    //glRotatef(45.0f, 1.0f, 0.0f, 1.0f);
+
+    //calculate area scale
+    if (WINDOW_WIDTH == WINDOW_HEIGHT)
+    {
+        area_scale_x = 1.0f;
+        area_scale_y = 1.0f;
+    }
+    else if (WINDOW_WIDTH / WINDOW_HEIGHT > 1.0f)
+    {
+        area_scale_x = WINDOW_HEIGHT / WINDOW_WIDTH;
+        area_scale_y = 1.0f;
+    }
+    else
+    {
+        area_scale_x = 1.0f;
+        area_scale_y = WINDOW_WIDTH / WINDOW_HEIGHT;
+    }
+
+    //calculate field size
+    field_size_x = area_scale_x / (float) TOWN_WIDTH;
+    field_size_y = area_scale_y / (float) TOWN_DEPTH;
+    
+    //calculate vertices and colors
+    for (uint32_t x = 0; x < TOWN_WIDTH; x++)
+    {
+        for (uint32_t y = 0; y < TOWN_DEPTH; y++)
+        {
+            verts[x][y].x1 = (area_scale_x / 2.0f) + (float) x * -1.0f * field_size_x;
+            verts[x][y].x2 = verts[x][y].x1 + field_size_x;
+            verts[x][y].y1 = (area_scale_y / 2.0f) + (float) y * -1.0f * field_size_y;
+            verts[x][y].y2 = verts[x][y].y1 + field_size_y;
+
+            if (data->town->area_hidden[x][y] == true)
+            {
+                colrs[x][y].r = 0;
+                colrs[x][y].g = 0;
+                colrs[x][y].b = 0;
+            }
+            else
+            {
+                colrs[x][y].r = 100;
+                colrs[x][y].g = 255;
+                colrs[x][y].b = 100;
+            }
+        }
+    }
+
     //mainloop
     while (active)
     {
@@ -114,14 +168,30 @@ int32_t gfx_game(void* p_data)
         {
             glClear(GL_COLOR_BUFFER_BIT);
 
-            glBegin(GL_QUADS);
+            /*glBegin(GL_QUADS);
+            
+            glVertex2f(area_scale_x * -1.0f, area_scale_y * -1.0f);
+            glVertex2f(area_scale_x * -1.0f, area_scale_y);
+            glVertex2f(area_scale_x, area_scale_y);
+            glVertex2f(area_scale_x, area_scale_y * -1.0f);
 
-            glVertex2f(-0.9f, -0.9f);
-            glVertex2f(0.9f, -0.9f);
-            glVertex2f(0.9f, 0.9f);
-            glVertex2f(-0.9f, 0.9f);
+            glEnd();*/
 
-            glEnd();
+            for (uint32_t x = 0; x < TOWN_WIDTH; x++)
+            {
+                for (uint32_t y = 0; y < TOWN_DEPTH; y++)
+                {
+                    glBegin(GL_QUADS);
+                    
+                    glColor3ub(colrs[x][y].r, colrs[x][y].g, colrs[x][y].b);
+                    glVertex2f(verts[x][y].x1, verts[x][y].y1);
+                    glVertex2f(verts[x][y].x2, verts[x][y].y1);
+                    glVertex2f(verts[x][y].x2, verts[x][y].y2);
+                    glVertex2f(verts[x][y].x1, verts[x][y].y2);
+
+                    glEnd();
+                }
+            }
 
             SDL_GL_SwapWindow(window);
         }

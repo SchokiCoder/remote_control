@@ -23,6 +23,21 @@
 
 struct Town;
 
+struct Color
+{
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+};
+
+struct Vertex
+{
+    float x1;
+    float y1;
+    float x2;
+    float y2;
+};
+
 enum GameCmd
 {
     GCMD_NONE
