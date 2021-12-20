@@ -62,6 +62,8 @@
 #define MSG_ERR_GL_MODELVIEW_MATRIX (MSG_ERR "OpenGL modelview matrix failed to set up.\n" MSG_GL_ERR)
 #define MSG_ERR_GL_CLEAR_COLOR (MSG_ERR "OpenGL clear color could not be set.\n" MSG_GL_ERR)
 #define MSG_ERR_GLEW_INIT (MSG_ERR "Glew could not be initialized.\n" MSG_GL_ERR)
+#define MSG_ERR_SHADER_COMPILE (MSG_ERR "Shader could not be compiled.\n")
+#define MSG_ERR_FILE_READ (MSG_ERR "File \"%s\" could not be read.\n")
 
 #define CMD_HELP "h"                        /* context dependent: behaving different in-game and outside of game */
 #define CMD_HELP_LONG "help"
@@ -112,5 +114,13 @@
 #define COLOR_BG_RED    0.05f
 #define COLOR_BG_GREEN  0.05f
 #define COLOR_BG_BLUE   0.2f
+
+#define FIELD_VERTS (2 * 3)
+#define TOWN_VERTS (TOWN_WIDTH * TOWN_DEPTH * FIELD_VERTS)
+
+#define PATH_SHADER_DIR "assets/shader/"
+#define PATH_VERT_SHADER (PATH_SHADER_DIR "vert.glsl")
+#define PATH_FRAG_SHADER_HIDDEN (PATH_SHADER_DIR "hidden.glsl")
+#define PATH_FRAG_SHADER_EXPOSED (PATH_SHADER_DIR "exposed.glsl")
 
 #endif

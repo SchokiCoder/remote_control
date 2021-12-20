@@ -16,34 +16,44 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef GAME_H
-#define GAME_H
+#ifndef DRAW_H
+#define DRAW_H
 
-#include <stdint.h>
+#include <GL/glew.h>
 
-struct Town;
-
-enum GameCmd
+struct Vertex
 {
-    GCMD_NONE
+    float x;
+    float y;
+    float z;
 };
 
-enum GameResponse
+struct Triangle
 {
-    GRSP_NONE,
-    GRSP_STOPPED
+    struct Vertex a;
+    struct Vertex b;
+    struct Vertex c;
 };
 
-struct GameData
+struct Face
 {
-    char* window_title;
-    struct Town* town;
-    enum GameCmd cmd;           /* 1-way stream to inform gfx-window what to do */
-    enum GameResponse rsp;      /* 1-way stream to provide feedback from the gfx-window */
+    struct Triangle a;
+    struct Triangle b;
 };
 
-int32_t gfx_game(void* p_data);
+struct VertexBuffer
+{
+    GLuint vao;         /* vertex array object */
+    GLuint buffer_id;
+    uint32_t num_verts;
+};
 
-int32_t terminal_game(struct GameData* data);
+void VertexBuffer_new(struct VertexBuffer* self, void* p_data, uint32_t p_num_verts);
+
+void VertexBuffer_delete(struct VertexBuffer* self);
+
+void VertexBuffer_bind(struct VertexBuffer* self);
+
+void VertexBuffer_unbind(struct VertexBuffer* self);
 
 #endif

@@ -24,26 +24,9 @@
 #include <stdbool.h>
 #include "constants.h"
 #include "town.h"
+#include "draw.h"
+#include "shader.h"
 #include "game.h"
-
-void draw_triangle(struct Vertex *p_a, struct Vertex *p_b, struct Vertex *p_c, struct Color *p_color)
-{
-    glColor3f(p_color->r, p_color->g, p_color->b);
-    
-    glBegin(GL_TRIANGLE_STRIP);
-
-    glVertex3f(p_a->x, p_a->y, p_a->z);
-    glVertex3f(p_b->x, p_b->y, p_c->z);
-    glVertex3f(p_c->x, p_c->y, p_c->z);
-
-    glEnd();
-}
-
-void draw_face(struct Face *p_face, struct Color *p_color)
-{
-    draw_triangle(&p_face->a, &p_face->b, &p_face->c, p_color);
-    draw_triangle(&p_face->b, &p_face->c, &p_face->d, p_color);
-}
 
 int32_t gfx_game(void* p_data)
 {
@@ -51,13 +34,12 @@ int32_t gfx_game(void* p_data)
     SDL_Window* window;
     SDL_GLContext* glc;
     GLenum gl_err = GL_NO_ERROR;
-    GLuint vert_buf;
+    struct VertexBuffer vtb_terrain;
     SDL_Event event;
     struct GameData* data = (struct GameData*) (p_data);
     float area_scale_x, area_scale_y;
     float field_size_x, field_size_y;
     struct Face faces[TOWN_WIDTH][TOWN_DEPTH];
-    struct Color colrs[TOWN_WIDTH][TOWN_DEPTH];
 
     //init SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
@@ -141,10 +123,6 @@ int32_t gfx_game(void* p_data)
         printf(MSG_ERR_GLEW_INIT, glewGetErrorString(gl_err));
         return 7;
     }
-    
-    //create vertex buffer
-    glGenBuffers(1, &vert_buf);
-    glBindBuffer(GL_ARRAY_BUFFER, vert_buf);
 
     //calculate area scale
     if (WINDOW_WIDTH == WINDOW_HEIGHT)
@@ -167,62 +145,79 @@ int32_t gfx_game(void* p_data)
     field_size_x = area_scale_x / (float) TOWN_WIDTH;
     field_size_y = area_scale_y / (float) TOWN_DEPTH;
     
-    //calculate vertices and colors
+    //calculate vertices and define shader
     for (uint32_t x = 0; x < TOWN_WIDTH; x++)
     {
         for (uint32_t y = 0; y < TOWN_DEPTH; y++)
-        {
-            faces[x][y].a.x = (area_scale_x / 2.0f) + (float) x * -1.0f * field_size_x;
-            faces[x][y].a.y = (area_scale_y / 2.0f) + (float) y * -1.0f * field_size_y;
-            faces[x][y].a.z = 0.0f;
-            faces[x][y].b.x = faces[x][y].a.x + field_size_x;
-            faces[x][y].b.y = faces[x][y].a.y;
-            faces[x][y].b.z = 0.0f;
-            faces[x][y].c.x = faces[x][y].a.x;
-            faces[x][y].c.y = faces[x][y].a.y + field_size_y;
-            faces[x][y].c.z = 0.0f;
-            faces[x][y].d.x = faces[x][y].a.x + field_size_x;
-            faces[x][y].d.y = faces[x][y].a.y + field_size_y;
-            faces[x][y].d.z = 0.0f;
+        { 
+            faces[x][y].a.a.x = (area_scale_x / 2.0f) + (float) x * -1.0f * field_size_x;
+            faces[x][y].a.a.y = (area_scale_y / 2.0f) + (float) y * -1.0f * field_size_y;
+            faces[x][y].a.a.z = 0.0f;
 
-            if (data->town->area_hidden[x][y] == true)
-            {
-                colrs[x][y].r = 0;
-                colrs[x][y].g = 0;
-                colrs[x][y].b = 0;
-            }
-            else
-            {
-                colrs[x][y].r = 100;
-                colrs[x][y].g = 255;
-                colrs[x][y].b = 100;
-            }
+            faces[x][y].a.b.x = faces[x][y].a.a.x + field_size_x;
+            faces[x][y].a.b.y = faces[x][y].a.a.y;
+            faces[x][y].a.b.z = faces[x][y].a.a.z;
+
+            faces[x][y].a.c.x = faces[x][y].a.a.x;
+            faces[x][y].a.c.y = faces[x][y].a.a.y + field_size_y;
+            faces[x][y].a.c.z = faces[x][y].a.a.z;
+
+            faces[x][y].b.a.x = faces[x][y].a.b.x;
+            faces[x][y].b.a.y = faces[x][y].a.b.y;
+            faces[x][y].b.a.z = faces[x][y].a.b.z;
+
+            faces[x][y].b.b.x = faces[x][y].a.c.x;
+            faces[x][y].b.b.y = faces[x][y].a.c.y;
+            faces[x][y].b.b.z = faces[x][y].a.c.z;
+
+            faces[x][y].b.c.x = faces[x][y].a.a.x + field_size_x;
+            faces[x][y].b.c.y = faces[x][y].a.a.y + field_size_y;
+            faces[x][y].b.c.z = faces[x][y].a.a.z;
         }
     }
 
-    //send vertices into vert buffer
-    glBufferData(GL_ARRAY_BUFFER, TOWN_WIDTH * TOWN_DEPTH * sizeof(struct Face), faces, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(struct Vertex), offsetof(struct Face, a));
+    //create vertex buffer
+    VertexBuffer_new(&vtb_terrain, &faces, TOWN_VERTS);
+
+    //bind vert buf
+    VertexBuffer_bind(&vtb_terrain);
+
+    //load shader
+    struct Shader shdr_hidden;
+    struct Shader shdr_exposed;
+
+    Shader_new(&shdr_hidden, PATH_VERT_SHADER, PATH_FRAG_SHADER_HIDDEN);
+    Shader_new(&shdr_exposed, PATH_VERT_SHADER, PATH_FRAG_SHADER_EXPOSED);
 
     //mainloop
+    uint32_t vert_offset;
+
     while (active)
     {
         //draw to window
+        glClear(GL_COLOR_BUFFER_BIT);
+        vert_offset = 0;
+
+        for (uint32_t x = 0; x < TOWN_WIDTH; x++)
         {
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            glDrawArrays(GL_TRIANGLES, 0, TOWN_WIDTH * TOWN_DEPTH);
-            /*for (uint32_t x = 0; x < TOWN_WIDTH; x++)
+            for (uint32_t y = 0; y < TOWN_DEPTH; y++)
             {
-                for (uint32_t y = 0; y < TOWN_DEPTH; y++)
+                if (data->town->area_hidden[x][y] == true)
                 {
-                    
+                    Shader_bind(&shdr_hidden);
                 }
-            }*/
+                else
+                {
+                    Shader_bind(&shdr_exposed);
+                }
 
-            SDL_GL_SwapWindow(window);
+                glDrawArrays(GL_TRIANGLES, vert_offset, FIELD_VERTS);
+
+                vert_offset += FIELD_VERTS;
+            }
         }
+
+        SDL_GL_SwapWindow(window);
         
         //handle terminal command-signals
         switch (data->cmd)

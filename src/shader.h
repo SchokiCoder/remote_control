@@ -16,34 +16,22 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef GAME_H
-#define GAME_H
+#ifndef SHADER_H
+#define SHADER_H
 
-#include <stdint.h>
+#include <GL/glew.h>
 
-struct Town;
-
-enum GameCmd
+struct Shader
 {
-    GCMD_NONE
+    GLuint shader_id;
 };
 
-enum GameResponse
-{
-    GRSP_NONE,
-    GRSP_STOPPED
-};
+void Shader_new(struct Shader* self, const char* p_vert_shader_filename, const char* p_frag_shader_filename);
 
-struct GameData
-{
-    char* window_title;
-    struct Town* town;
-    enum GameCmd cmd;           /* 1-way stream to inform gfx-window what to do */
-    enum GameResponse rsp;      /* 1-way stream to provide feedback from the gfx-window */
-};
+void Shader_destroy(struct Shader* self);
 
-int32_t gfx_game(void* p_data);
+void Shader_bind(struct Shader* self);
 
-int32_t terminal_game(struct GameData* data);
+void Shader_unbind();
 
 #endif
