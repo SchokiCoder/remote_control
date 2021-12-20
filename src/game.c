@@ -17,6 +17,8 @@
 */
 
 #include <SDL2/SDL.h>
+#define GLEW_STATIC
+#include <GL/glew.h>
 #include <GL/glu.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -24,17 +26,37 @@
 #include "town.h"
 #include "game.h"
 
+void draw_triangle(struct Vertex *p_a, struct Vertex *p_b, struct Vertex *p_c, struct Color *p_color)
+{
+    glColor3f(p_color->r, p_color->g, p_color->b);
+    
+    glBegin(GL_TRIANGLE_STRIP);
+
+    glVertex3f(p_a->x, p_a->y, p_a->z);
+    glVertex3f(p_b->x, p_b->y, p_c->z);
+    glVertex3f(p_c->x, p_c->y, p_c->z);
+
+    glEnd();
+}
+
+void draw_face(struct Face *p_face, struct Color *p_color)
+{
+    draw_triangle(&p_face->a, &p_face->b, &p_face->c, p_color);
+    draw_triangle(&p_face->b, &p_face->c, &p_face->d, p_color);
+}
+
 int32_t gfx_game(void* p_data)
 {
     bool active = true;
     SDL_Window* window;
     SDL_GLContext* glc;
     GLenum gl_err = GL_NO_ERROR;
+    GLuint vert_buf;
     SDL_Event event;
     struct GameData* data = (struct GameData*) (p_data);
     float area_scale_x, area_scale_y;
     float field_size_x, field_size_y;
-    struct Vertex verts[TOWN_WIDTH][TOWN_DEPTH];
+    struct Face faces[TOWN_WIDTH][TOWN_DEPTH];
     struct Color colrs[TOWN_WIDTH][TOWN_DEPTH];
 
     //init SDL
@@ -45,12 +67,11 @@ int32_t gfx_game(void* p_data)
     }
 
     //configure OpenGL
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 16);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     
     //create window
@@ -78,7 +99,7 @@ int32_t gfx_game(void* p_data)
     }
 
     //init GL projection matrix
-    glMatrixMode(GL_PROJECTION);
+    /*glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
     gl_err = glGetError();
@@ -99,21 +120,31 @@ int32_t gfx_game(void* p_data)
     {
         printf(MSG_ERR_GL_MODELVIEW_MATRIX, gluErrorString(gl_err));
         return 5;
-    }
+    }*/
 
     //set gl clear color
     glClearColor(COLOR_BG_RED, COLOR_BG_GREEN, COLOR_BG_BLUE, 1.0f);
 
-    gl_err = glGetError();
+    /*gl_err = glGetError();
 
     if (gl_err != GL_NO_ERROR)
     {
         printf(MSG_ERR_GL_CLEAR_COLOR, gluErrorString(gl_err));
         return 6;
-    }
+    }*/
 
-    //set perspective
-    //glRotatef(45.0f, 1.0f, 0.0f, 1.0f);
+    //init glew
+    gl_err = glewInit();
+
+    if (gl_err != GLEW_OK)
+    {
+        printf(MSG_ERR_GLEW_INIT, glewGetErrorString(gl_err));
+        return 7;
+    }
+    
+    //create vertex buffer
+    glGenBuffers(1, &vert_buf);
+    glBindBuffer(GL_ARRAY_BUFFER, vert_buf);
 
     //calculate area scale
     if (WINDOW_WIDTH == WINDOW_HEIGHT)
@@ -141,10 +172,18 @@ int32_t gfx_game(void* p_data)
     {
         for (uint32_t y = 0; y < TOWN_DEPTH; y++)
         {
-            verts[x][y].x1 = (area_scale_x / 2.0f) + (float) x * -1.0f * field_size_x;
-            verts[x][y].x2 = verts[x][y].x1 + field_size_x;
-            verts[x][y].y1 = (area_scale_y / 2.0f) + (float) y * -1.0f * field_size_y;
-            verts[x][y].y2 = verts[x][y].y1 + field_size_y;
+            faces[x][y].a.x = (area_scale_x / 2.0f) + (float) x * -1.0f * field_size_x;
+            faces[x][y].a.y = (area_scale_y / 2.0f) + (float) y * -1.0f * field_size_y;
+            faces[x][y].a.z = 0.0f;
+            faces[x][y].b.x = faces[x][y].a.x + field_size_x;
+            faces[x][y].b.y = faces[x][y].a.y;
+            faces[x][y].b.z = 0.0f;
+            faces[x][y].c.x = faces[x][y].a.x;
+            faces[x][y].c.y = faces[x][y].a.y + field_size_y;
+            faces[x][y].c.z = 0.0f;
+            faces[x][y].d.x = faces[x][y].a.x + field_size_x;
+            faces[x][y].d.y = faces[x][y].a.y + field_size_y;
+            faces[x][y].d.z = 0.0f;
 
             if (data->town->area_hidden[x][y] == true)
             {
@@ -161,6 +200,11 @@ int32_t gfx_game(void* p_data)
         }
     }
 
+    //send vertices into vert buffer
+    glBufferData(GL_ARRAY_BUFFER, TOWN_WIDTH * TOWN_DEPTH * sizeof(struct Face), faces, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(struct Vertex), offsetof(struct Face, a));
+
     //mainloop
     while (active)
     {
@@ -168,30 +212,14 @@ int32_t gfx_game(void* p_data)
         {
             glClear(GL_COLOR_BUFFER_BIT);
 
-            /*glBegin(GL_QUADS);
-            
-            glVertex2f(area_scale_x * -1.0f, area_scale_y * -1.0f);
-            glVertex2f(area_scale_x * -1.0f, area_scale_y);
-            glVertex2f(area_scale_x, area_scale_y);
-            glVertex2f(area_scale_x, area_scale_y * -1.0f);
-
-            glEnd();*/
-
-            for (uint32_t x = 0; x < TOWN_WIDTH; x++)
+            glDrawArrays(GL_TRIANGLES, 0, TOWN_WIDTH * TOWN_DEPTH);
+            /*for (uint32_t x = 0; x < TOWN_WIDTH; x++)
             {
                 for (uint32_t y = 0; y < TOWN_DEPTH; y++)
                 {
-                    glBegin(GL_QUADS);
                     
-                    glColor3ub(colrs[x][y].r, colrs[x][y].g, colrs[x][y].b);
-                    glVertex2f(verts[x][y].x1, verts[x][y].y1);
-                    glVertex2f(verts[x][y].x2, verts[x][y].y1);
-                    glVertex2f(verts[x][y].x2, verts[x][y].y2);
-                    glVertex2f(verts[x][y].x1, verts[x][y].y2);
-
-                    glEnd();
                 }
-            }
+            }*/
 
             SDL_GL_SwapWindow(window);
         }

@@ -61,6 +61,7 @@
 #define MSG_ERR_GL_PROJECTION_MATRIX (MSG_ERR "OpenGL projection matrix failed to set up.\n" MSG_GL_ERR)
 #define MSG_ERR_GL_MODELVIEW_MATRIX (MSG_ERR "OpenGL modelview matrix failed to set up.\n" MSG_GL_ERR)
 #define MSG_ERR_GL_CLEAR_COLOR (MSG_ERR "OpenGL clear color could not be set.\n" MSG_GL_ERR)
+#define MSG_ERR_GLEW_INIT (MSG_ERR "Glew could not be initialized.\n" MSG_GL_ERR)
 
 #define CMD_HELP "h"                        /* context dependent: behaving different in-game and outside of game */
 #define CMD_HELP_LONG "help"

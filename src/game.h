@@ -25,17 +25,24 @@ struct Town;
 
 struct Color
 {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
+    float r;
+    float g;
+    float b;
 };
 
 struct Vertex
 {
-    float x1;
-    float y1;
-    float x2;
-    float y2;
+    float x;
+    float y;
+    float z;
+};
+
+struct Face
+{
+    struct Vertex a;
+    struct Vertex b;
+    struct Vertex c;
+    struct Vertex d;
 };
 
 enum GameCmd
@@ -56,6 +63,10 @@ struct GameData
     enum GameCmd cmd;           /* 1-way stream to inform gfx-window what to do */
     enum GameResponse rsp;      /* 1-way stream to provide feedback from the gfx-window */
 };
+
+void draw_triangle(struct Vertex *p_a, struct Vertex *p_b, struct Vertex *p_c, struct Color *p_color);
+
+void draw_face(struct Face *p_face, struct Color *p_color);
 
 int32_t gfx_game(void* p_data);
 
