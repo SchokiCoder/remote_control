@@ -37,9 +37,11 @@ int32_t gfx_game(void* p_data)
     struct VertexBuffer vtb_terrain;
     SDL_Event event;
     struct GameData* data = (struct GameData*) (p_data);
-    float area_scale_x, area_scale_y;
+    float area_size_x, area_size_y;
     float field_size_x, field_size_y;
+    struct Vertex base;
     struct Face faces[TOWN_WIDTH][TOWN_DEPTH];
+    uint32_t vert_offset;
 
     //init SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
@@ -127,32 +129,37 @@ int32_t gfx_game(void* p_data)
     //calculate area scale
     if (WINDOW_WIDTH == WINDOW_HEIGHT)
     {
-        area_scale_x = 1.0f;
-        area_scale_y = 1.0f;
+        area_size_x = 1.0f;
+        area_size_y = 1.0f;
     }
     else if (WINDOW_WIDTH / WINDOW_HEIGHT > 1.0f)
     {
-        area_scale_x = WINDOW_HEIGHT / WINDOW_WIDTH;
-        area_scale_y = 1.0f;
+        area_size_x = WINDOW_HEIGHT / WINDOW_WIDTH;
+        area_size_y = 1.0f;
     }
     else
     {
-        area_scale_x = 1.0f;
-        area_scale_y = WINDOW_WIDTH / WINDOW_HEIGHT;
+        area_size_x = 1.0f;
+        area_size_y = WINDOW_WIDTH / WINDOW_HEIGHT;
     }
 
     //calculate field size
-    field_size_x = area_scale_x / (float) TOWN_WIDTH;
-    field_size_y = area_scale_y / (float) TOWN_DEPTH;
+    field_size_x = area_size_x / (float) TOWN_WIDTH;
+    field_size_y = area_size_y / (float) TOWN_DEPTH;
     
-    //calculate vertices and define shader
+    //calculate base vertex
+    base.x = (-1.0f + (area_size_x / 2.0f));
+    base.y = (-1.0f + (area_size_x / 2.0f));
+    base.z = 0.0f;
+
+    //set terrain vertices from base vertex
     for (uint32_t x = 0; x < TOWN_WIDTH; x++)
     {
         for (uint32_t y = 0; y < TOWN_DEPTH; y++)
         { 
-            faces[x][y].a.a.x = (area_scale_x / 2.0f) + (float) x * -1.0f * field_size_x;
-            faces[x][y].a.a.y = (area_scale_y / 2.0f) + (float) y * -1.0f * field_size_y;
-            faces[x][y].a.a.z = 0.0f;
+            faces[x][y].a.a.x = base.x + (field_size_x * x);
+            faces[x][y].a.a.y = base.y + (field_size_y * y);
+            faces[x][y].a.a.z = base.z;
 
             faces[x][y].a.b.x = faces[x][y].a.a.x + field_size_x;
             faces[x][y].a.b.y = faces[x][y].a.a.y;
@@ -189,9 +196,10 @@ int32_t gfx_game(void* p_data)
     Shader_new(&shdr_hidden, PATH_VERT_SHADER, PATH_FRAG_SHADER_HIDDEN);
     Shader_new(&shdr_exposed, PATH_VERT_SHADER, PATH_FRAG_SHADER_EXPOSED);
 
-    //mainloop
-    uint32_t vert_offset;
+    //debug wireframe mode
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    //mainloop
     while (active)
     {
         //draw to window

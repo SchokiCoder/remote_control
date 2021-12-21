@@ -1,8 +1,6 @@
-#version 330 core
-
-layout(location = 0) out vec4 color;
+#version 120
 
 void main()
 {
-    color = vec4(0.4f, 1.0f, 0.4f, 1.0f);
+    gl_FragColor = vec4(0.4f, 1.0f, 0.4f, 1.0f);
 }

@@ -53,6 +53,8 @@ GLuint compile_shader(const char* p_shader_source, GLenum p_type)
 {
     GLuint id;
     int32_t rc_c;
+    char* gl_err;
+    int32_t gl_err_length;
 
     //compile
     id = glCreateShader(p_type);
@@ -64,7 +66,15 @@ GLuint compile_shader(const char* p_shader_source, GLenum p_type)
 
     if (rc_c != GL_TRUE)
     {
-        printf(MSG_ERR_SHADER_COMPILE);
+        //get gl error
+        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &gl_err_length);
+        gl_err = malloc(gl_err_length * sizeof(char));
+        glGetShaderInfoLog(id, gl_err_length, &gl_err_length, gl_err);
+
+        //print
+        printf(MSG_ERR_SHADER_COMPILE, gl_err);
+
+        free(gl_err);
         return 0;
     }
 
