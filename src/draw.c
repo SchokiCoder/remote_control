@@ -16,6 +16,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include "constants.h"
 #include "draw.h"
 
 void VertexBuffer_new(struct VertexBuffer* self, void* p_data, uint32_t p_num_verts)
@@ -50,4 +51,22 @@ void VertexBuffer_bind(struct VertexBuffer* self)
 void VertexBuffer_unbind(struct VertexBuffer* self)
 {
     glBindVertexArray(0);
+}
+
+int32_t Texture_load(struct Texture* self, const char* p_filepath)
+{
+    self->buffer = stbi_load(p_filepath, &self->width, &self->height, &self->colordepth, 4);
+
+    if (self->buffer == NULL)
+    {
+        printf(MSG_ERR_TEXTURE_LOAD, p_filepath);
+        return 1;
+    }
+
+    return 0;
+}
+
+void Texture_free(struct Texture* self)
+{
+    stbi_image_free(self->buffer);
 }

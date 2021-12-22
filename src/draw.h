@@ -19,7 +19,11 @@
 #ifndef DRAW_H
 #define DRAW_H
 
+#include <stdint.h>
 #include <GL/glew.h>
+#define STBI_IMAGE_IMPLEMENTATION
+#define STBI_ONLY_PNG
+#include <stb/stb_image.h>
 
 struct Vertex
 {
@@ -35,11 +39,15 @@ struct Triangle
     struct Vertex c;
 };
 
-struct Face
+struct Rectangle
 {
-    struct Triangle a;
-    struct Triangle b;
+    struct Vertex a;
+    struct Vertex b;
+    struct Vertex c;
+    struct Vertex d;
 };
+
+static const uint32_t FIELD_NUM_VERTS = sizeof(struct Rectangle) / sizeof(struct Vertex);
 
 struct VertexBuffer
 {
@@ -49,11 +57,19 @@ struct VertexBuffer
 };
 
 void VertexBuffer_new(struct VertexBuffer* self, void* p_data, uint32_t p_num_verts);
-
 void VertexBuffer_delete(struct VertexBuffer* self);
-
 void VertexBuffer_bind(struct VertexBuffer* self);
-
 void VertexBuffer_unbind(struct VertexBuffer* self);
+
+struct Texture
+{
+    int32_t width;
+    int32_t height;
+    int32_t colordepth;
+    stbi_uc* buffer;
+};
+
+int32_t Texture_load(struct Texture* self, const char* p_filepath);
+void Texture_free(struct Texture* self);
 
 #endif

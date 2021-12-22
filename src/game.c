@@ -28,6 +28,23 @@
 #include "shader.h"
 #include "game.h"
 
+static const uint32_t TOWN_NUM_VERTS = FIELD_NUM_VERTS * TOWN_WIDTH * TOWN_DEPTH;
+
+#ifdef _DEBUG
+void opengl_debug_callback(
+    GLenum p_source,
+    GLenum p_type,
+    GLuint p_id,
+    GLenum p_severity,
+    GLsizei p_length,
+    const GLchar* p_message,
+    const void* p_param)
+{
+    if (p_severity == GL_DEBUG_SEVERITY_HIGH || p_severity == GL_DEBUG_SEVERITY_MEDIUM)
+        printf("OpenGL Debug (%u): %s\n", p_severity, p_message);
+}
+#endif
+
 int32_t gfx_game(void* p_data)
 {
     bool active = true;
@@ -40,7 +57,7 @@ int32_t gfx_game(void* p_data)
     float area_size_x, area_size_y;
     float field_size_x, field_size_y;
     struct Vertex base;
-    struct Face faces[TOWN_WIDTH][TOWN_DEPTH];
+    struct Rectangle faces[TOWN_WIDTH][TOWN_DEPTH];
     uint32_t vert_offset;
 
     //init SDL
@@ -57,7 +74,11 @@ int32_t gfx_game(void* p_data)
     SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 16);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    
+
+    #ifdef _DEBUG
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+    #endif
+
     //create window
     window = SDL_CreateWindow(
         data->window_title,
@@ -106,9 +127,6 @@ int32_t gfx_game(void* p_data)
         return 5;
     }*/
 
-    //set gl clear color
-    glClearColor(COLOR_BG_RED, COLOR_BG_GREEN, COLOR_BG_BLUE, 1.0f);
-
     /*gl_err = glGetError();
 
     if (gl_err != GL_NO_ERROR)
@@ -125,6 +143,16 @@ int32_t gfx_game(void* p_data)
         printf(MSG_ERR_GLEW_INIT, glewGetErrorString(gl_err));
         return 7;
     }
+
+    //enable gl debug output
+    #ifdef _DEBUG
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(opengl_debug_callback, NULL);
+    #endif
+
+    //set gl clear color
+    glClearColor(COLOR_BG_RED, COLOR_BG_GREEN, COLOR_BG_BLUE, 1.0f);
 
     //calculate area scale
     if (WINDOW_WIDTH == WINDOW_HEIGHT)
@@ -156,35 +184,27 @@ int32_t gfx_game(void* p_data)
     for (uint32_t x = 0; x < TOWN_WIDTH; x++)
     {
         for (uint32_t y = 0; y < TOWN_DEPTH; y++)
-        { 
-            faces[x][y].a.a.x = base.x + (field_size_x * x);
-            faces[x][y].a.a.y = base.y + (field_size_y * y);
-            faces[x][y].a.a.z = base.z;
+        {
+            faces[x][y].a.x = base.x + (field_size_x * x);
+            faces[x][y].a.y = base.y + (field_size_y * y);
+            faces[x][y].a.z = base.z;
 
-            faces[x][y].a.b.x = faces[x][y].a.a.x + field_size_x;
-            faces[x][y].a.b.y = faces[x][y].a.a.y;
-            faces[x][y].a.b.z = faces[x][y].a.a.z;
+            faces[x][y].b.x = faces[x][y].a.x + field_size_x;
+            faces[x][y].b.y = faces[x][y].a.y;
+            faces[x][y].b.z = faces[x][y].a.z;
 
-            faces[x][y].a.c.x = faces[x][y].a.a.x;
-            faces[x][y].a.c.y = faces[x][y].a.a.y + field_size_y;
-            faces[x][y].a.c.z = faces[x][y].a.a.z;
+            faces[x][y].c.x = faces[x][y].a.x;
+            faces[x][y].c.y = faces[x][y].a.y + field_size_y;
+            faces[x][y].c.z = faces[x][y].a.z;
 
-            faces[x][y].b.a.x = faces[x][y].a.b.x;
-            faces[x][y].b.a.y = faces[x][y].a.b.y;
-            faces[x][y].b.a.z = faces[x][y].a.b.z;
-
-            faces[x][y].b.b.x = faces[x][y].a.c.x;
-            faces[x][y].b.b.y = faces[x][y].a.c.y;
-            faces[x][y].b.b.z = faces[x][y].a.c.z;
-
-            faces[x][y].b.c.x = faces[x][y].a.a.x + field_size_x;
-            faces[x][y].b.c.y = faces[x][y].a.a.y + field_size_y;
-            faces[x][y].b.c.z = faces[x][y].a.a.z;
-        }
+            faces[x][y].d.x = faces[x][y].a.x + field_size_x;
+            faces[x][y].d.y = faces[x][y].a.y + field_size_y;
+            faces[x][y].d.z = faces[x][y].a.z;
+       }
     }
 
     //create vertex buffer
-    VertexBuffer_new(&vtb_terrain, &faces, TOWN_VERTS);
+    VertexBuffer_new(&vtb_terrain, &faces, TOWN_NUM_VERTS);
 
     //bind vert buf
     VertexBuffer_bind(&vtb_terrain);
@@ -197,7 +217,18 @@ int32_t gfx_game(void* p_data)
     Shader_new(&shdr_exposed, PATH_VERT_SHADER, PATH_FRAG_SHADER_EXPOSED);
 
     //debug wireframe mode
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    #ifdef _DEBUG
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    #endif
+
+    //load textures
+    struct Texture buildings[2];
+
+    stbi_set_flip_vertically_on_load(true);
+
+    if (Texture_load(&buildings[0], PATH_TEXTURE_HQ) != 0 ||
+        Texture_load(&buildings[1], PATH_TEXTURE_TREE_0) != 0)
+        return 666; //TODO resort return codes
 
     //mainloop
     while (active)
@@ -219,9 +250,9 @@ int32_t gfx_game(void* p_data)
                     Shader_bind(&shdr_exposed);
                 }
 
-                glDrawArrays(GL_TRIANGLES, vert_offset, FIELD_VERTS);
+                glDrawArrays(GL_TRIANGLE_STRIP, vert_offset, FIELD_NUM_VERTS);
 
-                vert_offset += FIELD_VERTS;
+                vert_offset += FIELD_NUM_VERTS;
             }
         }
 

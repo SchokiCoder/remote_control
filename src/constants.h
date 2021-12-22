@@ -30,65 +30,76 @@
     #define SLASH "/"
 #endif
 
-#define DIR_BASE ("." APP_NAME)
-#define DIR_TOWNS "towns"
+#define DIR_BASE                    "." APP_NAME
+#define DIR_TOWNS                   "towns"
+
+#define PATH_ASSETS                 "assets" SLASH
+#define PATH_SHADER                 PATH_ASSETS "shader" SLASH
+#define PATH_VERT_SHADER            PATH_SHADER "vert.glsl"
+#define PATH_FRAG_SHADER_HIDDEN     PATH_SHADER "hidden.glsl"
+#define PATH_FRAG_SHADER_EXPOSED    PATH_SHADER "exposed.glsl"
+#define PATH_TEXTURES               PATH_ASSETS "textures" SLASH
+#define PATH_TEXTURE_HQ             PATH_TEXTURES "headquarter.png"
+#define PATH_TEXTURE_TREE_0         PATH_TEXTURES "tree_0.png"
 
 #define FILETYPE_TOWN "twn"
 
-#define MSG_ERR "ERROR: "
-#define MSG_WARN "WARNING: "
+#define MSG_ERR     "ERROR: "
+#define MSG_WARN    "WARNING: "
 #define MSG_SDL_ERR "SDL-Err: %s\n"
-#define MSG_GL_ERR "GL-Err: %s\n"
-#define MSG_ERR_ARG_MIN (MSG_ERR "Too few arguments passed.\nStopped.\n")
-#define MSG_WARN_ARG_MAX (MSG_WARN "Too many arguments passed.\nAdditional arguments will be ignored.\n")
-#define MSG_ERR_FILE_SAVE (MSG_ERR "File could not be saved.\nMake sure you have permissions to write and read.\n")
-#define MSG_ERR_FILE_LOAD (MSG_ERR "File could not be loaded.\nMake sure the file exists and permissions to read are given.\n")
-#define MSG_ERR_DIR_BASE (MSG_ERR "Game file directory does not exist and could not be created.\n")
-#define MSG_ERR_DIR_TOWNS_CREATE (MSG_ERR "Town file directory does not exist and could not be created.\n")
-#define MSG_ERR_DIR_TOWNS (MSG_ERR "Town file directory does not exist.\n")
-#define MSG_ERR_FILE_TOWN_CORRUPT (MSG_ERR "Town file has corrupt information.\n")
-#define MSG_ERR_FILE_TOWN_SAVE (MSG_ERR "New town was not successfully created.\n")
-#define MSG_FILE_TOWN_SAVE "New town was successfully created and is awaiting your commands.\n" 
-#define MSG_ERR_FILE_TOWN_LOAD (MSG_ERR "Town could not be loaded.\n")
-#define MSG_FILE_TOWN_LOAD "Town loaded.\n"
-#define MSG_WARN_FILE_TOWN_EXIST (MSG_WARN "The town already exists, type 'y' if you are sure to proceed.\n")
-#define MSG_ERR_ADMIN_ID (MSG_ERR "Given admin id does not exist.\nUse \"" CMD_LIST_ADMINS_LONG "\" command to make your decision.\n")
-#define MSG_TOWN_CREATION_STOPPED "Town creation stopped.\n"
-#define MSG_ERR_SDL_INIT (MSG_ERR "SDL could not be initialized.\n" MSG_SDL_ERR)
-#define MSG_ERR_SDL_WINDOW (MSG_ERR "SDL could not open a window.\n" MSG_SDL_ERR)
-#define MSG_ERR_SDL_RENDERER (MSG_ERR "SDL could not create a renderer.\n" MSG_SDL_ERR)
-#define MSG_ERR_GL_CONTEXT (MSG_ERR "OpenGL context could not be created.\n" MSG_GL_ERR)
-#define MSG_ERR_GL_PROJECTION_MATRIX (MSG_ERR "OpenGL projection matrix failed to set up.\n" MSG_GL_ERR)
-#define MSG_ERR_GL_MODELVIEW_MATRIX (MSG_ERR "OpenGL modelview matrix failed to set up.\n" MSG_GL_ERR)
-#define MSG_ERR_GL_CLEAR_COLOR (MSG_ERR "OpenGL clear color could not be set.\n" MSG_GL_ERR)
-#define MSG_ERR_GLEW_INIT (MSG_ERR "Glew could not be initialized.\n" MSG_GL_ERR)
-#define MSG_ERR_SHADER_COMPILE (MSG_ERR "Shader could not be compiled.\n" MSG_GL_ERR)
-#define MSG_ERR_FILE_READ (MSG_ERR "File \"%s\" could not be read.\n")
+#define MSG_GL_ERR  "GL-Err: %s\n"
 
-#define CMD_HELP "h"                        /* context dependent: behaving different in-game and outside of game */
-#define CMD_HELP_LONG "help"
-#define CMD_LIST_ADMINS "la"
-#define CMD_LIST_ADMINS_LONG "list-admins"
-#define CMD_HIRE_ADMIN "ha"                 /* create new game */
-#define CMD_HIRE_ADMIN_LONG "hire-admin"
-#define CMD_LIST_TOWNS "lt"
-#define CMD_LIST_TOWNS_LONG "list-towns"
-#define CMD_CONNECT "c"                     /* start playing game, inits the mainloop */
-#define CMD_CONNECT_LONG "connect"
+#define MSG_ERR_ARG_MIN                 MSG_ERR "Too few arguments passed.\nStopped.\n"
+#define MSG_WARN_ARG_MAX                MSG_WARN "Too many arguments passed.\nAdditional arguments will be ignored.\n"
+#define MSG_ERR_FILE_SAVE               MSG_ERR "File could not be saved.\nMake sure you have permissions to write and read.\n"
+#define MSG_ERR_FILE_LOAD               MSG_ERR "File could not be loaded.\nMake sure the file exists and permissions to read are given.\n"
+#define MSG_ERR_DIR_BASE                MSG_ERR "Game file directory does not exist and could not be created.\n"
+#define MSG_ERR_DIR_TOWNS_CREATE        MSG_ERR "Town file directory does not exist and could not be created.\n"
+#define MSG_ERR_DIR_TOWNS               MSG_ERR "Town file directory does not exist.\n"
+#define MSG_ERR_FILE_TOWN_CORRUPT       MSG_ERR "Town file has corrupt information.\n"
+#define MSG_ERR_FILE_TOWN_SAVE          MSG_ERR "New town was not successfully created.\n"
+#define MSG_FILE_TOWN_SAVE              "New town was successfully created and is awaiting your commands.\n" 
+#define MSG_ERR_FILE_TOWN_LOAD          MSG_ERR "Town could not be loaded.\n"
+#define MSG_FILE_TOWN_LOAD              "Town loaded.\n"
+#define MSG_WARN_FILE_TOWN_EXIST        MSG_WARN "The town already exists, type 'y' if you are sure to proceed.\n"
+#define MSG_ERR_ADMIN_ID                MSG_ERR "Given admin id does not exist.\nUse \"" CMD_LIST_ADMINS_LONG "\" command to make your decision.\n"
+#define MSG_TOWN_CREATION_STOPPED       "Town creation stopped.\n"
+#define MSG_ERR_SDL_INIT                MSG_ERR "SDL could not be initialized.\n" MSG_SDL_ERR
+#define MSG_ERR_SDL_WINDOW              MSG_ERR "SDL could not open a window.\n" MSG_SDL_ERR
+#define MSG_ERR_SDL_RENDERER            MSG_ERR "SDL could not create a renderer.\n" MSG_SDL_ERR
+#define MSG_ERR_GL_CONTEXT              MSG_ERR "OpenGL context could not be created.\n" MSG_GL_ERR
+#define MSG_ERR_GL_PROJECTION_MATRIX    MSG_ERR "OpenGL projection matrix failed to set up.\n" MSG_GL_ERR
+#define MSG_ERR_GL_MODELVIEW_MATRIX     MSG_ERR "OpenGL modelview matrix failed to set up.\n" MSG_GL_ERR
+#define MSG_ERR_GL_CLEAR_COLOR          MSG_ERR "OpenGL clear color could not be set.\n" MSG_GL_ERR
+#define MSG_ERR_GLEW_INIT               MSG_ERR "Glew could not be initialized.\n" MSG_GL_ERR
+#define MSG_ERR_SHADER_COMPILE          MSG_ERR "Shader could not be compiled.\n" MSG_GL_ERR
+#define MSG_ERR_FILE_READ               MSG_ERR "File \"%s\" could not be read.\n"
+#define MSG_ERR_TEXTURE_LOAD            MSG_ERR "Texture \"%s\" could not be loaded.\n"
 
-#define TOWN_WIDTH 15
-#define TOWN_DEPTH 15
-#define TOWN_EXPOSURE_AREA_BEGIN_X 4
-#define TOWN_EXPOSURE_AREA_BEGIN_Y 4
-#define TOWN_EXPOSURE_AREA_END_X 11
-#define TOWN_EXPOSURE_AREA_END_Y 11
-#define TOWN_TREEFREE_AREA_BEGIN_X 5
-#define TOWN_TREEFREE_AREA_BEGIN_Y 5
-#define TOWN_TREEFREE_AREA_END_X 10
-#define TOWN_TREEFREE_AREA_END_Y 10
-#define TOWN_GEN_TREE_THRESHOLD 40      /* from 0 to 100 */
-#define TOWN_HQ_SPAWN_X 7
-#define TOWN_HQ_SPAWN_Y 7
+#define CMD_HELP                "h"     /* context dependent: behaving different in-game and outside of game */
+#define CMD_HELP_LONG           "help"
+#define CMD_LIST_ADMINS         "la"
+#define CMD_LIST_ADMINS_LONG    "list-admins"
+#define CMD_HIRE_ADMIN          "ha"    /* create new game */
+#define CMD_HIRE_ADMIN_LONG     "hire-admin"
+#define CMD_LIST_TOWNS          "lt"
+#define CMD_LIST_TOWNS_LONG     "list-towns"
+#define CMD_CONNECT             "c"    /* start playing game, inits the mainloop */
+#define CMD_CONNECT_LONG        "connect"
+
+#define TOWN_WIDTH                  15
+#define TOWN_DEPTH                  15
+#define TOWN_EXPOSURE_AREA_BEGIN_X  4
+#define TOWN_EXPOSURE_AREA_BEGIN_Y  4
+#define TOWN_EXPOSURE_AREA_END_X    11
+#define TOWN_EXPOSURE_AREA_END_Y    11
+#define TOWN_TREEFREE_AREA_BEGIN_X  5
+#define TOWN_TREEFREE_AREA_BEGIN_Y  5
+#define TOWN_TREEFREE_AREA_END_X    10
+#define TOWN_TREEFREE_AREA_END_Y    10
+#define TOWN_GEN_TREE_THRESHOLD     40  /* from 0 to 100 */
+#define TOWN_HQ_SPAWN_X             7
+#define TOWN_HQ_SPAWN_Y             7
 
 #define HELP_TEXT_OUTSIDE "Usage " APP_NAME " COMMAND [ARGS]\n" \
 "\n" \
@@ -108,19 +119,11 @@
 "  connect to a towns administrator and get to work:\n" \
 "  " CMD_CONNECT ",\t" CMD_CONNECT_LONG "\t\tTOWN_NAME\n"
 
-#define WINDOW_WIDTH 600.0f
-#define WINDOW_HEIGHT 600.0f
+#define WINDOW_WIDTH    600.0f
+#define WINDOW_HEIGHT   600.0f
 
 #define COLOR_BG_RED    0.05f
 #define COLOR_BG_GREEN  0.05f
 #define COLOR_BG_BLUE   0.2f
-
-#define FIELD_VERTS (2 * 3)
-#define TOWN_VERTS (TOWN_WIDTH * TOWN_DEPTH * FIELD_VERTS)
-
-#define PATH_SHADER_DIR "assets/shader/"
-#define PATH_VERT_SHADER (PATH_SHADER_DIR "vert.glsl")
-#define PATH_FRAG_SHADER_HIDDEN (PATH_SHADER_DIR "hidden.glsl")
-#define PATH_FRAG_SHADER_EXPOSED (PATH_SHADER_DIR "exposed.glsl")
 
 #endif
