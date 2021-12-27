@@ -34,10 +34,12 @@
 #define DIR_TOWNS                   "towns"
 
 #define PATH_ASSETS                 "assets" SLASH
-#define PATH_SHADER                 PATH_ASSETS "shader" SLASH
-#define PATH_VERT_SHADER            PATH_SHADER "vert.glsl"
-#define PATH_FRAG_SHADER_HIDDEN     PATH_SHADER "hidden.glsl"
-#define PATH_FRAG_SHADER_EXPOSED    PATH_SHADER "exposed.glsl"
+#define PATH_SHADER                 PATH_ASSETS "shader_old" SLASH
+#define PATH_VERT_SHADER_FIELD      PATH_SHADER "field.vert"
+#define PATH_FRAG_SHADER_HIDDEN     PATH_SHADER "hidden.frag"
+#define PATH_FRAG_SHADER_EXPOSED    PATH_SHADER "exposed.frag"
+#define PATH_VERT_SHADER_BUILDING   PATH_SHADER "building.vert"
+#define PATH_FRAG_SHADER_BUILDING   PATH_SHADER "building.frag"
 #define PATH_TEXTURES               PATH_ASSETS "textures" SLASH
 #define PATH_TEXTURE_HQ             PATH_TEXTURES "headquarter.png"
 #define PATH_TEXTURE_TREE_0         PATH_TEXTURES "tree_0.png"
@@ -73,6 +75,7 @@
 #define MSG_ERR_GL_CLEAR_COLOR          MSG_ERR "OpenGL clear color could not be set.\n" MSG_GL_ERR
 #define MSG_ERR_GLEW_INIT               MSG_ERR "Glew could not be initialized.\n" MSG_GL_ERR
 #define MSG_ERR_SHADER_COMPILE          MSG_ERR "Shader could not be compiled.\n" MSG_GL_ERR
+#define MSG_ERR_SHADER_COMPILE_FILES    "Shader compilation results:\n\tVert (%s): %i\n\tFrag (%s): %i\n"
 #define MSG_ERR_FILE_READ               MSG_ERR "File \"%s\" could not be read.\n"
 #define MSG_ERR_TEXTURE_LOAD            MSG_ERR "Texture \"%s\" could not be loaded.\n"
 

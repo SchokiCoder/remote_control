@@ -52,7 +52,7 @@ static const uint32_t FIELD_NUM_VERTS = sizeof(struct Rectangle) / sizeof(struct
 struct VertexBuffer
 {
     GLuint vao;         /* vertex array object */
-    GLuint buffer_id;
+    GLuint id;
     uint32_t num_verts;
 };
 
@@ -63,10 +63,11 @@ void VertexBuffer_unbind(struct VertexBuffer* self);
 
 struct Texture
 {
+    GLuint id;
+    stbi_uc* buffer;
     int32_t width;
     int32_t height;
     int32_t colordepth;
-    stbi_uc* buffer;
 };
 
 int32_t Texture_load(struct Texture* self, const char* p_filepath);

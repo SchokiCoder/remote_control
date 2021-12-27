@@ -17,9 +17,11 @@
 */
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "constants.h"
+#include "draw.h"
 #include "shader.h"
 
 uint32_t read_file(const char* p_filename, char* p_out[])
@@ -93,33 +95,79 @@ void Shader_new(struct Shader* self, const char* p_vert_shader_filename, const c
     read_file(p_frag_shader_filename, &frag_shader_source);
 
     //compile shader source
-    self->shader_id = glCreateProgram();
+    self->id = glCreateProgram();
     vert_shader = compile_shader(vert_shader_source, GL_VERTEX_SHADER);
     frag_shader = compile_shader(frag_shader_source, GL_FRAGMENT_SHADER);
 
+    //check for errors
+    if (vert_shader == 0 || frag_shader == 0)
+    {
+        printf(MSG_ERR_SHADER_COMPILE_FILES,
+            p_vert_shader_filename, vert_shader,
+            p_frag_shader_filename, frag_shader);
+    }
+
     //link shader
-    glAttachShader(self->shader_id, vert_shader);
-    glAttachShader(self->shader_id, frag_shader);
-    glLinkProgram(self->shader_id);
+    glAttachShader(self->id, vert_shader);
+    glAttachShader(self->id, frag_shader);
+    glLinkProgram(self->id);
 
     //delete shaders
-    glDetachShader(self->shader_id, vert_shader);
-    glDetachShader(self->shader_id, frag_shader);
+    glDetachShader(self->id, vert_shader);
+    glDetachShader(self->id, frag_shader);
     glDeleteShader(vert_shader);
     glDeleteShader(frag_shader);
 }
 
 void Shader_destroy(struct Shader* self)
 {
-    glDeleteProgram(self->shader_id);
+    glDeleteProgram(self->id);
 }
 
 void Shader_bind(struct Shader* self)
 {
-    glUseProgram(self->shader_id);
+    glUseProgram(self->id);
 }
 
 void Shader_unbind()
 {
     glUseProgram(0);
+}
+
+void Shader_prepare_texture_slot(struct Shader* self, int32_t p_texture_slot)
+{
+    Shader_bind(self);
+
+    self->texture_uniform_location = glGetUniformLocation(self->id, "u_texture");
+
+    if (self->texture_uniform_location != -1)
+    {
+        glUniform1i(self->texture_uniform_location, p_texture_slot);
+    }
+
+    Shader_unbind();
+}
+
+void Shader_bind_texture(int32_t p_texture_slot, struct Texture* p_texture)
+{
+    switch(p_texture_slot)
+    {
+    case 0:
+        glActiveTexture(GL_TEXTURE0);
+    break;
+
+    case 1:
+        glActiveTexture(GL_TEXTURE1);
+    break;
+
+    case 2:
+        glActiveTexture(GL_TEXTURE2);
+    break;
+
+    case 4:
+        glActiveTexture(GL_TEXTURE3);
+    break;
+
+    glBindTexture(GL_TEXTURE_2D, p_texture->id);
+    }
 }

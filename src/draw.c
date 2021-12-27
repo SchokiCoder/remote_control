@@ -27,8 +27,8 @@ void VertexBuffer_new(struct VertexBuffer* self, void* p_data, uint32_t p_num_ve
     glGenVertexArrays(1, &self->vao);
     VertexBuffer_bind(self);
     
-    glGenBuffers(1, &self->buffer_id);
-    glBindBuffer(GL_ARRAY_BUFFER, self->buffer_id);
+    glGenBuffers(1, &self->id);
+    glBindBuffer(GL_ARRAY_BUFFER, self->id);
     glBufferData(GL_ARRAY_BUFFER, self->num_verts * sizeof(struct Vertex), p_data, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
@@ -40,7 +40,7 @@ void VertexBuffer_new(struct VertexBuffer* self, void* p_data, uint32_t p_num_ve
 
 void VertexBuffer_delete(struct VertexBuffer* self)
 {
-    glDeleteBuffers(1, &self->buffer_id);
+    glDeleteBuffers(1, &self->id);
 }
 
 void VertexBuffer_bind(struct VertexBuffer* self)
@@ -55,6 +55,7 @@ void VertexBuffer_unbind(struct VertexBuffer* self)
 
 int32_t Texture_load(struct Texture* self, const char* p_filepath)
 {
+    //load texure
     self->buffer = stbi_load(p_filepath, &self->width, &self->height, &self->colordepth, 4);
 
     if (self->buffer == NULL)
@@ -63,10 +64,27 @@ int32_t Texture_load(struct Texture* self, const char* p_filepath)
         return 1;
     }
 
+    //gl create texture
+    glGenTextures(1, &self->id);
+    glBindTexture(GL_TEXTURE_2D, self->id);
+
+    //set texture attributes
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    //apply and unbind
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_RGBA8, self->width, self->height,
+        0, GL_RGBA, GL_UNSIGNED_BYTE, self->buffer);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     return 0;
 }
 
 void Texture_free(struct Texture* self)
 {
     stbi_image_free(self->buffer);
+    glDeleteTextures(1, &self->id);
 }

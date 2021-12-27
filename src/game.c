@@ -41,7 +41,8 @@ void opengl_debug_callback(
     const void* p_param)
 {
     if (p_severity == GL_DEBUG_SEVERITY_HIGH || p_severity == GL_DEBUG_SEVERITY_MEDIUM)
-        printf("OpenGL Debug (%u): %s\n", p_severity, p_message);
+        printf("OpenGL Debug\nsource: %u\ntype: %u\nseverity: %u\n%s\n",
+            p_source, p_type, p_severity, p_message);
 }
 #endif
 
@@ -212,9 +213,11 @@ int32_t gfx_game(void* p_data)
     //load shader
     struct Shader shdr_hidden;
     struct Shader shdr_exposed;
+    struct Shader shdr_building;
 
-    Shader_new(&shdr_hidden, PATH_VERT_SHADER, PATH_FRAG_SHADER_HIDDEN);
-    Shader_new(&shdr_exposed, PATH_VERT_SHADER, PATH_FRAG_SHADER_EXPOSED);
+    Shader_new(&shdr_hidden, PATH_VERT_SHADER_FIELD, PATH_FRAG_SHADER_HIDDEN);
+    Shader_new(&shdr_exposed, PATH_VERT_SHADER_FIELD, PATH_FRAG_SHADER_EXPOSED);
+    Shader_new(&shdr_building, PATH_VERT_SHADER_BUILDING, PATH_FRAG_SHADER_BUILDING);
 
     //debug wireframe mode
     #ifdef _DEBUG
@@ -230,6 +233,10 @@ int32_t gfx_game(void* p_data)
         Texture_load(&buildings[1], PATH_TEXTURE_TREE_0) != 0)
         return 666; //TODO resort return codes
 
+    //assign textures to shaders
+    Shader_prepare_texture_slot(&shdr_building, 0);
+    Shader_prepare_texture_slot(&shdr_building, 1);
+
     //mainloop
     while (active)
     {
@@ -240,14 +247,30 @@ int32_t gfx_game(void* p_data)
         for (uint32_t x = 0; x < TOWN_WIDTH; x++)
         {
             for (uint32_t y = 0; y < TOWN_DEPTH; y++)
-            {
+            {              
+                //determine which shader and texture to use
                 if (data->town->area_hidden[x][y] == true)
                 {
                     Shader_bind(&shdr_hidden);
                 }
                 else
                 {
-                    Shader_bind(&shdr_exposed);
+                    switch (data->town->area_content[x][y])
+                    {
+                    case FIELD_ADMINISTRATION:
+                        Shader_bind_texture(0, &buildings[0]);
+                        Shader_bind(&shdr_building);
+                    break;
+
+                    case FIELD_TREE:
+                        Shader_bind_texture(1, &buildings[1]);
+                        Shader_bind(&shdr_building);
+                    break;
+
+                    case FIELD_EMPTY:
+                        Shader_bind(&shdr_exposed);
+                    break;
+                    }
                 }
 
                 glDrawArrays(GL_TRIANGLE_STRIP, vert_offset, FIELD_NUM_VERTS);
