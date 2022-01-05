@@ -17,68 +17,27 @@
 */
 
 #include <SDL2/SDL.h>
-#define GLEW_STATIC
-#include <GL/glew.h>
-#include <GL/glu.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "constants.h"
 #include "town.h"
-#include "draw.h"
-#include "shader.h"
+#include "sprite.h"
 #include "game.h"
-
-static const uint32_t TOWN_NUM_VERTS = FIELD_NUM_VERTS * TOWN_WIDTH * TOWN_DEPTH;
-
-#ifdef _DEBUG
-void opengl_debug_callback(
-    GLenum p_source,
-    GLenum p_type,
-    GLuint p_id,
-    GLenum p_severity,
-    GLsizei p_length,
-    const GLchar* p_message,
-    const void* p_param)
-{
-    if (p_severity == GL_DEBUG_SEVERITY_HIGH || p_severity == GL_DEBUG_SEVERITY_MEDIUM)
-        printf("OpenGL Debug\nsource: %u\ntype: %u\nseverity: %u\n%s\n",
-            p_source, p_type, p_severity, p_message);
-}
-#endif
 
 int32_t gfx_game(void* p_data)
 {
     bool active = true;
     SDL_Window* window;
-    SDL_GLContext* glc;
-    GLenum gl_err = GL_NO_ERROR;
-    struct VertexBuffer vtb_terrain;
+    SDL_Renderer* renderer;
     SDL_Event event;
     struct GameData* data = (struct GameData*) (p_data);
-    float area_size_x, area_size_y;
-    float field_size_x, field_size_y;
-    struct Vertex base;
-    struct Rectangle faces[TOWN_WIDTH][TOWN_DEPTH];
-    uint32_t vert_offset;
-
+   
     //init SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
         printf(MSG_ERR_SDL_INIT, SDL_GetError());
         return 1;
     }
-
-    //configure OpenGL
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 16);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-
-    #ifdef _DEBUG
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-    #endif
 
     //create window
     window = SDL_CreateWindow(
@@ -87,7 +46,7 @@ int32_t gfx_game(void* p_data)
         SDL_WINDOWPOS_CENTERED,
         WINDOW_WIDTH,
         WINDOW_HEIGHT,
-        (SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN));
+        SDL_WINDOW_SHOWN);
 
     if (window == NULL)
     {
@@ -95,191 +54,102 @@ int32_t gfx_game(void* p_data)
         return 2;
     }
 
-    //create gl context
-    glc = SDL_GL_CreateContext(window);
+    //create renderer
+    renderer = SDL_CreateRenderer(window, -1, 0);
 
-    if (glc == NULL)
+    if (renderer == NULL)
     {
-        printf(MSG_ERR_GL_CONTEXT, SDL_GetError());
+        printf(MSG_ERR_SDL_RENDERER, SDL_GetError());
         return 3;
     }
 
-    //init GL projection matrix
-    /*glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
+    //load sprites
+    struct Sprite sprite_hq;
+    struct Sprite sprite_trees[1];
 
-    gl_err = glGetError();
-
-    if (gl_err != GL_NO_ERROR)
+    if ((Sprite_from(&sprite_hq, PATH_TEXTURE_HQ, renderer) != 0) |
+        (Sprite_from(&sprite_trees[0], PATH_TEXTURE_TREE_0, renderer) != 0))
     {
-        printf(MSG_ERR_GL_PROJECTION_MATRIX, gluErrorString(gl_err));
         return 4;
     }
 
-    //init GL modelview matrix
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+    //calculate size of area and fields
+    float size_area_x = WINDOW_WIDTH / 1.0f * SIZE_AREA_X;
+    float size_area_y = WINDOW_HEIGHT / 1.0f * SIZE_AREA_Y;
+    float size_field_x = size_area_x / TOWN_WIDTH;
+    float size_field_y = size_area_y / TOWN_HEIGHT;
 
-    gl_err = glGetError();
+    //calc render begin coord
+    float coord_begin_x = (WINDOW_WIDTH - size_area_x) / 2.0f;
+    float coord_begin_y = (WINDOW_HEIGHT - size_area_y) / 2.0f;
 
-    if (gl_err != GL_NO_ERROR)
-    {
-        printf(MSG_ERR_GL_MODELVIEW_MATRIX, gluErrorString(gl_err));
-        return 5;
-    }*/
+    //calc field coords
+    SDL_Rect coords_fields[TOWN_WIDTH][TOWN_HEIGHT];
 
-    /*gl_err = glGetError();
-
-    if (gl_err != GL_NO_ERROR)
-    {
-        printf(MSG_ERR_GL_CLEAR_COLOR, gluErrorString(gl_err));
-        return 6;
-    }*/
-
-    //init glew
-    gl_err = glewInit();
-
-    if (gl_err != GLEW_OK)
-    {
-        printf(MSG_ERR_GLEW_INIT, glewGetErrorString(gl_err));
-        return 7;
-    }
-
-    //enable gl debug output
-    #ifdef _DEBUG
-    glEnable(GL_DEBUG_OUTPUT);
-    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageCallback(opengl_debug_callback, NULL);
-    #endif
-
-    //set gl clear color
-    glClearColor(COLOR_BG_RED, COLOR_BG_GREEN, COLOR_BG_BLUE, 1.0f);
-
-    //calculate area scale
-    if (WINDOW_WIDTH == WINDOW_HEIGHT)
-    {
-        area_size_x = 1.0f;
-        area_size_y = 1.0f;
-    }
-    else if (WINDOW_WIDTH / WINDOW_HEIGHT > 1.0f)
-    {
-        area_size_x = WINDOW_HEIGHT / WINDOW_WIDTH;
-        area_size_y = 1.0f;
-    }
-    else
-    {
-        area_size_x = 1.0f;
-        area_size_y = WINDOW_WIDTH / WINDOW_HEIGHT;
-    }
-
-    //calculate field size
-    field_size_x = area_size_x / (float) TOWN_WIDTH;
-    field_size_y = area_size_y / (float) TOWN_DEPTH;
-    
-    //calculate base vertex
-    base.x = (-1.0f + (area_size_x / 2.0f));
-    base.y = (-1.0f + (area_size_x / 2.0f));
-    base.z = 0.0f;
-
-    //set terrain vertices from base vertex
     for (uint32_t x = 0; x < TOWN_WIDTH; x++)
     {
-        for (uint32_t y = 0; y < TOWN_DEPTH; y++)
+        for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
         {
-            faces[x][y].a.x = base.x + (field_size_x * x);
-            faces[x][y].a.y = base.y + (field_size_y * y);
-            faces[x][y].a.z = base.z;
-
-            faces[x][y].b.x = faces[x][y].a.x + field_size_x;
-            faces[x][y].b.y = faces[x][y].a.y;
-            faces[x][y].b.z = faces[x][y].a.z;
-
-            faces[x][y].c.x = faces[x][y].a.x;
-            faces[x][y].c.y = faces[x][y].a.y + field_size_y;
-            faces[x][y].c.z = faces[x][y].a.z;
-
-            faces[x][y].d.x = faces[x][y].a.x + field_size_x;
-            faces[x][y].d.y = faces[x][y].a.y + field_size_y;
-            faces[x][y].d.z = faces[x][y].a.z;
-       }
+            coords_fields[x][y].x = coord_begin_x + (x * size_field_x);
+            coords_fields[x][y].y = coord_begin_y + (y * size_field_y);
+            coords_fields[x][y].w = size_field_x;
+            coords_fields[x][y].h = size_field_y;
+        }
     }
-
-    //create vertex buffer
-    VertexBuffer_new(&vtb_terrain, &faces, TOWN_NUM_VERTS);
-
-    //bind vert buf
-    VertexBuffer_bind(&vtb_terrain);
-
-    //load shader
-    struct Shader shdr_hidden;
-    struct Shader shdr_exposed;
-    struct Shader shdr_building;
-
-    Shader_new(&shdr_hidden, PATH_VERT_SHADER_FIELD, PATH_FRAG_SHADER_HIDDEN);
-    Shader_new(&shdr_exposed, PATH_VERT_SHADER_FIELD, PATH_FRAG_SHADER_EXPOSED);
-    Shader_new(&shdr_building, PATH_VERT_SHADER_BUILDING, PATH_FRAG_SHADER_BUILDING);
-
-    //debug wireframe mode
-    #ifdef _DEBUG
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    #endif
-
-    //load textures
-    struct Texture buildings[2];
-
-    stbi_set_flip_vertically_on_load(true);
-
-    if (Texture_load(&buildings[0], PATH_TEXTURE_HQ) != 0 ||
-        Texture_load(&buildings[1], PATH_TEXTURE_TREE_0) != 0)
-        return 666; //TODO resort return codes
-
-    //assign textures to shaders
-    Shader_prepare_texture_slot(&shdr_building, 0);
-    Shader_prepare_texture_slot(&shdr_building, 1);
 
     //mainloop
     while (active)
     {
-        //draw to window
-        glClear(GL_COLOR_BUFFER_BIT);
-        vert_offset = 0;
-
+        //clear screen
+        SDL_SetRenderDrawColor(renderer, COLOR_BG_RED, COLOR_BG_GREEN, COLOR_BG_BLUE, 255);
+        SDL_RenderClear(renderer);
+        
+        //draw fields
         for (uint32_t x = 0; x < TOWN_WIDTH; x++)
         {
-            for (uint32_t y = 0; y < TOWN_DEPTH; y++)
+            for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
             {              
-                //determine which shader and texture to use
+                //determine which ground to draw
                 if (data->town->area_hidden[x][y] == true)
                 {
-                    Shader_bind(&shdr_hidden);
+                    SDL_SetRenderDrawColor(
+                        renderer,
+                        COLOR_FIELD_HIDDEN_RED,
+                        COLOR_FIELD_HIDDEN_GREEN, 
+                        COLOR_FIELD_HIDDEN_BLUE,
+                        COLOR_FIELD_HIDDEN_ALPHA);
+                    SDL_RenderFillRect(renderer, &coords_fields[x][y]);
                 }
                 else
                 {
+                    SDL_SetRenderDrawColor(
+                        renderer,
+                        COLOR_FIELD_EXPOSED_RED,
+                        COLOR_FIELD_EXPOSED_GREEN, 
+                        COLOR_FIELD_EXPOSED_BLUE,
+                        COLOR_FIELD_EXPOSED_ALPHA);
+                    SDL_RenderFillRect(renderer, &coords_fields[x][y]);
+
+                    //determine which texture to draw onto the ground
                     switch (data->town->area_content[x][y])
                     {
                     case FIELD_ADMINISTRATION:
-                        Shader_bind_texture(0, &buildings[0]);
-                        Shader_bind(&shdr_building);
+                       SDL_RenderCopy(renderer, sprite_hq.texture, NULL, &coords_fields[x][y]); 
                     break;
 
                     case FIELD_TREE:
-                        Shader_bind_texture(1, &buildings[1]);
-                        Shader_bind(&shdr_building);
+                        SDL_RenderCopy(renderer, sprite_trees[0].texture, NULL, &coords_fields[x][y]);
                     break;
 
                     case FIELD_EMPTY:
-                        Shader_bind(&shdr_exposed);
                     break;
                     }
                 }
-
-                glDrawArrays(GL_TRIANGLE_STRIP, vert_offset, FIELD_NUM_VERTS);
-
-                vert_offset += FIELD_NUM_VERTS;
             }
         }
 
-        SDL_GL_SwapWindow(window);
+        //show image
+        SDL_RenderPresent(renderer);
         
         //handle terminal command-signals
         switch (data->cmd)
@@ -305,7 +175,8 @@ int32_t gfx_game(void* p_data)
     //send stop response
     data->rsp = GRSP_STOPPED;
 
-    //destroy window
+    //destroy window and renderer
+    SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
 
     //quit sdl

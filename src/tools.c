@@ -33,7 +33,7 @@ void print_town(char* p_town_name, struct Town* p_in)
     //exposure
     for (uint32_t x = 0; x < TOWN_WIDTH; x++)
     {
-        for (uint32_t y = 0; y < TOWN_DEPTH; y++)
+        for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
         {
             printf("%i", p_in->area_hidden[x][y]);
         }
@@ -46,7 +46,7 @@ void print_town(char* p_town_name, struct Town* p_in)
     //content
     for (uint32_t x = 0; x < TOWN_WIDTH; x++)
     {
-        for (uint32_t y = 0; y < TOWN_DEPTH; y++)
+        for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
         {
             printf("%i", p_in->area_content[x][y]);
         }
@@ -60,7 +60,7 @@ int32_t save_town(char* p_town_name, struct Town* p_in)
     char filepath[1024] = "";
     FILE* f;
     uint32_t town_width = TOWN_WIDTH;
-    uint32_t town_depth = TOWN_DEPTH;
+    uint32_t town_depth = TOWN_HEIGHT;
 
     //get path
     if (get_town_path(filepath) != 0)
@@ -88,13 +88,13 @@ int32_t save_town(char* p_town_name, struct Town* p_in)
     //write exposure data
     for (uint32_t x = 0; x < TOWN_WIDTH; x++)
     {
-        fwrite(p_in->area_hidden[x], sizeof(p_in->area_hidden[x][0]), TOWN_DEPTH, f);
+        fwrite(p_in->area_hidden[x], sizeof(p_in->area_hidden[x][0]), TOWN_HEIGHT, f);
     }
 
     //write content data
     for (uint32_t x = 0; x < TOWN_WIDTH; x++)
     {
-        fwrite(p_in->area_content[x], sizeof(p_in->area_content[x][0]), TOWN_DEPTH, f);
+        fwrite(p_in->area_content[x], sizeof(p_in->area_content[x][0]), TOWN_HEIGHT, f);
     }
 
     //check and done
@@ -142,7 +142,7 @@ int32_t load_town(char* p_town_name, struct Town* p_out)
     //check header info
     if (
         !((town_width == TOWN_WIDTH) &
-        (town_depth == TOWN_DEPTH))
+        (town_depth == TOWN_HEIGHT))
        )
     {
         printf(MSG_ERR_FILE_TOWN_CORRUPT);
@@ -152,13 +152,13 @@ int32_t load_town(char* p_town_name, struct Town* p_out)
     //read exposure data
     for (uint32_t x = 0; x < TOWN_WIDTH; x++)
     {
-        fread(p_out->area_hidden[x], sizeof(p_out->area_hidden[x][0]), TOWN_DEPTH, f);
+        fread(p_out->area_hidden[x], sizeof(p_out->area_hidden[x][0]), TOWN_HEIGHT, f);
     }
 
     //read content data
     for (uint32_t x = 0; x < TOWN_WIDTH; x++)
     {
-        fread(p_out->area_content[x], sizeof(p_out->area_content[x][0]), TOWN_DEPTH, f);
+        fread(p_out->area_content[x], sizeof(p_out->area_content[x][0]), TOWN_HEIGHT, f);
     }
 
     //check and done

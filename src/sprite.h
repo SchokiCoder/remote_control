@@ -16,30 +16,19 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef SHADER_H
-#define SHADER_H
+#ifndef SPRITE_H
+#define SPRITE_H
 
-#include <GL/glew.h>
+#include <stdint.h>
+#include <SDL2/SDL.h>
 
-struct Texture;
-
-struct Shader
+struct Sprite
 {
-    GLuint id;
-    int32_t texture_uniform_location;
-
+    SDL_Surface* surface;
+    SDL_Texture* texture;
 };
 
-void Shader_new(struct Shader* self, const char* p_vert_shader_filename, const char* p_frag_shader_filename);
-
-void Shader_destroy(struct Shader* self);
-
-void Shader_bind(struct Shader* self);
-
-void Shader_unbind();
-
-void Shader_prepare_texture_slot(struct Shader* self, int32_t p_texture_slot);
-
-void Shader_bind_texture(int32_t p_texture_slot, struct Texture* p_texture);
+int32_t Sprite_from(struct Sprite* self, const char* p_filepath, SDL_Renderer* p_renderer);
+void Sprite_clear(struct Sprite* self);
 
 #endif

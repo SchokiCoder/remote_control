@@ -16,25 +16,35 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef TOWN_H
-#define TOWN_H
-
-#include <stdint.h>
-#include <stdbool.h>
+#include <SDL2/SDL_image.h>
 #include "constants.h"
+#include "sprite.h"
 
-enum Field
+int32_t Sprite_from(struct Sprite* self, const char* p_filepath, SDL_Renderer* p_renderer)
 {
-    FIELD_EMPTY,
-    FIELD_TREE,
-    FIELD_ADMINISTRATION
-};
+    //load image
+    self->surface = IMG_Load(p_filepath);
 
-struct Town
+    if (self->surface == NULL)
+    {
+        printf(MSG_ERR_IMAGE_LOAD, p_filepath);
+        return 1;
+    }
+
+    //create texture
+    self->texture = SDL_CreateTextureFromSurface(p_renderer, self->surface);
+
+    if (self->texture == NULL)
+    {
+        printf(MSG_ERR_TEXTURE_CREATE, p_filepath);
+        return 2;
+    }
+
+    return 0;
+}
+
+void Sprite_clear(struct Sprite* self)
 {
-    uint8_t admin_id;
-    enum Field area_content[TOWN_WIDTH][TOWN_HEIGHT];
-    bool area_hidden[TOWN_WIDTH][TOWN_HEIGHT];
-};
-
-#endif
+    SDL_FreeSurface(self->surface);
+    SDL_DestroyTexture(self->texture);
+}

@@ -22,7 +22,7 @@
 #define APP_NAME "remote_control"
 #define APP_MAJOR 0
 #define APP_MINOR 0
-#define APP_MINOR 0
+#define APP_PATCH 0
 
 #ifdef _WIN32
     #define SLASH "\\"
@@ -34,12 +34,6 @@
 #define DIR_TOWNS                   "towns"
 
 #define PATH_ASSETS                 "assets" SLASH
-#define PATH_SHADER                 PATH_ASSETS "shader_old" SLASH
-#define PATH_VERT_SHADER_FIELD      PATH_SHADER "field.vert"
-#define PATH_FRAG_SHADER_HIDDEN     PATH_SHADER "hidden.frag"
-#define PATH_FRAG_SHADER_EXPOSED    PATH_SHADER "exposed.frag"
-#define PATH_VERT_SHADER_BUILDING   PATH_SHADER "building.vert"
-#define PATH_FRAG_SHADER_BUILDING   PATH_SHADER "building.frag"
 #define PATH_TEXTURES               PATH_ASSETS "textures" SLASH
 #define PATH_TEXTURE_HQ             PATH_TEXTURES "headquarter.png"
 #define PATH_TEXTURE_TREE_0         PATH_TEXTURES "tree_0.png"
@@ -49,7 +43,6 @@
 #define MSG_ERR     "ERROR: "
 #define MSG_WARN    "WARNING: "
 #define MSG_SDL_ERR "SDL-Err: %s\n"
-#define MSG_GL_ERR  "GL-Err: %s\n"
 
 #define MSG_ERR_ARG_MIN                 MSG_ERR "Too few arguments passed.\nStopped.\n"
 #define MSG_WARN_ARG_MAX                MSG_WARN "Too many arguments passed.\nAdditional arguments will be ignored.\n"
@@ -69,15 +62,9 @@
 #define MSG_ERR_SDL_INIT                MSG_ERR "SDL could not be initialized.\n" MSG_SDL_ERR
 #define MSG_ERR_SDL_WINDOW              MSG_ERR "SDL could not open a window.\n" MSG_SDL_ERR
 #define MSG_ERR_SDL_RENDERER            MSG_ERR "SDL could not create a renderer.\n" MSG_SDL_ERR
-#define MSG_ERR_GL_CONTEXT              MSG_ERR "OpenGL context could not be created.\n" MSG_GL_ERR
-#define MSG_ERR_GL_PROJECTION_MATRIX    MSG_ERR "OpenGL projection matrix failed to set up.\n" MSG_GL_ERR
-#define MSG_ERR_GL_MODELVIEW_MATRIX     MSG_ERR "OpenGL modelview matrix failed to set up.\n" MSG_GL_ERR
-#define MSG_ERR_GL_CLEAR_COLOR          MSG_ERR "OpenGL clear color could not be set.\n" MSG_GL_ERR
-#define MSG_ERR_GLEW_INIT               MSG_ERR "Glew could not be initialized.\n" MSG_GL_ERR
-#define MSG_ERR_SHADER_COMPILE          MSG_ERR "Shader could not be compiled.\n" MSG_GL_ERR
-#define MSG_ERR_SHADER_COMPILE_FILES    "Shader compilation results:\n\tVert (%s): %i\n\tFrag (%s): %i\n"
 #define MSG_ERR_FILE_READ               MSG_ERR "File \"%s\" could not be read.\n"
-#define MSG_ERR_TEXTURE_LOAD            MSG_ERR "Texture \"%s\" could not be loaded.\n"
+#define MSG_ERR_IMAGE_LOAD              MSG_ERR "Texture \"%s\" could not be loaded.\n"
+#define MSG_ERR_TEXTURE_CREATE          MSG_ERR "Texture \"%s\" can not be used.\n"
 
 #define CMD_HELP                "h"     /* context dependent: behaving different in-game and outside of game */
 #define CMD_HELP_LONG           "help"
@@ -91,7 +78,7 @@
 #define CMD_CONNECT_LONG        "connect"
 
 #define TOWN_WIDTH                  15
-#define TOWN_DEPTH                  15
+#define TOWN_HEIGHT                 15
 #define TOWN_EXPOSURE_AREA_BEGIN_X  4
 #define TOWN_EXPOSURE_AREA_BEGIN_Y  4
 #define TOWN_EXPOSURE_AREA_END_X    11
@@ -125,8 +112,21 @@
 #define WINDOW_WIDTH    600.0f
 #define WINDOW_HEIGHT   600.0f
 
-#define COLOR_BG_RED    0.05f
-#define COLOR_BG_GREEN  0.05f
-#define COLOR_BG_BLUE   0.2f
+#define COLOR_BG_RED    20
+#define COLOR_BG_GREEN  20
+#define COLOR_BG_BLUE   80
+
+#define COLOR_FIELD_HIDDEN_RED      0
+#define COLOR_FIELD_HIDDEN_GREEN    0
+#define COLOR_FIELD_HIDDEN_BLUE     0
+#define COLOR_FIELD_HIDDEN_ALPHA    255
+
+#define COLOR_FIELD_EXPOSED_RED     100
+#define COLOR_FIELD_EXPOSED_GREEN   255
+#define COLOR_FIELD_EXPOSED_BLUE    100
+#define COLOR_FIELD_EXPOSED_ALPHA   255
+
+#define SIZE_AREA_X 0.9f
+#define SIZE_AREA_Y 0.9f
 
 #endif

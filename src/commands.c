@@ -102,7 +102,7 @@ void cmd_hire_admin(int32_t p_admin_id, char* p_town_name)
     //hide fields, generate trees
     for (uint32_t x = 0; x < TOWN_WIDTH; x++)
     {
-        for (uint32_t y = 0; y < TOWN_DEPTH; y++)
+        for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
         {
             tree_chance = rand() % 100;
             
