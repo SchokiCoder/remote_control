@@ -28,7 +28,7 @@ struct Sprite
     SDL_Texture* texture;
 };
 
-int32_t Sprite_from(struct Sprite* self, const char* p_filepath, SDL_Renderer* p_renderer);
+int32_t Sprite_init(struct Sprite* self, const char* p_filepath, SDL_Renderer* p_renderer);
 void Sprite_clear(struct Sprite* self);
 
 #endif

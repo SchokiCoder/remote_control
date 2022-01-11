@@ -35,9 +35,13 @@
 
 #define PATH_ASSETS                 "assets" SLASH
 #define PATH_TEXTURES               PATH_ASSETS "textures" SLASH
+#define PATH_TEXTURE_GROUND         PATH_TEXTURES "ground.png"
 #define PATH_TEXTURE_HQ             PATH_TEXTURES "headquarter.png"
 #define PATH_TEXTURE_TREE_0         PATH_TEXTURES "tree_0.png"
-
+#define PATH_TEXTURE_TREE_1         PATH_TEXTURES "tree_1.png"
+#define PATH_TEXTURE_TREE_2         PATH_TEXTURES "tree_2.png"
+#define PATH_TEXTURE_TREE_3         PATH_TEXTURES "tree_3.png"
+#define PATH_TEXTURE_TREE_4         PATH_TEXTURES "tree_4.png"
 #define FILETYPE_TOWN "twn"
 
 #define MSG_ERR     "ERROR: "
@@ -111,6 +115,7 @@
 
 #define WINDOW_WIDTH    600.0f
 #define WINDOW_HEIGHT   600.0f
+#define FRAMERATE       5
 
 #define COLOR_BG_RED    20
 #define COLOR_BG_GREEN  20

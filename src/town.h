@@ -23,10 +23,16 @@
 #include <stdbool.h>
 #include "constants.h"
 
+#define TOWN_TREE_VARIETY_COUNT 5
+
 enum Field
 {
     FIELD_EMPTY,
-    FIELD_TREE,
+    FIELD_TREE_0,
+    FIELD_TREE_1,
+    FIELD_TREE_2,
+    FIELD_TREE_3,
+    FIELD_TREE_4,
     FIELD_ADMINISTRATION
 };
 

@@ -31,6 +31,8 @@ int32_t gfx_game(void* p_data)
     SDL_Renderer* renderer;
     SDL_Event event;
     struct GameData* data = (struct GameData*) (p_data);
+    uint32_t ts_now = 0;
+    uint32_t ts_render = 0;
    
     //init SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
@@ -64,11 +66,17 @@ int32_t gfx_game(void* p_data)
     }
 
     //load sprites
+    struct Sprite sprite_ground;
     struct Sprite sprite_hq;
-    struct Sprite sprite_trees[1];
+    struct Sprite sprite_trees[TOWN_TREE_VARIETY_COUNT];
 
-    if ((Sprite_from(&sprite_hq, PATH_TEXTURE_HQ, renderer) != 0) |
-        (Sprite_from(&sprite_trees[0], PATH_TEXTURE_TREE_0, renderer) != 0))
+    if ((Sprite_init(&sprite_ground, PATH_TEXTURE_GROUND, renderer) != 0) |
+        (Sprite_init(&sprite_hq, PATH_TEXTURE_HQ, renderer) != 0) |
+        (Sprite_init(&sprite_trees[0], PATH_TEXTURE_TREE_0, renderer) != 0) |
+        (Sprite_init(&sprite_trees[1], PATH_TEXTURE_TREE_1, renderer) != 0) |
+        (Sprite_init(&sprite_trees[2], PATH_TEXTURE_TREE_2, renderer) != 0) |
+        (Sprite_init(&sprite_trees[3], PATH_TEXTURE_TREE_3, renderer) != 0) |
+        (Sprite_init(&sprite_trees[4], PATH_TEXTURE_TREE_4, renderer) != 0))
     {
         return 4;
     }
@@ -97,60 +105,126 @@ int32_t gfx_game(void* p_data)
         }
     }
 
+    //generate graphical information
+    uint32_t ground_angles[TOWN_WIDTH][TOWN_HEIGHT];
+    SDL_RendererFlip ground_flip[TOWN_WIDTH][TOWN_HEIGHT];
+    uint32_t angle, flip;
+    SDL_Texture* area_content_textures[TOWN_WIDTH][TOWN_HEIGHT];
+
+
+    for (uint32_t x = 0; x < TOWN_WIDTH; x++)
+    {
+        for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
+        {
+            //ground texture angles
+            angle = rand() % 3;
+            ground_angles[x][y] = angle * 90;
+
+            //ground texture flip
+            flip = rand() % 3;
+
+            switch(flip)
+            {
+            case 0:
+                ground_flip[x][y] = SDL_FLIP_NONE;
+            break;
+
+            case 1:
+                ground_flip[x][y] = SDL_FLIP_VERTICAL;
+            break;
+            
+            case 2:
+                ground_flip[x][y] = SDL_FLIP_HORIZONTAL;
+            break;
+            
+            case 3:
+                ground_flip[x][y] = SDL_FLIP_VERTICAL | SDL_FLIP_HORIZONTAL;
+            break;
+            }
+
+            //map textures to area content
+            switch (data->town->area_content[x][y])
+            {
+                case FIELD_ADMINISTRATION:
+                     area_content_textures[x][y] = sprite_hq.texture; 
+                break;
+
+                case FIELD_TREE_0:
+                     area_content_textures[x][y] = sprite_trees[0].texture;
+                break;
+
+                case FIELD_TREE_1:
+                     area_content_textures[x][y] = sprite_trees[1].texture;
+                break;
+
+                case FIELD_TREE_2:
+                     area_content_textures[x][y] = sprite_trees[2].texture;
+                break;
+
+                case FIELD_TREE_3:
+                     area_content_textures[x][y] = sprite_trees[3].texture;
+                break;
+
+                case FIELD_TREE_4:
+                     area_content_textures[x][y] = sprite_trees[4].texture;
+                break;
+          
+                case FIELD_EMPTY:
+                    area_content_textures[x][y] = NULL;
+                break;           
+            }
+        }
+    }
+
     //mainloop
     while (active)
     {
-        //clear screen
-        SDL_SetRenderDrawColor(renderer, COLOR_BG_RED, COLOR_BG_GREEN, COLOR_BG_BLUE, 255);
-        SDL_RenderClear(renderer);
-        
-        //draw fields
-        for (uint32_t x = 0; x < TOWN_WIDTH; x++)
+        if (ts_now > (ts_render + (1000 / FRAMERATE)))
         {
-            for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
-            {              
-                //determine which ground to draw
-                if (data->town->area_hidden[x][y] == true)
-                {
-                    SDL_SetRenderDrawColor(
-                        renderer,
-                        COLOR_FIELD_HIDDEN_RED,
-                        COLOR_FIELD_HIDDEN_GREEN, 
-                        COLOR_FIELD_HIDDEN_BLUE,
-                        COLOR_FIELD_HIDDEN_ALPHA);
-                    SDL_RenderFillRect(renderer, &coords_fields[x][y]);
-                }
-                else
-                {
-                    SDL_SetRenderDrawColor(
-                        renderer,
-                        COLOR_FIELD_EXPOSED_RED,
-                        COLOR_FIELD_EXPOSED_GREEN, 
-                        COLOR_FIELD_EXPOSED_BLUE,
-                        COLOR_FIELD_EXPOSED_ALPHA);
-                    SDL_RenderFillRect(renderer, &coords_fields[x][y]);
-
-                    //determine which texture to draw onto the ground
-                    switch (data->town->area_content[x][y])
+            //clear screen
+            SDL_SetRenderDrawColor(renderer, COLOR_BG_RED, COLOR_BG_GREEN, COLOR_BG_BLUE, 255);
+            SDL_RenderClear(renderer);
+        
+            //draw fields
+            for (uint32_t x = 0; x < TOWN_WIDTH; x++)
+            {
+                for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
+                {              
+                    //determine which ground to draw
+                    if (data->town->area_hidden[x][y] == true)
                     {
-                    case FIELD_ADMINISTRATION:
-                       SDL_RenderCopy(renderer, sprite_hq.texture, NULL, &coords_fields[x][y]); 
-                    break;
+                        SDL_SetRenderDrawColor(
+                            renderer,
+                            COLOR_FIELD_HIDDEN_RED,
+                            COLOR_FIELD_HIDDEN_GREEN, 
+                            COLOR_FIELD_HIDDEN_BLUE,
+                            COLOR_FIELD_HIDDEN_ALPHA);
+                        SDL_RenderFillRect(renderer, &coords_fields[x][y]);
+                    }
+                    else
+                    {
+                        SDL_RenderCopyEx(renderer, sprite_ground.texture, NULL, &coords_fields[x][y],
+                            ground_angles[x][y],
+                            NULL,
+                            ground_flip[x][y]);
 
-                    case FIELD_TREE:
-                        SDL_RenderCopy(renderer, sprite_trees[0].texture, NULL, &coords_fields[x][y]);
-                    break;
-
-                    case FIELD_EMPTY:
-                    break;
+                        //if given, draw content texture
+                        if (area_content_textures[x][y] != NULL)
+                        {                        
+                            SDL_RenderCopy(renderer, area_content_textures[x][y], NULL, &coords_fields[x][y]);
+                        }
                     }
                 }
             }
-        }
 
-        //show image
-        SDL_RenderPresent(renderer);
+            //show image, save time
+            SDL_RenderPresent(renderer);
+            ts_render = ts_now;
+        }
         
+        //update time
+        ts_now = SDL_GetTicks();
+
         //handle terminal command-signals
         switch (data->cmd)
         {

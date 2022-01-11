@@ -53,6 +53,7 @@ void cmd_hire_admin(int32_t p_admin_id, char* p_town_name)
 {
     struct Town new_game;
     float tree_chance;
+    float tree_variance;
     time_t rng_seed;
     char filepath[1024] = "";
     FILE* f;
@@ -106,7 +107,19 @@ void cmd_hire_admin(int32_t p_admin_id, char* p_town_name)
         {
             tree_chance = rand() % 100;
             
-            new_game.area_content[x][y] = (tree_chance > TOWN_GEN_TREE_THRESHOLD ? FIELD_EMPTY : FIELD_TREE);
+            //chance to generate tree
+            if (tree_chance > TOWN_GEN_TREE_THRESHOLD)
+            {
+                //chance for species
+                tree_variance = rand() % (TOWN_TREE_VARIETY_COUNT - 1);
+                new_game.area_content[x][y] = (FIELD_TREE_0 + tree_variance);
+            }
+            else
+            {
+                new_game.area_content[x][y] = FIELD_EMPTY;
+            }
+
+            //hide field
             new_game.area_hidden[x][y] = true;
         }
     }
