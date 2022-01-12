@@ -81,6 +81,11 @@
 #define CMD_CONNECT             "c"    /* start playing game, inits the mainloop */
 #define CMD_CONNECT_LONG        "connect"
 
+#define GM_CMD_SAVE     "save"
+#define GM_CMD_SAVE_AS  "save-as"
+#define GM_CMD_EXIT     "exit"
+#define GM_CMD_HELP     "help"
+
 #define TOWN_WIDTH                  15
 #define TOWN_HEIGHT                 15
 #define TOWN_EXPOSURE_AREA_BEGIN_X  4
@@ -112,6 +117,10 @@
 "\n" \
 "  connect to a towns administrator and get to work:\n" \
 "  " CMD_CONNECT ",\t" CMD_CONNECT_LONG "\t\tTOWN_NAME\n"
+
+#define TRM_MAX_ARGS    8
+#define TRM_MAX_ARG_LEN 32
+#define TRM_MAX_IN_LEN  (TRM_MAX_ARGS * TRM_MAX_ARG_LEN)
 
 #define WINDOW_WIDTH    600.0f
 #define WINDOW_HEIGHT   600.0f

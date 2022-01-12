@@ -16,35 +16,11 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef GAME_H
-#define GAME_H
+#ifndef GAME_COMMANDS_H
+#define GAME_COMMANDS_H
 
 #include <stdint.h>
 
-struct Town;
-
-enum GameCmd
-{
-    GCMD_NONE
-};
-
-enum GameResponse
-{
-    GRSP_NONE,
-    GRSP_INIT,
-    GRSP_STOPPED
-};
-
-struct GameData
-{
-    char* window_title;
-    struct Town* town;
-    enum GameCmd cmd;           /* 1-way stream to inform gfx-window what to do */
-    enum GameResponse rsp;      /* 1-way stream to provide feedback from the gfx-window */
-};
-
-int32_t gfx_game(void* p_data);
-
-int32_t terminal_game(struct GameData* data);
+int32_t gm_cmd_save(char* p_town_name, struct Town* p_in);
 
 #endif

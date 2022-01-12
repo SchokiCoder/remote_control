@@ -176,6 +176,9 @@ int32_t gfx_game(void* p_data)
         }
     }
 
+    //send signal (init successful)
+    data->rsp = GRSP_INIT;
+
     //mainloop
     while (active)
     {
@@ -261,21 +264,55 @@ int32_t gfx_game(void* p_data)
 
 int32_t terminal_game(struct GameData* data)
 {
-    bool active = true;
+    bool active = true;     /* mainloop active */
+    bool enabled = false;   /* describes if the console accepts input */
+/*    char input[TRM_MAX_IN_LEN];
+    char *split1, *split2;
+    char args[TRM_MAX_ARGS][TRM_MAX_ARG_LEN];*/
     
     //mainloop
     while (active)
     {
+        //handle responses
         switch (data->rsp)
         {
         case GRSP_NONE:
         break;
 
-        //gfx window stopped
+        case GRSP_INIT:
+            enabled = true;
+        break;
+
         case GRSP_STOPPED:
-            //stop
+            enabled = false;
             active = false;
         break;
+        }
+
+        //if enabled, handle input
+        if (enabled)
+        {
+            /*//take
+            fgets(input, TRM_MAX_IN_LEN, stdin);
+
+            split1 = &input[0];
+
+            //split
+            for (
+                uint32_t i = 0;
+                i < TRM_MAX_ARGS && ((split2 = strchr(split1, ' ')) != NULL);
+                i++)
+            {
+                strncpy(args[i], split1, (size_t) (split2 - split1));
+
+                split1 = split2;
+            }
+
+            //parse
+            for (uint32_t i = 0; i < TRM_MAX_ARGS; i++)
+            {
+                printf("%s\n", args[i]);
+            }*/
         }
     }
 
