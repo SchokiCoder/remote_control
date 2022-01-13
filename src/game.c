@@ -22,6 +22,7 @@
 #include "constants.h"
 #include "town.h"
 #include "sprite.h"
+#include "game_commands.h"
 #include "game.h"
 
 int32_t gfx_game(void* p_data)
@@ -43,7 +44,7 @@ int32_t gfx_game(void* p_data)
 
     //create window
     window = SDL_CreateWindow(
-        data->window_title,
+        data->town_name,
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         WINDOW_WIDTH,
@@ -233,6 +234,10 @@ int32_t gfx_game(void* p_data)
         {
         case GCMD_NONE:
         break;
+
+        case GCMD_STOP:
+            active = false;
+        break;
         }
 
         //handle sdl-events
@@ -266,9 +271,10 @@ int32_t terminal_game(struct GameData* data)
 {
     bool active = true;     /* mainloop active */
     bool enabled = false;   /* describes if the console accepts input */
-/*    char input[TRM_MAX_IN_LEN];
+    char input[TRM_MAX_IN_LEN];
     char *split1, *split2;
-    char args[TRM_MAX_ARGS][TRM_MAX_ARG_LEN];*/
+    uint32_t argc;
+    char argv[TRM_MAX_ARGS][TRM_MAX_ARG_LEN];
     
     //mainloop
     while (active)
@@ -292,27 +298,52 @@ int32_t terminal_game(struct GameData* data)
         //if enabled, handle input
         if (enabled)
         {
-            /*//take
+            //reset argc
+            argc = 0;
+            
+            //take
             fgets(input, TRM_MAX_IN_LEN, stdin);
 
-            split1 = &input[0];
+            //replace linebreak with \0
+            split1 = strchr(input, '\n');
+            *split1 = '\0';
 
             //split
-            for (
-                uint32_t i = 0;
-                i < TRM_MAX_ARGS && ((split2 = strchr(split1, ' ')) != NULL);
-                i++)
-            {
-                strncpy(args[i], split1, (size_t) (split2 - split1));
+            split1 = &input[0];
 
-                split1 = split2;
+            for (uint32_t i = 0; i < TRM_MAX_ARGS; i++)
+            {
+                //increment arg counter
+                argc++;
+
+                //split
+                split2 = strchr(split1, ' ');
+
+                argv[i][0] = '\0';
+                strncat(argv[i], split1, (size_t) (split2 - split1));
+
+                //if not end, move pointers, else stop
+                if (split2 != NULL)
+                    split1 = split2 + 1;
+                else
+                    break;
             }
 
             //parse
-            for (uint32_t i = 0; i < TRM_MAX_ARGS; i++)
+            if (strcmp(argv[0], GM_CMD_SAVE) == 0)
             {
-                printf("%s\n", args[i]);
-            }*/
+                gm_cmd_save(data->town_name, data->town);
+            }
+            else if (strcmp(argv[0], GM_CMD_SAVE_AS) == 0)
+            {
+                gm_cmd_save_as(argv[1], data->town);
+            }
+            else if (strcmp(argv[0], GM_CMD_EXIT) == 0)
+            {
+                data->cmd = GCMD_STOP;
+                enabled = false;
+                active = false;
+            }
         }
     }
 

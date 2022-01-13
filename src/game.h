@@ -25,7 +25,8 @@ struct Town;
 
 enum GameCmd
 {
-    GCMD_NONE
+    GCMD_NONE,
+    GCMD_STOP
 };
 
 enum GameResponse
@@ -37,7 +38,7 @@ enum GameResponse
 
 struct GameData
 {
-    char* window_title;
+    char* town_name;
     struct Town* town;
     enum GameCmd cmd;           /* 1-way stream to inform gfx-window what to do */
     enum GameResponse rsp;      /* 1-way stream to provide feedback from the gfx-window */

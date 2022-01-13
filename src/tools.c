@@ -105,7 +105,6 @@ int32_t save_town(char* p_town_name, struct Town* p_in)
         return 3;
     }
     
-    printf(MSG_FILE_TOWN_SAVE);
     fclose(f);
     return 0;
 }

@@ -146,7 +146,8 @@ void cmd_hire_admin(int32_t p_admin_id, char* p_town_name)
     new_game.area_content[TOWN_HQ_SPAWN_X][TOWN_HQ_SPAWN_Y] = FIELD_ADMINISTRATION;
 
     //save town to file
-    save_town(p_town_name, &new_game);
+    if(save_town(p_town_name, &new_game) == 0)
+        printf(MSG_FILE_TOWN_CREATE);
 }
 
 void cmd_list_towns()
@@ -198,7 +199,7 @@ void cmd_connect(char* p_town_name)
         return;
 
     //prepare data of gfx part
-    game_data.window_title = p_town_name;
+    game_data.town_name = p_town_name;
     game_data.town = &town;
     game_data.cmd = GCMD_NONE;
     game_data.rsp = GRSP_NONE;

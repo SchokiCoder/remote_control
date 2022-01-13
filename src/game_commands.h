@@ -21,6 +21,7 @@
 
 #include <stdint.h>
 
-int32_t gm_cmd_save(char* p_town_name, struct Town* p_in);
+void gm_cmd_save(char* p_town_name, struct Town* p_in);
+void gm_cmd_save_as(char* p_town_name, struct Town* p_in);
 
 #endif
