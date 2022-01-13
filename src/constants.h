@@ -20,9 +20,13 @@
 #define CONSTANTS_H
 
 #define APP_NAME "remote_control"
-#define APP_MAJOR 0
-#define APP_MINOR 0
-#define APP_PATCH 0
+#define APP_LICENSE "GPLv3"
+#define APP_LICENSE_NOTICE "You should have received a copy of the GNU General Public License\n" \
+"along with this program.  If not, see <https://www.gnu.org/licenses/>.\n"
+#define APP_SOURCE "https://github.com/SchokiCoder/remote_control"
+#define APP_MAJOR "0"
+#define APP_MINOR "1"
+#define APP_PATCH "0"
 
 #ifdef _WIN32
     #define SLASH "\\"
@@ -33,8 +37,6 @@
 #define DIR_BASE                    "." APP_NAME
 #define DIR_TOWNS                   "towns"
 
-#define PATH_ASSETS                 "assets" SLASH
-#define PATH_TEXTURES               PATH_ASSETS "textures" SLASH
 #define PATH_TEXTURE_GROUND         PATH_TEXTURES "ground.png"
 #define PATH_TEXTURE_HQ             PATH_TEXTURES "headquarter.png"
 #define PATH_TEXTURE_TREE_0         PATH_TEXTURES "tree_0.png"
@@ -116,7 +118,13 @@
 "  " CMD_LIST_TOWNS ",\t" CMD_LIST_TOWNS_LONG "\n" \
 "\n" \
 "  connect to a towns administrator and get to work:\n" \
-"  " CMD_CONNECT ",\t" CMD_CONNECT_LONG "\t\tTOWN_NAME\n"
+"  " CMD_CONNECT ",\t" CMD_CONNECT_LONG "\t\tTOWN_NAME\n" \
+"\n" \
+APP_NAME " " APP_MAJOR "." APP_MINOR "." APP_PATCH " is licensed under the " APP_LICENSE ".\n" \
+APP_LICENSE_NOTICE \
+"The source code of this program is available at\n" \
+APP_SOURCE "\n"
+ 
 
 #define TRM_MAX_ARGS    8
 #define TRM_MAX_ARG_LEN 32
