@@ -44,7 +44,8 @@
 #define PATH_TEXTURE_TREE_2         PATH_TEXTURES "tree_2.png"
 #define PATH_TEXTURE_TREE_3         PATH_TEXTURES "tree_3.png"
 #define PATH_TEXTURE_TREE_4         PATH_TEXTURES "tree_4.png"
-#define FILETYPE_TOWN "twn"
+#define FILETYPE_TOWN   "twn"
+#define FILETYPE_BACKUP "bkp"
 
 #define MSG_ERR     "ERROR: "
 #define MSG_WARN    "WARNING: "
@@ -62,9 +63,12 @@
 #define MSG_FILE_TOWN_SAVE              "Town was successfully saved.\n"
 #define MSG_FILE_TOWN_SAVE_AS           "Town was successfully saved as \"%s\".\n"
 #define MSG_FILE_TOWN_CREATE            "New town was successfully created and is awaiting your commands.\n" 
+#define MSG_FILE_TOWN_DELETE            "Depending on how bad this case was, you should also get rid of the physical drive.\n"
+#define MSG_ERR_FILE_TOWN_DELETE        MSG_ERR "Town files couldn't be deleted.\n"
 #define MSG_ERR_FILE_TOWN_LOAD          MSG_ERR "Town could not be loaded.\n"
 #define MSG_FILE_TOWN_LOAD              "Town loaded.\n"
 #define MSG_WARN_FILE_TOWN_EXIST        MSG_WARN "The town already exists, type 'y' if you are sure to proceed.\n"
+#define MSG_WARN_FILE_TOWN_BACKUP       MSG_WARN "Creating backup files of this town failed.\n"
 #define MSG_ERR_ADMIN_ID                MSG_ERR "Given admin id does not exist.\nUse \"" CMD_LIST_ADMINS_LONG "\" command to make your decision.\n"
 #define MSG_TOWN_CREATION_STOPPED       "Town creation stopped.\n"
 #define MSG_ERR_SDL_INIT                MSG_ERR "SDL could not be initialized.\n" MSG_SDL_ERR
@@ -74,7 +78,7 @@
 #define MSG_ERR_IMAGE_LOAD              MSG_ERR "Texture \"%s\" could not be loaded.\n"
 #define MSG_ERR_TEXTURE_CREATE          MSG_ERR "Texture \"%s\" can not be used.\n"
 
-#define CMD_HELP                "h"     /* context dependent: behaving different in-game and outside of game */
+#define CMD_HELP                "h"
 #define CMD_HELP_LONG           "help"
 #define CMD_LIST_ADMINS         "la"
 #define CMD_LIST_ADMINS_LONG    "list-admins"
@@ -84,6 +88,7 @@
 #define CMD_LIST_TOWNS_LONG     "list-towns"
 #define CMD_CONNECT             "c"    /* start playing game, inits the mainloop */
 #define CMD_CONNECT_LONG        "connect"
+#define CMD_DELETE_TOWN_LONG    "delete"
 
 #define GM_CMD_SAVE     "save"
 #define GM_CMD_SAVE_AS  "save-as"
@@ -104,7 +109,17 @@
 #define TOWN_HQ_SPAWN_X             7
 #define TOWN_HQ_SPAWN_Y             7
 
-#define HELP_TEXT_OUTSIDE "Usage " APP_NAME " COMMAND [ARGS]\n" \
+#define HELP_TEXT_OUTSIDE "\n" \
+"If you are new to this post, you should follow this 1st steps guide to quickly get started.\n" \
+"1. Use the " CMD_LIST_ADMINS_LONG " or in short " CMD_LIST_ADMINS " command, to take a glance at our loyal administrators.\n" \
+"   Remember their strengths well and you should be good to go.\n" \
+"2. Use the " CMD_HIRE_ADMIN_LONG " or " CMD_HIRE_ADMIN " command, to start a new town.\n" \
+"3. Use the " CMD_CONNECT_LONG " / " CMD_CONNECT " command to begin your work in this town.\n" \
+"\n" \
+"PS. It is advisable to read through the commands description, before using it.\n" \
+"\n" \
+"\n" \
+"Usage " APP_NAME " COMMAND [ARGS]\n" \
 "\n" \
 "Commands to prepare your work:\n" \
 "  show this message:\n" \
@@ -122,11 +137,27 @@
 "  connect to a towns administrator and get to work:\n" \
 "  " CMD_CONNECT ",\t" CMD_CONNECT_LONG "\t\tTOWN_NAME\n" \
 "\n" \
+"  delete all files of a given town:\n" \
+"  " CMD_DELETE_TOWN_LONG "\t\tTOWN_NAME\n" \
+"\n" \
 APP_NAME " " APP_MAJOR "." APP_MINOR "." APP_PATCH " is licensed under the " APP_LICENSE ".\n" \
 APP_LICENSE_NOTICE \
 "The source code of this program is available at\n" \
 APP_SOURCE "\n"
- 
+
+#define HELP_TEXT_INGAME "List of commands:\n" \
+"\n" \
+"  show this message:\n" \
+"  " GM_CMD_HELP "\n" \
+"\n" \
+"  save current game:\n" \
+"  " GM_CMD_SAVE "\n" \
+"\n" \
+"  save game with different name:\n" \
+"  " GM_CMD_SAVE_AS "\tTOWN_NAME\n" \
+"\n" \
+"  exit the game:\n" \
+"  " GM_CMD_EXIT "\n"
 
 #define TRM_MAX_ARGS    8
 #define TRM_MAX_ARG_LEN 32
@@ -145,12 +176,13 @@ APP_SOURCE "\n"
 #define COLOR_FIELD_HIDDEN_BLUE     0
 #define COLOR_FIELD_HIDDEN_ALPHA    255
 
-#define COLOR_FIELD_EXPOSED_RED     100
-#define COLOR_FIELD_EXPOSED_GREEN   255
-#define COLOR_FIELD_EXPOSED_BLUE    100
-#define COLOR_FIELD_EXPOSED_ALPHA   255
+#define COLOR_FIELD_BORDER_RED      100
+#define COLOR_FIELD_BORDER_GREEN    100
+#define COLOR_FIELD_BORDER_BLUE     255
+#define COLOR_FIELD_BORDER_ALPHA    50
 
-#define SIZE_AREA_X 0.9f
-#define SIZE_AREA_Y 0.9f
+#define SIZE_AREA_X         0.9f
+#define SIZE_AREA_Y         0.9f
+#define SIZE_FIELD_CONTENT  0.95f
 
 #endif

@@ -26,5 +26,6 @@ void cmd_list_admins();
 void cmd_hire_admin(int32_t p_admin_id, char* p_town_name);
 void cmd_list_towns();
 void cmd_connect(char* p_town_name);
+void cmd_delete(char* p_town_name);
 
 #endif

@@ -52,8 +52,8 @@ void cmd_list_admins()
 void cmd_hire_admin(int32_t p_admin_id, char* p_town_name)
 {
     struct Town new_game;
-    float tree_chance;
-    float tree_variance;
+    uint32_t tree_chance;
+    uint32_t tree_variance;
     time_t rng_seed;
     char filepath[1024] = "";
     FILE* f;
@@ -111,7 +111,7 @@ void cmd_hire_admin(int32_t p_admin_id, char* p_town_name)
             if (tree_chance > TOWN_GEN_TREE_THRESHOLD)
             {
                 //chance for species
-                tree_variance = rand() % (TOWN_TREE_VARIETY_COUNT - 1);
+                tree_variance = rand() % TOWN_TREE_VARIETY_COUNT;
                 new_game.area_content[x][y] = (FIELD_TREE_0 + tree_variance);
             }
             else
@@ -213,4 +213,24 @@ void cmd_connect(char* p_town_name)
     //wait for gfx thread to finish
     SDL_WaitThread(gfx_thread, &gfx_rc);
     gfx_thread = NULL;
+}
+
+void cmd_delete(char* p_town_name)
+{
+    char filepath[1024] = "";
+
+    //get path
+    if (get_town_path(filepath) != 0)
+        return;
+    
+    //glue file part to path
+    strcat(filepath, p_town_name);
+    strcat(filepath, ".");
+    strcat(filepath, FILETYPE_TOWN);
+    
+    if (remove(filepath) != 0)
+        printf(MSG_ERR_FILE_TOWN_DELETE);
+
+    else
+        printf(MSG_FILE_TOWN_DELETE);
 }

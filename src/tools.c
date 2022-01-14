@@ -57,22 +57,40 @@ void print_town(char* p_town_name, struct Town* p_in)
 
 int32_t save_town(char* p_town_name, struct Town* p_in)
 {
-    char filepath[1024] = "";
+    char filepath_save[1024] = "";
+    char filepath_bkp[1024] = "";
     FILE* f;
     uint32_t town_width = TOWN_WIDTH;
     uint32_t town_depth = TOWN_HEIGHT;
 
     //get path
-    if (get_town_path(filepath) != 0)
+    if (get_town_path(filepath_save) != 0)
         return 1;
     
     //glue file part to path
-    strcat(filepath, p_town_name);
-    strcat(filepath, ".");
-    strcat(filepath, FILETYPE_TOWN);
+    strcat(filepath_save, p_town_name);
+    strcat(filepath_save, ".");
+
+    strcpy(filepath_bkp, filepath_save);
+
+    strcat(filepath_save, FILETYPE_TOWN);
+    strcat(filepath_bkp, FILETYPE_BACKUP);
+
+    //if save already exists, move to backup
+    f = fopen(filepath_save, "r");
+
+    if (f != NULL)
+    {
+        if (rename(filepath_save, filepath_bkp) != 0)
+        {
+            printf(MSG_WARN_FILE_TOWN_BACKUP);
+        }
+
+        fclose(f);
+    }
 
     //open file
-    f = fopen(filepath, "w");
+    f = fopen(filepath_save, "w");
 
     if (f == NULL)
     {

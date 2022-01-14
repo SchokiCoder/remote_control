@@ -20,15 +20,94 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <time.h>
 #include "constants.h"
 #include "commands.h"
 
 int main(int argc, char *argv[])
-{
-    //check amount of args
+{    
+    //if no args given
     if (argc < 2)
     {
-        printf("No commands issued.\nUse \"%s\" command for information on usage.\n", CMD_HELP_LONG);
+        uint32_t option = 0;
+        char input[64];
+        int32_t num_arg;
+
+        printf("Welcome to duty overseer, ");
+
+        while (option != 7)
+        {
+            //ask
+            printf("\nwhat do you wish to do?\n"
+                "1) help\n"
+                "2) list available administrators\n"
+                "3) hire administrator\n"
+                "4) list current towns\n"
+                "5) connect to a town\n"
+                "6) delete a town's documents\n"
+                "7) exit\n");
+            scanf("%s", input);
+
+            //parse
+            option = strtol(input, NULL, 10);
+
+            switch(option)
+            {
+            case 1:
+                cmd_help_outgame();
+            break;
+
+            case 2:
+                cmd_list_admins();
+            break;
+
+            case 3:
+                printf("Please enter the admin-id now: ");
+                scanf("%s", input);
+                num_arg = strtol(input, NULL, 10);
+
+                printf("Please enter the town name now: ");
+                scanf("%s", input);
+
+                cmd_hire_admin(num_arg, input);
+            break;
+
+            case 4:
+                cmd_list_towns();
+            break;
+
+            case 5:
+                printf("Please enter the town name now: ");
+                scanf("%s", input);
+                
+                cmd_connect(input);
+            break;
+
+            case 6:
+                //confirm deletion
+                printf("Are you sure, to delete the town's files? (y)\n");
+                scanf("%s", input);
+
+                if (input[0] != 'y')
+                    break;
+
+                //delete
+                printf("Please enter the town name now: ");
+                scanf("%s", input);               
+
+                cmd_delete(input);
+            break;
+
+            case 7:
+                printf("Goodbye.\n");
+            break;
+
+            default:
+                printf("Option not recognised.\n");
+            break;
+            }
+        }
+
         return 0;
     }
 
@@ -104,6 +183,23 @@ int main(int argc, char *argv[])
         }
 
         cmd_connect(argv[2]);
+    }
+    else if (strcmp(argv[1], CMD_DELETE_TOWN_LONG) == 0)
+    {
+        //check argc min
+        if (argc < 3)
+        {
+            printf(MSG_ERR_ARG_MIN);
+            return 0;
+        }
+
+        //check argc max
+        if (argc > 3)
+        {
+            printf(MSG_WARN_ARG_MAX);
+        }
+        
+        cmd_delete(argv[2]);
     }
     else
     {

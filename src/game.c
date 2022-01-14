@@ -31,6 +31,7 @@ int32_t gfx_game(void* p_data)
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Event event;
+    SDL_Point mouse;
     struct GameData* data = (struct GameData*) (p_data);
     uint32_t ts_now = 0;
     uint32_t ts_render = 0;
@@ -39,6 +40,7 @@ int32_t gfx_game(void* p_data)
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
         printf(MSG_ERR_SDL_INIT, SDL_GetError());
+        data->rsp = GRSP_STOPPED;
         return 1;
     }
 
@@ -54,6 +56,7 @@ int32_t gfx_game(void* p_data)
     if (window == NULL)
     {
         printf(MSG_ERR_SDL_WINDOW, SDL_GetError());
+        data->rsp = GRSP_STOPPED;
         return 2;
     }
 
@@ -63,8 +66,12 @@ int32_t gfx_game(void* p_data)
     if (renderer == NULL)
     {
         printf(MSG_ERR_SDL_RENDERER, SDL_GetError());
+        data->rsp = GRSP_STOPPED;
         return 3;
     }
+
+    //set alpha channel
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
     //load sprites
     struct Sprite sprite_ground;
@@ -79,30 +86,31 @@ int32_t gfx_game(void* p_data)
         (Sprite_init(&sprite_trees[3], PATH_TEXTURE_TREE_3, renderer) != 0) |
         (Sprite_init(&sprite_trees[4], PATH_TEXTURE_TREE_4, renderer) != 0))
     {
+        data->rsp = GRSP_STOPPED;
         return 4;
     }
 
-    //calculate size of area and fields
-    float size_area_x = WINDOW_WIDTH / 1.0f * SIZE_AREA_X;
-    float size_area_y = WINDOW_HEIGHT / 1.0f * SIZE_AREA_Y;
-    float size_field_x = size_area_x / TOWN_WIDTH;
-    float size_field_y = size_area_y / TOWN_HEIGHT;
+    //calculate area rect and field size
+    SDL_Rect area_rect;
+    area_rect.w = WINDOW_WIDTH * SIZE_AREA_X;
+    area_rect.h = WINDOW_HEIGHT * SIZE_AREA_Y;
+    area_rect.x = (WINDOW_WIDTH - (float) area_rect.w) / 2.0f;
+    area_rect.y = (WINDOW_HEIGHT - (float) area_rect.h) / 2.0f;
 
-    //calc render begin coord
-    float coord_begin_x = (WINDOW_WIDTH - size_area_x) / 2.0f;
-    float coord_begin_y = (WINDOW_HEIGHT - size_area_y) / 2.0f;
+    float size_field_x = (float) area_rect.w / (float) TOWN_WIDTH;
+    float size_field_y = (float) area_rect.h / (float) TOWN_HEIGHT;
 
     //calc field coords
-    SDL_Rect coords_fields[TOWN_WIDTH][TOWN_HEIGHT];
+    SDL_Rect field_rect[TOWN_WIDTH][TOWN_HEIGHT];
 
     for (uint32_t x = 0; x < TOWN_WIDTH; x++)
     {
         for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
         {
-            coords_fields[x][y].x = coord_begin_x + (x * size_field_x);
-            coords_fields[x][y].y = coord_begin_y + (y * size_field_y);
-            coords_fields[x][y].w = size_field_x;
-            coords_fields[x][y].h = size_field_y;
+            field_rect[x][y].x = area_rect.x + (x * size_field_x);
+            field_rect[x][y].y = area_rect.y + (y * size_field_y);
+            field_rect[x][y].w = size_field_x;
+            field_rect[x][y].h = size_field_y;
         }
     }
 
@@ -111,12 +119,22 @@ int32_t gfx_game(void* p_data)
     SDL_RendererFlip ground_flip[TOWN_WIDTH][TOWN_HEIGHT];
     uint32_t angle, flip;
     SDL_Texture* area_content_textures[TOWN_WIDTH][TOWN_HEIGHT];
-
+    SDL_Rect field_content_rect[TOWN_WIDTH][TOWN_HEIGHT];
 
     for (uint32_t x = 0; x < TOWN_WIDTH; x++)
     {
         for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
         {
+            //content texture rects
+            field_content_rect[x][y].w = (float) field_rect[x][y].w * SIZE_FIELD_CONTENT;
+            field_content_rect[x][y].h = (float) field_rect[x][y].h * SIZE_FIELD_CONTENT;
+            field_content_rect[x][y].x = 
+                (float) field_rect[x][y].x + 
+                (((float) field_rect[x][y].w - (float) field_content_rect[x][y].w) / 2.0f);
+            field_content_rect[x][y].y = 
+                (float) field_rect[x][y].y + 
+                (((float) field_rect[x][y].h - (float) field_content_rect[x][y].h) / 2.0f);
+
             //ground texture angles
             angle = rand() % 3;
             ground_angles[x][y] = angle * 90;
@@ -194,7 +212,7 @@ int32_t gfx_game(void* p_data)
             {
                 for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
                 {              
-                    //determine which ground to draw
+                    //if hidden draw black, else ground with content
                     if (data->town->area_hidden[x][y] == true)
                     {
                         SDL_SetRenderDrawColor(
@@ -203,11 +221,12 @@ int32_t gfx_game(void* p_data)
                             COLOR_FIELD_HIDDEN_GREEN, 
                             COLOR_FIELD_HIDDEN_BLUE,
                             COLOR_FIELD_HIDDEN_ALPHA);
-                        SDL_RenderFillRect(renderer, &coords_fields[x][y]);
+                        SDL_RenderFillRect(renderer, &field_rect[x][y]);
                     }
                     else
                     {
-                        SDL_RenderCopyEx(renderer, sprite_ground.texture, NULL, &coords_fields[x][y],
+                        //draw ground
+                        SDL_RenderCopyEx(renderer, sprite_ground.texture, NULL, &field_rect[x][y],
                             ground_angles[x][y],
                             NULL,
                             ground_flip[x][y]);
@@ -215,9 +234,22 @@ int32_t gfx_game(void* p_data)
                         //if given, draw content texture
                         if (area_content_textures[x][y] != NULL)
                         {                        
-                            SDL_RenderCopy(renderer, area_content_textures[x][y], NULL, &coords_fields[x][y]);
+                            SDL_RenderCopy(
+                                renderer,
+                                area_content_textures[x][y],
+                                NULL,
+                                &field_content_rect[x][y]);
                         }
                     }
+
+                    //draw field border
+                    SDL_SetRenderDrawColor(
+                        renderer,
+                        COLOR_FIELD_BORDER_RED,
+                        COLOR_FIELD_BORDER_GREEN,
+                        COLOR_FIELD_BORDER_BLUE,
+                        COLOR_FIELD_BORDER_ALPHA);
+                    SDL_RenderDrawRect(renderer, &field_rect[x][y]);
                 }
             }
 
@@ -245,9 +277,27 @@ int32_t gfx_game(void* p_data)
         {
             switch (event.type)
             {
-            //window closed
+            case SDL_MOUSEMOTION:
+                //if mouse hovers in field
+                SDL_GetMouseState(&mouse.x, &mouse.y);
+
+                if (SDL_PointInRect(&mouse, &area_rect) == true)
+                {
+                    //calc in which
+                    SDL_Point mouse_mapped;
+                    mouse_mapped.x = mouse.x - area_rect.x;
+                    mouse_mapped.y = mouse.y - area_rect.y;
+
+                    SDL_Point field_hover;
+                    field_hover.x = (float) mouse_mapped.x / size_field_x;
+                    field_hover.y = (float) mouse_mapped.y / size_field_y;
+
+                    //print TODO this is just for now
+                    printf("Field hover: %i, %i\n", field_hover.x, field_hover.y);
+                }
+            break;
+            
             case SDL_QUIT:
-                //stop gfx mainloop
                 active = false;
             break;
             }
@@ -330,7 +380,11 @@ int32_t terminal_game(struct GameData* data)
             }
 
             //parse
-            if (strcmp(argv[0], GM_CMD_SAVE) == 0)
+            if (strcmp(argv[0], GM_CMD_HELP) == 0)
+            {
+                printf(HELP_TEXT_INGAME);
+            }
+            else if (strcmp(argv[0], GM_CMD_SAVE) == 0)
             {
                 gm_cmd_save(data->town_name, data->town);
             }
