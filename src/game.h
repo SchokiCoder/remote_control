@@ -22,6 +22,7 @@
 #include <stdint.h>
 
 struct Town;
+struct Config;
 
 enum GameCmd
 {
@@ -40,6 +41,7 @@ struct GameData
 {
     char* town_name;
     struct Town* town;
+    struct Config* cfg;
     enum GameCmd cmd;           /* 1-way stream to inform gfx-window what to do */
     enum GameResponse rsp;      /* 1-way stream to provide feedback from the gfx-window */
 };

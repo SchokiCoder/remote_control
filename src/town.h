@@ -43,4 +43,8 @@ struct Town
     bool area_hidden[TOWN_WIDTH][TOWN_HEIGHT];
 };
 
+void print_town(char* p_town_name, struct Town* p_in);
+int32_t save_town(char* p_town_name, struct Town* p_in);
+int32_t load_town(char* p_town_name, struct Town* p_out);
+
 #endif

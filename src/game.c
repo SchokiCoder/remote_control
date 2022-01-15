@@ -21,6 +21,7 @@
 #include <stdbool.h>
 #include "constants.h"
 #include "town.h"
+#include "config.h"
 #include "sprite.h"
 #include "game_commands.h"
 #include "game.h"
@@ -245,10 +246,10 @@ int32_t gfx_game(void* p_data)
                     //draw field border
                     SDL_SetRenderDrawColor(
                         renderer,
-                        COLOR_FIELD_BORDER_RED,
-                        COLOR_FIELD_BORDER_GREEN,
-                        COLOR_FIELD_BORDER_BLUE,
-                        COLOR_FIELD_BORDER_ALPHA);
+                        data->cfg->field_border_red,
+                        data->cfg->field_border_green,
+                        data->cfg->field_border_blue,
+                        data->cfg->field_border_alpha);
                     SDL_RenderDrawRect(renderer, &field_rect[x][y]);
                 }
             }
@@ -382,21 +383,96 @@ int32_t terminal_game(struct GameData* data)
             //parse
             if (strcmp(argv[0], GM_CMD_HELP) == 0)
             {
+                //check arg max
+                if (argc > 1)
+                {
+                    printf(MSG_WARN_ARG_MAX);
+                }
+
                 printf(HELP_TEXT_INGAME);
             }
             else if (strcmp(argv[0], GM_CMD_SAVE) == 0)
             {
+                //check arg max
+                if (argc > 1)
+                {
+                    printf(MSG_WARN_ARG_MAX);
+                }
+
                 gm_cmd_save(data->town_name, data->town);
             }
             else if (strcmp(argv[0], GM_CMD_SAVE_AS) == 0)
             {
+                //check arg min
+                if (argc < 2)
+                {
+                    printf(MSG_ERR_ARG_MIN);
+                    break;
+                }
+
+                //check arg max
+                else if (argc > 2)
+                {
+                    printf(MSG_WARN_ARG_MAX);
+                }
+
                 gm_cmd_save_as(argv[1], data->town);
             }
             else if (strcmp(argv[0], GM_CMD_EXIT) == 0)
             {
+                //check arg max
+                if (argc > 1)
+                {
+                    printf(MSG_WARN_ARG_MAX);
+                }
+
                 data->cmd = GCMD_STOP;
                 enabled = false;
                 active = false;
+            }
+            else if (strcmp(argv[0], GM_CMD_SET) == 0)
+            {
+                //check arg min
+                if (argc < 3)
+                {
+                    printf(MSG_ERR_ARG_MIN);
+                    break;
+                }
+
+                //check arg max
+                else if (argc > 3)
+                {
+                    printf(MSG_WARN_ARG_MAX);
+                }
+
+                //check which setting should be changed
+                if (strcmp(argv[1], CFG_SETTING_FIELD_BORDER_RED) == 0)
+                {
+                    data->cfg->field_border_red = strtoul(argv[2], NULL, 10);
+                }
+                else if (strcmp(argv[1], CFG_SETTING_FIELD_BORDER_GREEN) == 0)
+                {
+                    data->cfg->field_border_green = strtoul(argv[2], NULL, 10);
+                }
+                else if (strcmp(argv[1], CFG_SETTING_FIELD_BORDER_BLUE) == 0)
+                {
+                    data->cfg->field_border_blue = strtoul(argv[2], NULL, 10);
+                }
+                else if (strcmp(argv[1], CFG_SETTING_FIELD_BORDER_ALPHA) == 0)
+                {
+                    data->cfg->field_border_alpha = strtoul(argv[2], NULL, 10);
+                }
+                else
+                {
+                    printf(MSG_ERR_UNKNOWN_SETTING, argv[1]);
+                    break;
+                }
+
+                save_config(data->cfg);
+            }
+            else
+            {
+                printf(MSG_ERR_UNKNOWN_COMMAND);
             }
         }
     }

@@ -23,5 +23,6 @@
 
 int32_t get_base_path(char* p_out);
 int32_t get_town_path(char* p_out);
+int32_t get_config_path(char* p_out);
 
 #endif

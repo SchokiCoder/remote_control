@@ -26,7 +26,7 @@
 #include "constants.h"
 #include "administrators.h"
 #include "town.h"
-#include "tools.h"
+#include "config.h"
 #include "path.h"
 #include "game.h"
 #include "commands.h"
@@ -55,7 +55,7 @@ void cmd_hire_admin(int32_t p_admin_id, char* p_town_name)
     uint32_t tree_chance;
     uint32_t tree_variance;
     time_t rng_seed;
-    char filepath[1024] = "";
+    char filepath[FILEPATH_MAX_LEN] = "";
     FILE* f;
     char confirmation;
     
@@ -152,7 +152,7 @@ void cmd_hire_admin(int32_t p_admin_id, char* p_town_name)
 
 void cmd_list_towns()
 {
-    char path[1024] = "";
+    char path[FILEPATH_MAX_LEN] = "";
     DIR* dir;
     struct dirent* d_ent;
     char* substr = NULL;
@@ -190,6 +190,7 @@ void cmd_list_towns()
 void cmd_connect(char* p_town_name)
 {
     struct Town town;
+    struct Config cfg;
     struct GameData game_data;
     SDL_Thread* gfx_thread;
     int32_t gfx_rc;
@@ -198,9 +199,13 @@ void cmd_connect(char* p_town_name)
     if (load_town(p_town_name, &town) != 0)
         return;
 
-    //prepare data of gfx part
+    //read config
+    load_config(&cfg);
+
+    //prepare game data
     game_data.town_name = p_town_name;
     game_data.town = &town;
+    game_data.cfg = &cfg;
     game_data.cmd = GCMD_NONE;
     game_data.rsp = GRSP_NONE;
 
@@ -217,7 +222,7 @@ void cmd_connect(char* p_town_name)
 
 void cmd_delete(char* p_town_name)
 {
-    char filepath[1024] = "";
+    char filepath[FILEPATH_MAX_LEN] = "";
 
     //get path
     if (get_town_path(filepath) != 0)

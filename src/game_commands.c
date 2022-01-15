@@ -18,7 +18,7 @@
 
 #include <stdio.h>
 #include "constants.h"
-#include "tools.h"
+#include "town.h"
 #include "game_commands.h"
 
 void gm_cmd_save(char* p_town_name, struct Town* p_in)

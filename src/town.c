@@ -20,10 +20,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "town.h"
 #include "constants.h"
 #include "path.h"
-#include "tools.h"
+#include "town.h"
 
 void print_town(char* p_town_name, struct Town* p_in)
 {
@@ -57,8 +56,8 @@ void print_town(char* p_town_name, struct Town* p_in)
 
 int32_t save_town(char* p_town_name, struct Town* p_in)
 {
-    char filepath_save[1024] = "";
-    char filepath_bkp[1024] = "";
+    char filepath_save[FILEPATH_MAX_LEN] = "";
+    char filepath_bkp[FILEPATH_MAX_LEN] = "";
     FILE* f;
     uint32_t town_width = TOWN_WIDTH;
     uint32_t town_depth = TOWN_HEIGHT;
@@ -130,7 +129,7 @@ int32_t save_town(char* p_town_name, struct Town* p_in)
 int32_t load_town(char* p_town_name, struct Town* p_out)
 {
     FILE *f;
-    char filepath[1024] = "";
+    char filepath[FILEPATH_MAX_LEN] = "";
     uint32_t town_width, town_depth;
     
     //get path

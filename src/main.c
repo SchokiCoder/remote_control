@@ -25,7 +25,7 @@
 #include "commands.h"
 
 int main(int argc, char *argv[])
-{    
+{       
     //if no args given
     if (argc < 2)
     {
@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        printf("Command not recognised.\nUse \"%s\" command for information on usage.\n", CMD_HELP_LONG);
+        printf(MSG_ERR_UNKNOWN_COMMAND);
     }
     
     return 0;

@@ -31,7 +31,7 @@ int32_t get_base_path(char* p_out)
     //get path
     strcat(p_out, getenv("HOME"));
     strcat(p_out, SLASH);
-    strcat(p_out, DIR_BASE);
+    strcat(p_out, PATH_BASE);
     strcat(p_out, SLASH);
 
     //in case, create dir
@@ -61,7 +61,7 @@ int32_t get_town_path(char* p_out)
         return rc;
 
     //get path
-    strcat(p_out, DIR_TOWNS);
+    strcat(p_out, PATH_TOWNS);
     strcat(p_out, SLASH);
 
     //in case, create dir
@@ -76,6 +76,22 @@ int32_t get_town_path(char* p_out)
             return 1;
         }
     }
+
+    return 0;
+}
+
+int32_t get_config_path(char* p_out)
+{
+    int32_t rc;
+
+    //get base path
+    rc = get_base_path(p_out);
+
+    if (rc != 0)
+        return rc;
+
+    //get path
+    strcat(p_out, PATH_CONFIG);
 
     return 0;
 }

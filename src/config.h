@@ -16,15 +16,18 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef TOOLS_H
-#define TOOLS_H
+#ifndef CONFIG_H
+#define CONFIG_H
 
-#include <stdint.h>
+struct Config
+{
+    uint8_t field_border_red;
+    uint8_t field_border_green;
+    uint8_t field_border_blue;
+    uint8_t field_border_alpha;
+};
 
-struct Town;
-
-void print_town(char* p_town_name, struct Town* p_in);
-int32_t save_town(char* p_town_name, struct Town* p_in);
-int32_t load_town(char* p_town_name, struct Town* p_out);
+int32_t load_config(struct Config* p_cfg);
+int32_t save_config(struct Config* p_cfg);
 
 #endif

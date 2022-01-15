@@ -19,6 +19,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+//application
 #define APP_NAME "remote_control"
 #define APP_LICENSE "GPLv3"
 #define APP_LICENSE_NOTICE "You should have received a copy of the GNU General Public License\n" \
@@ -34,9 +35,25 @@
     #define SLASH "/"
 #endif
 
-#define DIR_BASE                    "." APP_NAME
-#define DIR_TOWNS                   "towns"
+#define FILEPATH_MAX_LEN 1024
 
+//userfile paths
+#define PATH_BASE       "." APP_NAME    //appended onto the home path
+#define PATH_TOWNS      "towns"         //from here on: appended onto the base path
+#define PATH_CONFIG     "config.cfg"
+
+//config definitions
+#define CONFIG_MAX_LINES        255
+#define CONFIG_MAX_SETTING_LEN  64
+#define CONFIG_MAX_VALUE_LEN    64
+
+//config setting names
+#define CFG_SETTING_FIELD_BORDER_RED    "field_border_red"
+#define CFG_SETTING_FIELD_BORDER_GREEN  "field_border_green"
+#define CFG_SETTING_FIELD_BORDER_BLUE   "field_border_blue"
+#define CFG_SETTING_FIELD_BORDER_ALPHA  "field_border_alpha"
+
+//asset paths
 #define PATH_TEXTURE_GROUND         PATH_TEXTURES "ground.png"
 #define PATH_TEXTURE_HQ             PATH_TEXTURES "headquarter.png"
 #define PATH_TEXTURE_TREE_0         PATH_TEXTURES "tree_0.png"
@@ -47,16 +64,22 @@
 #define FILETYPE_TOWN   "twn"
 #define FILETYPE_BACKUP "bkp"
 
+//messages
 #define MSG_ERR     "ERROR: "
 #define MSG_WARN    "WARNING: "
 #define MSG_SDL_ERR "SDL-Err: %s\n"
 
+#define MSG_ERR_UNKNOWN_COMMAND         MSG_ERR "Command not recognised.\nUse " CMD_HELP_LONG " command for information on usage.\n"
 #define MSG_ERR_ARG_MIN                 MSG_ERR "Too few arguments passed.\nStopped.\n"
 #define MSG_WARN_ARG_MAX                MSG_WARN "Too many arguments passed.\nAdditional arguments will be ignored.\n"
 #define MSG_ERR_FILE_SAVE               MSG_ERR "File could not be saved.\nMake sure you have permissions to write and read.\n"
 #define MSG_ERR_FILE_LOAD               MSG_ERR "File could not be loaded.\nMake sure the file exists and permissions to read are given.\n"
 #define MSG_ERR_DIR_BASE                MSG_ERR "Game file directory does not exist and could not be created.\n"
 #define MSG_ERR_DIR_TOWNS_CREATE        MSG_ERR "Town file directory does not exist and could not be created.\n"
+#define MSG_WARN_CONFIG_SAVE            MSG_WARN "Config file could not be saved.\n"
+#define MSG_WARN_CONFIG_LOAD            MSG_WARN "Config file could not be loaded.\n"
+#define MSG_WARN_CONFIG_UNKNOWN_SETTING MSG_WARN "Unrecognised setting in config \"%s\".\n"
+#define MSG_ERR_UNKNOWN_SETTING  MSG_ERR "Unrecognised setting \"%s\".\n"
 #define MSG_ERR_DIR_TOWNS               MSG_ERR "Town file directory does not exist.\n"
 #define MSG_ERR_FILE_TOWN_CORRUPT       MSG_ERR "Town file has corrupt information.\n"
 #define MSG_ERR_FILE_TOWN_SAVE          MSG_ERR "Town was not successfully saved.\n"
@@ -78,6 +101,7 @@
 #define MSG_ERR_IMAGE_LOAD              MSG_ERR "Texture \"%s\" could not be loaded.\n"
 #define MSG_ERR_TEXTURE_CREATE          MSG_ERR "Texture \"%s\" can not be used.\n"
 
+//commands
 #define CMD_HELP                "h"
 #define CMD_HELP_LONG           "help"
 #define CMD_LIST_ADMINS         "la"
@@ -90,11 +114,14 @@
 #define CMD_CONNECT_LONG        "connect"
 #define CMD_DELETE_TOWN_LONG    "delete"
 
+//in-game comands
+#define GM_CMD_HELP     "help"
 #define GM_CMD_SAVE     "save"
 #define GM_CMD_SAVE_AS  "save-as"
 #define GM_CMD_EXIT     "exit"
-#define GM_CMD_HELP     "help"
+#define GM_CMD_SET      "set"
 
+//town generation
 #define TOWN_WIDTH                  15
 #define TOWN_HEIGHT                 15
 #define TOWN_EXPOSURE_AREA_BEGIN_X  4
@@ -109,6 +136,7 @@
 #define TOWN_HQ_SPAWN_X             7
 #define TOWN_HQ_SPAWN_Y             7
 
+//help text
 #define HELP_TEXT_OUTSIDE "\n" \
 "If you are new to this post, you should follow this 1st steps guide to quickly get started.\n" \
 "1. Use the " CMD_LIST_ADMINS_LONG " or in short " CMD_LIST_ADMINS " command, to take a glance at our loyal administrators.\n" \
@@ -157,16 +185,23 @@ APP_SOURCE "\n"
 "  " GM_CMD_SAVE_AS "\tTOWN_NAME\n" \
 "\n" \
 "  exit the game:\n" \
-"  " GM_CMD_EXIT "\n"
+"  " GM_CMD_EXIT "\n" \
+"\n" \
+"  set configuration values:\n" \
+"  " GM_CMD_SET "\tSETTING_NAME\tSETTING_VALUE\n" \
 
+//terminal in-game
 #define TRM_MAX_ARGS    8
 #define TRM_MAX_ARG_LEN 32
 #define TRM_MAX_IN_LEN  (TRM_MAX_ARGS * TRM_MAX_ARG_LEN)
 
+//gfx in-game
 #define WINDOW_WIDTH    600.0f
 #define WINDOW_HEIGHT   600.0f
 #define FRAMERATE       5
 
+
+//colors
 #define COLOR_BG_RED    20
 #define COLOR_BG_GREEN  20
 #define COLOR_BG_BLUE   80
@@ -181,6 +216,7 @@ APP_SOURCE "\n"
 #define COLOR_FIELD_BORDER_BLUE     255
 #define COLOR_FIELD_BORDER_ALPHA    50
 
+//gfx in-game sizes of displayed content in percent
 #define SIZE_AREA_X         0.9f
 #define SIZE_AREA_Y         0.9f
 #define SIZE_FIELD_CONTENT  0.95f
