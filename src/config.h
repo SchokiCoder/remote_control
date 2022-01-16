@@ -21,6 +21,11 @@
 
 struct Config
 {
+    float gfx_framerate;
+    float gfx_window_x;
+    float gfx_window_y;
+    float gfx_window_w;
+    float gfx_window_h;
     uint8_t field_border_red;
     uint8_t field_border_green;
     uint8_t field_border_blue;

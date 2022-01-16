@@ -48,11 +48,11 @@ int32_t gfx_game(void* p_data)
     //create window
     window = SDL_CreateWindow(
         data->town_name,
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
-        WINDOW_WIDTH,
-        WINDOW_HEIGHT,
-        SDL_WINDOW_SHOWN);
+        data->cfg->gfx_window_x,
+        data->cfg->gfx_window_y,
+        data->cfg->gfx_window_w,
+        data->cfg->gfx_window_h,
+        (SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE));
 
     if (window == NULL)
     {
@@ -91,13 +91,17 @@ int32_t gfx_game(void* p_data)
         return 4;
     }
 
-    //calculate area rect and field size
+    /* calculate area pos and size
+        -as wide as high
+        -stay on top and right
+    */
     SDL_Rect area_rect;
-    area_rect.w = WINDOW_WIDTH * SIZE_AREA_X;
-    area_rect.h = WINDOW_HEIGHT * SIZE_AREA_Y;
-    area_rect.x = (WINDOW_WIDTH - (float) area_rect.w) / 2.0f;
-    area_rect.y = (WINDOW_HEIGHT - (float) area_rect.h) / 2.0f;
-
+    area_rect.h = (float) data->cfg->gfx_window_h * UI_AREA_H;
+    area_rect.w = area_rect.h;
+    area_rect.y = (float) data->cfg->gfx_window_h * UI_AREA_Y;
+    area_rect.x = ((float) data->cfg->gfx_window_w * UI_AREA_X2) - area_rect.w;
+   
+    //calc field size
     float size_field_x = (float) area_rect.w / (float) TOWN_WIDTH;
     float size_field_y = (float) area_rect.h / (float) TOWN_HEIGHT;
 
@@ -127,8 +131,8 @@ int32_t gfx_game(void* p_data)
         for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
         {
             //content texture rects
-            field_content_rect[x][y].w = (float) field_rect[x][y].w * SIZE_FIELD_CONTENT;
-            field_content_rect[x][y].h = (float) field_rect[x][y].h * SIZE_FIELD_CONTENT;
+            field_content_rect[x][y].w = (float) field_rect[x][y].w * UI_FIELD_CONTENT_SIZE;
+            field_content_rect[x][y].h = (float) field_rect[x][y].h * UI_FIELD_CONTENT_SIZE;
             field_content_rect[x][y].x = 
                 (float) field_rect[x][y].x + 
                 (((float) field_rect[x][y].w - (float) field_content_rect[x][y].w) / 2.0f);
@@ -202,7 +206,7 @@ int32_t gfx_game(void* p_data)
     //mainloop
     while (active)
     {
-        if (ts_now > (ts_render + (1000 / FRAMERATE)))
+        if (ts_now > (ts_render + (1000.0f / data->cfg->gfx_framerate)))
         {
             //clear screen
             SDL_SetRenderDrawColor(renderer, COLOR_BG_RED, COLOR_BG_GREEN, COLOR_BG_BLUE, 255);
@@ -307,6 +311,22 @@ int32_t gfx_game(void* p_data)
 
     //send stop response
     data->rsp = GRSP_STOPPED;
+
+    //save window position and size to config
+    int32_t border_t, border_l;
+    int32_t window_x, window_y;
+    int32_t window_w, window_h;
+
+    SDL_GetWindowBordersSize(window, &border_t, &border_l, NULL, NULL);
+    SDL_GetWindowPosition(window, &window_x, &window_y);
+    SDL_GetWindowSize(window, &window_w, &window_h);
+
+    data->cfg->gfx_window_x = (float) window_x - (float) border_l;
+    data->cfg->gfx_window_y = (float) window_y - (float) border_t;
+    data->cfg->gfx_window_w = (float) window_w;
+    data->cfg->gfx_window_h = (float) window_h;
+
+    save_config(data->cfg);
 
     //destroy window and renderer
     SDL_DestroyRenderer(renderer);
@@ -430,6 +450,16 @@ int32_t terminal_game(struct GameData* data)
                 enabled = false;
                 active = false;
             }
+            else if (strcmp(argv[0], GM_CMD_SHOW_CONFIG) == 0)
+            {
+                //check arg max
+                if (argc > 1)
+                {
+                    printf(MSG_WARN_ARG_MAX);
+                }
+
+                gm_cmd_show_config(data->cfg);
+            }
             else if (strcmp(argv[0], GM_CMD_SET) == 0)
             {
                 //check arg min
@@ -445,30 +475,7 @@ int32_t terminal_game(struct GameData* data)
                     printf(MSG_WARN_ARG_MAX);
                 }
 
-                //check which setting should be changed
-                if (strcmp(argv[1], CFG_SETTING_FIELD_BORDER_RED) == 0)
-                {
-                    data->cfg->field_border_red = strtoul(argv[2], NULL, 10);
-                }
-                else if (strcmp(argv[1], CFG_SETTING_FIELD_BORDER_GREEN) == 0)
-                {
-                    data->cfg->field_border_green = strtoul(argv[2], NULL, 10);
-                }
-                else if (strcmp(argv[1], CFG_SETTING_FIELD_BORDER_BLUE) == 0)
-                {
-                    data->cfg->field_border_blue = strtoul(argv[2], NULL, 10);
-                }
-                else if (strcmp(argv[1], CFG_SETTING_FIELD_BORDER_ALPHA) == 0)
-                {
-                    data->cfg->field_border_alpha = strtoul(argv[2], NULL, 10);
-                }
-                else
-                {
-                    printf(MSG_ERR_UNKNOWN_SETTING, argv[1]);
-                    break;
-                }
-
-                save_config(data->cfg);
+                gm_cmd_set(data->cfg, argv[1], argv[2]);
             }
             else
             {
@@ -478,4 +485,4 @@ int32_t terminal_game(struct GameData* data)
     }
 
     return 0;
-}
+} 

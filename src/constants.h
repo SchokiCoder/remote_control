@@ -19,6 +19,8 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+#include <SDL2/SDL_video.h>
+
 //application
 #define APP_NAME "remote_control"
 #define APP_LICENSE "GPLv3"
@@ -47,7 +49,23 @@
 #define CONFIG_MAX_SETTING_LEN  64
 #define CONFIG_MAX_VALUE_LEN    64
 
+//default config values
+#define CFG_STD_GFX_FRAMERATE       2.5f
+#define CFG_STD_GFX_WINDOW_X        SDL_WINDOWPOS_CENTERED
+#define CFG_STD_GFX_WINDOW_Y        SDL_WINDOWPOS_CENTERED
+#define CFG_STD_GFX_WINDOW_W        600.0f
+#define CFG_STD_GFX_WINDOW_H        600.0f
+#define CFG_STD_FIELD_BORDER_RED    100
+#define CFG_STD_FIELD_BORDER_GREEN  100
+#define CFG_STD_FIELD_BORDER_BLUE   255
+#define CFG_STD_FIELD_BORDER_ALPHA  50
+
 //config setting names
+#define CFG_SETTING_GFX_FRAMERATE       "gfx_framerate"
+#define CFG_SETTING_GFX_WINDOW_X        "gfx_window_x"
+#define CFG_SETTING_GFX_WINDOW_Y        "gfx_window_y"
+#define CFG_SETTING_GFX_WINDOW_W        "gfx_window_w"
+#define CFG_SETTING_GFX_WINDOW_H        "gfx_window_h"
 #define CFG_SETTING_FIELD_BORDER_RED    "field_border_red"
 #define CFG_SETTING_FIELD_BORDER_GREEN  "field_border_green"
 #define CFG_SETTING_FIELD_BORDER_BLUE   "field_border_blue"
@@ -79,7 +97,8 @@
 #define MSG_WARN_CONFIG_SAVE            MSG_WARN "Config file could not be saved.\n"
 #define MSG_WARN_CONFIG_LOAD            MSG_WARN "Config file could not be loaded.\n"
 #define MSG_WARN_CONFIG_UNKNOWN_SETTING MSG_WARN "Unrecognised setting in config \"%s\".\n"
-#define MSG_ERR_UNKNOWN_SETTING  MSG_ERR "Unrecognised setting \"%s\".\n"
+#define MSG_ERR_UNKNOWN_SETTING         MSG_ERR "Unrecognised setting \"%s\".\n"
+#define MSG_CONFIG_CREATED              "The config was missing and a default config has been created.\n"
 #define MSG_ERR_DIR_TOWNS               MSG_ERR "Town file directory does not exist.\n"
 #define MSG_ERR_FILE_TOWN_CORRUPT       MSG_ERR "Town file has corrupt information.\n"
 #define MSG_ERR_FILE_TOWN_SAVE          MSG_ERR "Town was not successfully saved.\n"
@@ -115,11 +134,12 @@
 #define CMD_DELETE_TOWN_LONG    "delete"
 
 //in-game comands
-#define GM_CMD_HELP     "help"
-#define GM_CMD_SAVE     "save"
-#define GM_CMD_SAVE_AS  "save-as"
-#define GM_CMD_EXIT     "exit"
-#define GM_CMD_SET      "set"
+#define GM_CMD_HELP             "help"
+#define GM_CMD_SAVE             "save"
+#define GM_CMD_SAVE_AS          "save-as"
+#define GM_CMD_EXIT             "exit"
+#define GM_CMD_SHOW_CONFIG      "show-config"
+#define GM_CMD_SET              "set"
 
 //town generation
 #define TOWN_WIDTH                  15
@@ -187,6 +207,9 @@ APP_SOURCE "\n"
 "  exit the game:\n" \
 "  " GM_CMD_EXIT "\n" \
 "\n" \
+"  list all configuration values:\n" \
+"  " GM_CMD_SHOW_CONFIG "\n" \
+"\n" \
 "  set configuration values:\n" \
 "  " GM_CMD_SET "\tSETTING_NAME\tSETTING_VALUE\n" \
 
@@ -194,12 +217,6 @@ APP_SOURCE "\n"
 #define TRM_MAX_ARGS    8
 #define TRM_MAX_ARG_LEN 32
 #define TRM_MAX_IN_LEN  (TRM_MAX_ARGS * TRM_MAX_ARG_LEN)
-
-//gfx in-game
-#define WINDOW_WIDTH    600.0f
-#define WINDOW_HEIGHT   600.0f
-#define FRAMERATE       5
-
 
 //colors
 #define COLOR_BG_RED    20
@@ -211,14 +228,11 @@ APP_SOURCE "\n"
 #define COLOR_FIELD_HIDDEN_BLUE     0
 #define COLOR_FIELD_HIDDEN_ALPHA    255
 
-#define COLOR_FIELD_BORDER_RED      100
-#define COLOR_FIELD_BORDER_GREEN    100
-#define COLOR_FIELD_BORDER_BLUE     255
-#define COLOR_FIELD_BORDER_ALPHA    50
-
 //gfx in-game sizes of displayed content in percent
-#define SIZE_AREA_X         0.9f
-#define SIZE_AREA_Y         0.9f
-#define SIZE_FIELD_CONTENT  0.95f
+#define UI_AREA_X2      0.9f
+#define UI_AREA_Y       0.1f
+#define UI_AREA_H       0.8f
+
+#define UI_FIELD_CONTENT_SIZE   0.95f
 
 #endif

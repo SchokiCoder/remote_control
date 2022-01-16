@@ -17,8 +17,11 @@
 */
 
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include "constants.h"
 #include "town.h"
+#include "config.h"
 #include "game_commands.h"
 
 void gm_cmd_save(char* p_town_name, struct Town* p_in)
@@ -31,4 +34,75 @@ void gm_cmd_save_as(char* p_town_name, struct Town* p_in)
 {
     if (save_town(p_town_name, p_in) == 0)
         printf(MSG_FILE_TOWN_SAVE_AS, p_town_name);
+}
+
+void gm_cmd_set(struct Config* p_cfg, char* p_setting_name, char* p_setting_value)
+{
+    //check which setting should be changed
+    if (strcmp(p_setting_name, CFG_SETTING_GFX_FRAMERATE) == 0)
+    {
+        p_cfg->gfx_framerate = strtof(p_setting_value, NULL);
+    }
+    else if (strcmp(p_setting_name, CFG_SETTING_GFX_WINDOW_X) == 0)
+    {
+        p_cfg->gfx_window_x = strtof(p_setting_value, NULL);
+    }
+    else if (strcmp(p_setting_name, CFG_SETTING_GFX_WINDOW_Y) == 0)
+    {
+        p_cfg->gfx_window_y = strtof(p_setting_value, NULL);
+    }
+    else if (strcmp(p_setting_name, CFG_SETTING_GFX_WINDOW_W) == 0)
+    {
+        p_cfg->gfx_window_w = strtof(p_setting_value, NULL);
+    }
+    else if (strcmp(p_setting_name, CFG_SETTING_GFX_WINDOW_H) == 0)
+    {
+        p_cfg->gfx_window_h = strtof(p_setting_value, NULL);
+    }
+    else if (strcmp(p_setting_name, CFG_SETTING_FIELD_BORDER_RED) == 0)
+    {
+        p_cfg->field_border_red = strtoul(p_setting_value, NULL, 10);
+    }
+    else if (strcmp(p_setting_name, CFG_SETTING_FIELD_BORDER_GREEN) == 0)
+    {
+        p_cfg->field_border_green = strtoul(p_setting_value, NULL, 10);
+    }
+    else if (strcmp(p_setting_name, CFG_SETTING_FIELD_BORDER_BLUE) == 0)
+    {
+        p_cfg->field_border_blue = strtoul(p_setting_value, NULL, 10);
+    }
+    else if (strcmp(p_setting_name, CFG_SETTING_FIELD_BORDER_ALPHA) == 0)
+    {
+        p_cfg->field_border_alpha = strtoul(p_setting_value, NULL, 10);
+    }
+    else
+    {
+        printf(MSG_ERR_UNKNOWN_SETTING, p_setting_name);
+        return;
+    }
+
+    save_config(p_cfg);
+}
+
+void gm_cmd_show_config(struct Config* p_cfg)
+{
+    printf("" \
+        CFG_SETTING_GFX_FRAMERATE ": %f\n" \
+        CFG_SETTING_GFX_WINDOW_X ": %f\n" \
+        CFG_SETTING_GFX_WINDOW_Y ": %f\n" \
+        CFG_SETTING_GFX_WINDOW_W ": %f\n" \
+        CFG_SETTING_GFX_WINDOW_H ": %f\n" \
+        CFG_SETTING_FIELD_BORDER_RED ": %u\n" \
+        CFG_SETTING_FIELD_BORDER_GREEN ": %u\n" \
+        CFG_SETTING_FIELD_BORDER_BLUE ": %u\n" \
+        CFG_SETTING_FIELD_BORDER_ALPHA ": %u\n",
+        p_cfg->gfx_framerate,
+        p_cfg->gfx_window_x,
+        p_cfg->gfx_window_y,
+        p_cfg->gfx_window_w,
+        p_cfg->gfx_window_h,
+        p_cfg->field_border_red,
+        p_cfg->field_border_green,
+        p_cfg->field_border_blue,
+        p_cfg->field_border_alpha);
 }

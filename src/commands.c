@@ -199,6 +199,17 @@ void cmd_connect(char* p_town_name)
     if (load_town(p_town_name, &town) != 0)
         return;
 
+    //set cfg to std values (so that if something is missing it is still set)
+    cfg.gfx_framerate = CFG_STD_GFX_FRAMERATE;
+    cfg.gfx_window_x = CFG_STD_GFX_WINDOW_X;
+    cfg.gfx_window_y = CFG_STD_GFX_WINDOW_Y;
+    cfg.gfx_window_w = CFG_STD_GFX_WINDOW_W;
+    cfg.gfx_window_h = CFG_STD_GFX_WINDOW_H;
+    cfg.field_border_red = CFG_STD_FIELD_BORDER_RED;
+    cfg.field_border_green = CFG_STD_FIELD_BORDER_GREEN;
+    cfg.field_border_blue = CFG_STD_FIELD_BORDER_BLUE;
+    cfg.field_border_alpha = CFG_STD_FIELD_BORDER_ALPHA;
+
     //read config
     load_config(&cfg);
 

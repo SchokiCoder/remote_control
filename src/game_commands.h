@@ -21,7 +21,11 @@
 
 #include <stdint.h>
 
+struct Config;
+
 void gm_cmd_save(char* p_town_name, struct Town* p_in);
 void gm_cmd_save_as(char* p_town_name, struct Town* p_in);
+void gm_cmd_set(struct Config* p_cfg, char* p_setting_name, char* p_setting_value);
+void gm_cmd_show_config(struct Config* p_cfg);
 
 #endif

@@ -79,7 +79,7 @@ int32_t load_config(struct Config* p_cfg)
         break;
 
         default:
-            //if commad did not yet occur
+            //if comma did not yet occur
             if (read_setting == true)
             {
                 //read setting-name
@@ -105,7 +105,27 @@ int32_t load_config(struct Config* p_cfg)
     //convert strings into values
     for (uint32_t i = 0; i < (line + 1); i++)
     {
-        if (strcmp(cfg_settings[i], CFG_SETTING_FIELD_BORDER_RED) == 0)
+        if (strcmp(cfg_settings[i], CFG_SETTING_GFX_FRAMERATE) == 0)
+        {
+            p_cfg->gfx_framerate = strtof(cfg_values[i], NULL);
+        }
+        else if (strcmp(cfg_settings[i], CFG_SETTING_GFX_WINDOW_X) == 0)
+        {
+            p_cfg->gfx_window_x = strtof(cfg_values[i], NULL);
+        }
+        else if(strcmp(cfg_settings[i], CFG_SETTING_GFX_WINDOW_Y) == 0)
+        {
+            p_cfg->gfx_window_y = strtof(cfg_values[i], NULL);
+        }
+        else if(strcmp(cfg_settings[i], CFG_SETTING_GFX_WINDOW_W) == 0)
+        {
+            p_cfg->gfx_window_w = strtof(cfg_values[i], NULL);
+        }
+        else if(strcmp(cfg_settings[i], CFG_SETTING_GFX_WINDOW_H) == 0)
+        {
+            p_cfg->gfx_window_h = strtof(cfg_values[i], NULL);
+        }
+        else if (strcmp(cfg_settings[i], CFG_SETTING_FIELD_BORDER_RED) == 0)
         {
             p_cfg->field_border_red = strtoul(cfg_values[i], NULL, 10);
         }
@@ -152,6 +172,31 @@ int32_t save_config(struct Config* p_cfg)
     }
 
     //write
+    fputs(CFG_SETTING_GFX_FRAMERATE, f);
+    fputs(delim, f);
+    fprintf(f, "%f", p_cfg->gfx_framerate);
+    fputc('\n', f);
+    
+    fputs(CFG_SETTING_GFX_WINDOW_X, f);
+    fputs(delim, f);
+    fprintf(f, "%f", p_cfg->gfx_window_x);
+    fputc('\n', f);
+
+    fputs(CFG_SETTING_GFX_WINDOW_Y, f);
+    fputs(delim, f);
+    fprintf(f, "%f", p_cfg->gfx_window_y);
+    fputc('\n', f);
+
+    fputs(CFG_SETTING_GFX_WINDOW_W, f);
+    fputs(delim, f);
+    fprintf(f, "%f", p_cfg->gfx_window_w);
+    fputc('\n', f);
+
+    fputs(CFG_SETTING_GFX_WINDOW_H, f);
+    fputs(delim, f);
+    fprintf(f, "%f", p_cfg->gfx_window_h);
+    fputc('\n', f);
+
     fputs(CFG_SETTING_FIELD_BORDER_RED, f);
     fputs(delim, f);
     fprintf(f, "%u", p_cfg->field_border_red);
