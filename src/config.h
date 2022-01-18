@@ -19,13 +19,23 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "constants.h"
+
 struct Config
 {
+    char path_font[CFG_SETTING_PATH_FONT_MAX_LEN];
     float gfx_framerate;
     float gfx_window_x;
     float gfx_window_y;
     float gfx_window_w;
     float gfx_window_h;
+    uint8_t bg_red;
+    uint8_t bg_green;
+    uint8_t bg_blue;
+    uint8_t font_red;
+    uint8_t font_green;
+    uint8_t font_blue;
+    uint8_t font_alpha;
     uint8_t field_border_red;
     uint8_t field_border_green;
     uint8_t field_border_blue;

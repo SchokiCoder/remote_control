@@ -49,27 +49,51 @@
 #define CONFIG_MAX_SETTING_LEN  64
 #define CONFIG_MAX_VALUE_LEN    64
 
-//default config values
-#define CFG_STD_GFX_FRAMERATE       2.5f
-#define CFG_STD_GFX_WINDOW_X        SDL_WINDOWPOS_CENTERED
-#define CFG_STD_GFX_WINDOW_Y        SDL_WINDOWPOS_CENTERED
-#define CFG_STD_GFX_WINDOW_W        600.0f
-#define CFG_STD_GFX_WINDOW_H        600.0f
-#define CFG_STD_FIELD_BORDER_RED    100
-#define CFG_STD_FIELD_BORDER_GREEN  100
-#define CFG_STD_FIELD_BORDER_BLUE   255
-#define CFG_STD_FIELD_BORDER_ALPHA  50
+//config setting defintions
+#define CFG_SETTING_PATH_FONT_MAX_LEN   255
 
 //config setting names
+#define CFG_SETTING_PATH_FONT           "path_font"
 #define CFG_SETTING_GFX_FRAMERATE       "gfx_framerate"
 #define CFG_SETTING_GFX_WINDOW_X        "gfx_window_x"
 #define CFG_SETTING_GFX_WINDOW_Y        "gfx_window_y"
 #define CFG_SETTING_GFX_WINDOW_W        "gfx_window_w"
 #define CFG_SETTING_GFX_WINDOW_H        "gfx_window_h"
+#define CFG_SETTING_BG_RED              "bg_red"
+#define CFG_SETTING_BG_GREEN            "bg_green"
+#define CFG_SETTING_BG_BLUE             "bg_blue"
+#define CFG_SETTING_FONT_RED            "font_red"
+#define CFG_SETTING_FONT_GREEN          "font_green"
+#define CFG_SETTING_FONT_BLUE           "font_blue"
+#define CFG_SETTING_FONT_ALPHA          "font_alpha"
 #define CFG_SETTING_FIELD_BORDER_RED    "field_border_red"
 #define CFG_SETTING_FIELD_BORDER_GREEN  "field_border_green"
 #define CFG_SETTING_FIELD_BORDER_BLUE   "field_border_blue"
 #define CFG_SETTING_FIELD_BORDER_ALPHA  "field_border_alpha"
+
+//default config values
+#ifdef _WIN32
+    #define CFG_STD_PATH_FONT       "C:\\Windows\\Fonts\\Arial.ttf"    
+#else
+    #define CFG_STD_PATH_FONT       "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+#endif
+
+#define CFG_STD_GFX_FRAMERATE       2.5f
+#define CFG_STD_GFX_WINDOW_X        SDL_WINDOWPOS_CENTERED
+#define CFG_STD_GFX_WINDOW_Y        SDL_WINDOWPOS_CENTERED
+#define CFG_STD_GFX_WINDOW_W        600.0f
+#define CFG_STD_GFX_WINDOW_H        600.0f
+#define CFG_STD_BG_RED              20
+#define CFG_STD_BG_GREEN            20
+#define CFG_STD_BG_BLUE             80
+#define CFG_STD_FONT_RED            255
+#define CFG_STD_FONT_GREEN          255
+#define CFG_STD_FONT_BLUE           255
+#define CFG_STD_FONT_ALPHA          255
+#define CFG_STD_FIELD_BORDER_RED    100
+#define CFG_STD_FIELD_BORDER_GREEN  100
+#define CFG_STD_FIELD_BORDER_BLUE   255
+#define CFG_STD_FIELD_BORDER_ALPHA  50
 
 //asset paths
 #define PATH_TEXTURE_GROUND         PATH_TEXTURES "ground.png"
@@ -116,8 +140,11 @@
 #define MSG_ERR_SDL_INIT                MSG_ERR "SDL could not be initialized.\n" MSG_SDL_ERR
 #define MSG_ERR_SDL_WINDOW              MSG_ERR "SDL could not open a window.\n" MSG_SDL_ERR
 #define MSG_ERR_SDL_RENDERER            MSG_ERR "SDL could not create a renderer.\n" MSG_SDL_ERR
+#define MSG_ERR_TTF_INIT                MSG_ERR "SDL_ttf could not be initialized.\n"
 #define MSG_ERR_FILE_READ               MSG_ERR "File \"%s\" could not be read.\n"
 #define MSG_ERR_IMAGE_LOAD              MSG_ERR "Texture \"%s\" could not be loaded.\n"
+#define MSG_ERR_TEXT_CREATE             MSG_ERR "Texture could no be created fromn text \"%s\".\n"
+#define MSG_ERR_FONT_LOAD               MSG_ERR "Font \"%s\" could not be loaded.\nYou should change your config.\n"
 #define MSG_ERR_TEXTURE_CREATE          MSG_ERR "Texture \"%s\" can not be used.\n"
 
 //commands
@@ -219,20 +246,32 @@ APP_SOURCE "\n"
 #define TRM_MAX_IN_LEN  (TRM_MAX_ARGS * TRM_MAX_ARG_LEN)
 
 //colors
-#define COLOR_BG_RED    20
-#define COLOR_BG_GREEN  20
-#define COLOR_BG_BLUE   80
-
 #define COLOR_FIELD_HIDDEN_RED      0
 #define COLOR_FIELD_HIDDEN_GREEN    0
 #define COLOR_FIELD_HIDDEN_BLUE     0
 #define COLOR_FIELD_HIDDEN_ALPHA    255
 
 //gfx in-game sizes of displayed content in percent
-#define UI_AREA_X2      0.9f
-#define UI_AREA_Y       0.1f
-#define UI_AREA_H       0.8f
+#define UI_AREA_X2              0.9f
+#define UI_AREA_Y               0.1f
+#define UI_AREA_H               0.8f
 
 #define UI_FIELD_CONTENT_SIZE   0.95f
+
+#define UI_FONT_SIZE            12.0f
+
+#define UI_TEXT_HOVER_LABEL     "field:"
+#define UI_TEXT_HOVER_LABEL_X   0.005f
+#define UI_TEXT_HOVER_LABEL_Y   0.005f
+#define UI_TEXT_HOVER_LABEL_W   0.175f
+#define UI_TEXT_HOVER_LABEL_H   0.05f
+#define UI_TEXT_HOVER_X_X       (UI_TEXT_HOVER_LABEL_X + UI_TEXT_HOVER_LABEL_W + 0.025f)
+#define UI_TEXT_HOVER_X_Y       UI_TEXT_HOVER_LABEL_Y
+#define UI_TEXT_HOVER_X_W       0.065f
+#define UI_TEXT_HOVER_X_H       0.05f
+#define UI_TEXT_HOVER_Y_X       (UI_TEXT_HOVER_X_X + UI_TEXT_HOVER_X_W + 0.025f)
+#define UI_TEXT_HOVER_Y_Y       UI_TEXT_HOVER_X_Y
+#define UI_TEXT_HOVER_Y_W       UI_TEXT_HOVER_X_W
+#define UI_TEXT_HOVER_Y_H       UI_TEXT_HOVER_X_H
 
 #endif

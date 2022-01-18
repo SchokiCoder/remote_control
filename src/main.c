@@ -55,11 +55,11 @@ int main(int argc, char *argv[])
             {
             case 1:
                 cmd_help_outgame();
-            break;
+                break;
 
             case 2:
                 cmd_list_admins();
-            break;
+                break;
 
             case 3:
                 printf("Please enter the admin-id now: ");
@@ -70,18 +70,18 @@ int main(int argc, char *argv[])
                 scanf("%s", input);
 
                 cmd_hire_admin(num_arg, input);
-            break;
+                break;
 
             case 4:
                 cmd_list_towns();
-            break;
+                break;
 
             case 5:
                 printf("Please enter the town name now: ");
                 scanf("%s", input);
                 
                 cmd_connect(input);
-            break;
+                break;
 
             case 6:
                 //confirm deletion
@@ -96,15 +96,15 @@ int main(int argc, char *argv[])
                 scanf("%s", input);               
 
                 cmd_delete(input);
-            break;
+                break;
 
             case 7:
                 printf("Goodbye.\n");
-            break;
+                break;
 
             default:
                 printf("Option not recognised.\n");
-            break;
+                break;
             }
         }
 

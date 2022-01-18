@@ -17,10 +17,11 @@
 */
 
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include "constants.h"
 #include "sprite.h"
 
-int32_t Sprite_init(struct Sprite* self, const char* p_filepath, SDL_Renderer* p_renderer)
+int32_t Sprite_from_image(struct Sprite *self, SDL_Renderer *p_renderer, const char *p_filepath)
 {
     //load image
     self->surface = IMG_Load(p_filepath);
@@ -37,6 +38,34 @@ int32_t Sprite_init(struct Sprite* self, const char* p_filepath, SDL_Renderer* p
     if (self->texture == NULL)
     {
         printf(MSG_ERR_TEXTURE_CREATE, p_filepath);
+        return 2;
+    }
+
+    return 0;
+}
+
+int32_t Sprite_from_text(
+    struct Sprite *self,
+    SDL_Renderer *p_renderer,
+    const char *p_text,
+    TTF_Font *p_font,
+    SDL_Color p_color)
+{
+    //create text
+    self->surface = TTF_RenderText_Solid(p_font, p_text, p_color);
+    
+    if (self->surface == NULL)
+    {
+        printf(MSG_ERR_TEXT_CREATE, p_text);
+        return 1;
+    }
+    
+    //create texture
+    self->texture = SDL_CreateTextureFromSurface(p_renderer, self->surface);
+
+    if (self->texture == NULL)
+    {
+        printf(MSG_ERR_TEXTURE_CREATE, p_text);
         return 2;
     }
 

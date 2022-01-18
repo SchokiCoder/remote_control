@@ -22,13 +22,23 @@
 #include <stdint.h>
 #include <SDL2/SDL.h>
 
+struct TTF_Font;
+
 struct Sprite
 {
     SDL_Surface* surface;
     SDL_Texture* texture;
 };
 
-int32_t Sprite_init(struct Sprite* self, const char* p_filepath, SDL_Renderer* p_renderer);
+int32_t Sprite_from_image(struct Sprite *self, SDL_Renderer *p_renderer, const char *p_filepath);
+
+int32_t Sprite_from_text(
+    struct Sprite *self,
+    SDL_Renderer *p_renderer,
+    const char *p_text,
+    TTF_Font *p_font,
+    SDL_Color p_color);
+
 void Sprite_clear(struct Sprite* self);
 
 #endif

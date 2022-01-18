@@ -57,14 +57,14 @@ int32_t load_config(struct Config* p_cfg)
         {
         case ' ':
             //ignore spaces
-        break;
+            break;
 
         case '=':
             //start reading value, add '\0' to setting
             read_setting = false;
             cfg_settings[line][setting_len] = '\0';
             setting_len++;
-        break;
+            break;
 
         case '\n':
             //add '\0' to value
@@ -76,7 +76,7 @@ int32_t load_config(struct Config* p_cfg)
             read_setting = true;
             setting_len = 0;
             value_len = 0;
-        break;
+            break;
 
         default:
             //if comma did not yet occur
@@ -92,7 +92,7 @@ int32_t load_config(struct Config* p_cfg)
                 cfg_values[line][value_len] = (unsigned char) buf;
                 value_len++;
             }
-        break;
+            break;
         }
     }
 
@@ -105,10 +105,17 @@ int32_t load_config(struct Config* p_cfg)
     //convert strings into values
     for (uint32_t i = 0; i < (line + 1); i++)
     {
-        if (strcmp(cfg_settings[i], CFG_SETTING_GFX_FRAMERATE) == 0)
+        //etc
+        if (strcmp(cfg_settings[i], CFG_SETTING_PATH_FONT) == 0)
+        {
+            strcpy(p_cfg->path_font, cfg_values[i]);
+        }
+        else if (strcmp(cfg_settings[i], CFG_SETTING_GFX_FRAMERATE) == 0)
         {
             p_cfg->gfx_framerate = strtof(cfg_values[i], NULL);
         }
+        
+        //window pos, size
         else if (strcmp(cfg_settings[i], CFG_SETTING_GFX_WINDOW_X) == 0)
         {
             p_cfg->gfx_window_x = strtof(cfg_values[i], NULL);
@@ -125,6 +132,40 @@ int32_t load_config(struct Config* p_cfg)
         {
             p_cfg->gfx_window_h = strtof(cfg_values[i], NULL);
         }
+        
+        //bg color
+        else if (strcmp(cfg_settings[i], CFG_SETTING_BG_RED) == 0)
+        {
+            p_cfg->bg_red = strtoul(cfg_values[i], NULL, 10);
+        }
+        else if (strcmp(cfg_settings[i], CFG_SETTING_BG_GREEN) == 0)
+        {
+            p_cfg->bg_green = strtoul(cfg_values[i], NULL, 10);
+        }
+        else if (strcmp(cfg_settings[i], CFG_SETTING_BG_BLUE) == 0)
+        {
+            p_cfg->bg_blue = strtoul(cfg_values[i], NULL, 10);
+        }
+
+        //font color
+        else if (strcmp(cfg_settings[i], CFG_SETTING_FONT_RED) == 0)
+        {
+            p_cfg->font_red = strtoul(cfg_values[i], NULL, 10);
+        }
+        else if (strcmp(cfg_settings[i], CFG_SETTING_FONT_GREEN) == 0)
+        {
+            p_cfg->font_green = strtoul(cfg_values[i], NULL, 10);
+        }
+        else if (strcmp(cfg_settings[i], CFG_SETTING_FONT_BLUE) == 0)
+        {
+            p_cfg->font_blue = strtoul(cfg_values[i], NULL, 10);
+        }
+        else if (strcmp(cfg_settings[i], CFG_SETTING_FONT_ALPHA) == 0)
+        {
+            p_cfg->font_alpha = strtoul(cfg_values[i], NULL, 10);
+        }
+
+        //field border color
         else if (strcmp(cfg_settings[i], CFG_SETTING_FIELD_BORDER_RED) == 0)
         {
             p_cfg->field_border_red = strtoul(cfg_values[i], NULL, 10);
@@ -141,6 +182,8 @@ int32_t load_config(struct Config* p_cfg)
         {
             p_cfg->field_border_alpha = strtoul(cfg_values[i], NULL, 10);
         }
+
+        //unknown option
         else
         {
             printf(MSG_WARN_CONFIG_UNKNOWN_SETTING, cfg_settings[i]);
@@ -171,12 +214,18 @@ int32_t save_config(struct Config* p_cfg)
         return 2;
     }
 
-    //write
+    //write - etc
+    fputs(CFG_SETTING_PATH_FONT, f);
+    fputs(delim, f);
+    fprintf(f, "%s", p_cfg->path_font);
+    fputc('\n', f);
+
     fputs(CFG_SETTING_GFX_FRAMERATE, f);
     fputs(delim, f);
     fprintf(f, "%f", p_cfg->gfx_framerate);
     fputc('\n', f);
     
+    //window pos, size
     fputs(CFG_SETTING_GFX_WINDOW_X, f);
     fputs(delim, f);
     fprintf(f, "%f", p_cfg->gfx_window_x);
@@ -196,7 +245,45 @@ int32_t save_config(struct Config* p_cfg)
     fputs(delim, f);
     fprintf(f, "%f", p_cfg->gfx_window_h);
     fputc('\n', f);
+    
+    //bg color
+    fputs(CFG_SETTING_BG_RED, f);
+    fputs(delim, f);
+    fprintf(f, "%u", p_cfg->bg_red);
+    fputc('\n', f);
 
+    fputs(CFG_SETTING_BG_GREEN, f);
+    fputs(delim, f);
+    fprintf(f, "%u", p_cfg->bg_green);
+    fputc('\n', f);
+
+    fputs(CFG_SETTING_BG_BLUE, f);
+    fputs(delim, f);
+    fprintf(f, "%u", p_cfg->bg_blue);
+    fputc('\n', f);
+
+    //font color
+    fputs(CFG_SETTING_FONT_RED, f);
+    fputs(delim, f);
+    fprintf(f, "%u", p_cfg->font_red);
+    fputc('\n', f);
+
+    fputs(CFG_SETTING_FONT_GREEN, f);
+    fputs(delim, f);
+    fprintf(f, "%u", p_cfg->font_green);
+    fputc('\n', f);
+
+    fputs(CFG_SETTING_FONT_BLUE, f);
+    fputs(delim, f);
+    fprintf(f, "%u", p_cfg->font_blue);
+    fputc('\n', f);
+
+    fputs(CFG_SETTING_FONT_ALPHA, f);
+    fputs(delim, f);
+    fprintf(f, "%u", p_cfg->font_alpha);
+    fputc('\n', f);
+
+    //field border color
     fputs(CFG_SETTING_FIELD_BORDER_RED, f);
     fputs(delim, f);
     fprintf(f, "%u", p_cfg->field_border_red);

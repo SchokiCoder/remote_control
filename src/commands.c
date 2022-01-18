@@ -200,11 +200,19 @@ void cmd_connect(char* p_town_name)
         return;
 
     //set cfg to std values (so that if something is missing it is still set)
+    strcpy(cfg.path_font, CFG_STD_PATH_FONT);
     cfg.gfx_framerate = CFG_STD_GFX_FRAMERATE;
     cfg.gfx_window_x = CFG_STD_GFX_WINDOW_X;
     cfg.gfx_window_y = CFG_STD_GFX_WINDOW_Y;
     cfg.gfx_window_w = CFG_STD_GFX_WINDOW_W;
     cfg.gfx_window_h = CFG_STD_GFX_WINDOW_H;
+    cfg.bg_red = CFG_STD_BG_RED;
+    cfg.bg_green = CFG_STD_BG_GREEN;
+    cfg.bg_blue = CFG_STD_BG_BLUE;
+    cfg.font_red = CFG_STD_FONT_RED;
+    cfg.font_green = CFG_STD_FONT_GREEN;
+    cfg.font_blue = CFG_STD_FONT_BLUE;
+    cfg.font_alpha = CFG_STD_FONT_ALPHA;
     cfg.field_border_red = CFG_STD_FIELD_BORDER_RED;
     cfg.field_border_green = CFG_STD_FIELD_BORDER_GREEN;
     cfg.field_border_blue = CFG_STD_FIELD_BORDER_BLUE;
