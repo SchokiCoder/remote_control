@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include "constants.h"
 #include "administrators.h"
 #include "town.h"

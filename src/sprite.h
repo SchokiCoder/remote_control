@@ -20,7 +20,7 @@
 #define SPRITE_H
 
 #include <stdint.h>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 struct TTF_Font;
 

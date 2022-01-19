@@ -19,7 +19,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#include <SDL2/SDL_video.h>
+#include <SDL_video.h>
 
 //application
 #define APP_NAME "remote_control"
@@ -97,6 +97,7 @@
 
 //asset paths
 #define PATH_TEXTURE_GROUND         PATH_TEXTURES "ground.png"
+#define PATH_TEXTURE_HIDDEN         PATH_TEXTURES "hidden.png"
 #define PATH_TEXTURE_HQ             PATH_TEXTURES "headquarter.png"
 #define PATH_TEXTURE_TREE_0         PATH_TEXTURES "tree_0.png"
 #define PATH_TEXTURE_TREE_1         PATH_TEXTURES "tree_1.png"

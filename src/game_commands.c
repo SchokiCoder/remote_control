@@ -38,7 +38,7 @@ void gm_cmd_save_as(char* p_town_name, struct Town* p_in)
 
 void gm_cmd_set(struct Config* p_cfg, char* p_setting_name, char* p_setting_value)
 {
-    //check which setting should be changed
+    //check which setting should be changed -etc
     if (strcmp(p_setting_name, CFG_SETTING_PATH_FONT) == 0)
     {
         strcpy(p_cfg->path_font, p_setting_value);
@@ -47,22 +47,26 @@ void gm_cmd_set(struct Config* p_cfg, char* p_setting_name, char* p_setting_valu
     {
         p_cfg->gfx_framerate = strtof(p_setting_value, NULL);
     }
+
+    //window pos size
     else if (strcmp(p_setting_name, CFG_SETTING_GFX_WINDOW_X) == 0)
     {
-        p_cfg->gfx_window_x = strtof(p_setting_value, NULL);
+        p_cfg->gfx_window_x = strtol(p_setting_value, NULL, 10);
     }
     else if (strcmp(p_setting_name, CFG_SETTING_GFX_WINDOW_Y) == 0)
     {
-        p_cfg->gfx_window_y = strtof(p_setting_value, NULL);
+        p_cfg->gfx_window_y = strtol(p_setting_value, NULL, 10);
     }
     else if (strcmp(p_setting_name, CFG_SETTING_GFX_WINDOW_W) == 0)
     {
-        p_cfg->gfx_window_w = strtof(p_setting_value, NULL);
+        p_cfg->gfx_window_w = strtol(p_setting_value, NULL, 10);
     }
     else if (strcmp(p_setting_name, CFG_SETTING_GFX_WINDOW_H) == 0)
     {
-        p_cfg->gfx_window_h = strtof(p_setting_value, NULL);
+        p_cfg->gfx_window_h = strtol(p_setting_value, NULL, 10);
     }
+
+    //bg color
     else if (strcmp(p_setting_name, CFG_SETTING_BG_RED) == 0)
     {
         p_cfg->bg_red = strtoul(p_setting_value, NULL, 10);
@@ -75,6 +79,8 @@ void gm_cmd_set(struct Config* p_cfg, char* p_setting_name, char* p_setting_valu
     {
         p_cfg->bg_blue = strtoul(p_setting_value, NULL, 10);
     }
+
+    //font color
     else if (strcmp(p_setting_name, CFG_SETTING_FONT_RED) == 0)
     {
         p_cfg->font_red = strtoul(p_setting_value, NULL, 10);
@@ -91,6 +97,8 @@ void gm_cmd_set(struct Config* p_cfg, char* p_setting_name, char* p_setting_valu
     {
         p_cfg->font_alpha = strtoul(p_setting_value, NULL, 10);
     }
+
+    //field border color
     else if (strcmp(p_setting_name, CFG_SETTING_FIELD_BORDER_RED) == 0)
     {
         p_cfg->field_border_red = strtoul(p_setting_value, NULL, 10);
@@ -107,6 +115,8 @@ void gm_cmd_set(struct Config* p_cfg, char* p_setting_name, char* p_setting_valu
     {
         p_cfg->field_border_alpha = strtoul(p_setting_value, NULL, 10);
     }
+
+    //unknown
     else
     {
         printf(MSG_ERR_UNKNOWN_SETTING, p_setting_name);
@@ -121,10 +131,10 @@ void gm_cmd_show_config(struct Config* p_cfg)
     printf("" \
         CFG_SETTING_PATH_FONT ": %s\n"
         CFG_SETTING_GFX_FRAMERATE ": %f\n" \
-        CFG_SETTING_GFX_WINDOW_X ": %f\n" \
-        CFG_SETTING_GFX_WINDOW_Y ": %f\n" \
-        CFG_SETTING_GFX_WINDOW_W ": %f\n" \
-        CFG_SETTING_GFX_WINDOW_H ": %f\n" \
+        CFG_SETTING_GFX_WINDOW_X ": %i\n" \
+        CFG_SETTING_GFX_WINDOW_Y ": %i\n" \
+        CFG_SETTING_GFX_WINDOW_W ": %i\n" \
+        CFG_SETTING_GFX_WINDOW_H ": %i\n" \
         CFG_SETTING_BG_RED ": %u\n" \
         CFG_SETTING_BG_GREEN ": %u\n" \
         CFG_SETTING_BG_BLUE ": %u\n" \

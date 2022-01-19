@@ -36,7 +36,12 @@ int32_t get_base_path(char* p_out)
 
     //in case, create dir
     errno = 0;
-    rc = mkdir(p_out, S_IRWXU);
+
+    #ifdef _WIN32
+        rc = mkdir(p_out);
+    #else
+        rc = mkdir(p_out, S_IRWXU);
+    #endif
 
     if (rc == -1)
     {
@@ -66,7 +71,12 @@ int32_t get_town_path(char* p_out)
 
     //in case, create dir
     errno = 0;
-    rc = mkdir(p_out, S_IRWXU);
+    
+    #ifdef _WIN32
+        rc = mkdir(p_out);
+    #else
+        rc = mkdir(p_out, S_IRWXU);
+    #endif
     
     if (rc == -1)
     {

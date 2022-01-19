@@ -16,8 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL.h>
+#include <SDL_ttf.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "constants.h"
@@ -27,15 +27,35 @@
 #include "game_commands.h"
 #include "game.h"
 
+void exit_game(enum GameResponse *p_response, SDL_Window *p_window, SDL_Renderer *p_renderer)
+{
+    //send stop response
+    *p_response = GRSP_STOPPED;
+
+    //if given, destroy window and renderer
+    if (p_window != NULL)
+    {
+        SDL_DestroyWindow(p_window);
+    }
+
+    if (p_renderer != NULL)
+    {
+        SDL_DestroyRenderer(p_renderer);
+    }
+
+    //quit sdl
+    SDL_Quit();
+}
+
 void calculate_ui(
-    float p_window_w,
-    float p_window_h,
+    int32_t p_window_w,
+    int32_t p_window_h,
     SDL_Rect *p_hover_label_rect,
     SDL_Rect *p_hover_x_rect,
     SDL_Rect *p_hover_y_rect,
     SDL_Rect *p_area_rect,
-    float *p_field_width,
-    float *p_field_height,
+    uint32_t *p_field_width,
+    uint32_t *p_field_height,
     SDL_Rect p_field_rects[TOWN_WIDTH][TOWN_HEIGHT],
     SDL_Rect p_field_content_rects[TOWN_WIDTH][TOWN_HEIGHT])
 {
@@ -60,13 +80,14 @@ void calculate_ui(
         -stay on top and right
     */
     p_area_rect->h = p_window_h * UI_AREA_H;
+    p_area_rect->h -= (p_area_rect->h % TOWN_HEIGHT);  /* remove modulo, to fix mouse hitbox */
     p_area_rect->w = p_area_rect->h;
     p_area_rect->y = p_window_h * UI_AREA_Y;
     p_area_rect->x = (p_window_w * UI_AREA_X2) - p_area_rect->w;
-   
+
     //calc field size
-    *p_field_width = (float) p_area_rect->w / (float) TOWN_WIDTH;
-    *p_field_height = (float) p_area_rect->h / (float) TOWN_HEIGHT;
+    *p_field_width = p_area_rect->w / TOWN_WIDTH;
+    *p_field_height = p_area_rect->h / TOWN_HEIGHT;
 
     //calc field rects
     for (uint32_t x = 0; x < TOWN_WIDTH; x++)
@@ -80,14 +101,14 @@ void calculate_ui(
             p_field_rects[x][y].h = *p_field_height;
 
             //content texture rect
-            p_field_content_rects[x][y].w = (float) p_field_rects[x][y].w * UI_FIELD_CONTENT_SIZE;
-            p_field_content_rects[x][y].h = (float) p_field_rects[x][y].h * UI_FIELD_CONTENT_SIZE;
+            p_field_content_rects[x][y].w = p_field_rects[x][y].w * UI_FIELD_CONTENT_SIZE;
+            p_field_content_rects[x][y].h = p_field_rects[x][y].h * UI_FIELD_CONTENT_SIZE;
             p_field_content_rects[x][y].x = 
-                (float) p_field_rects[x][y].x + 
-                (((float) p_field_rects[x][y].w - (float) p_field_content_rects[x][y].w) / 2.0f);
+                p_field_rects[x][y].x + 
+                ((p_field_rects[x][y].w - p_field_content_rects[x][y].w) / 2);
             p_field_content_rects[x][y].y = 
-                (float) p_field_rects[x][y].y + 
-                (((float) p_field_rects[x][y].h - (float) p_field_content_rects[x][y].h) / 2.0f);
+                p_field_rects[x][y].y + 
+                ((p_field_rects[x][y].h - p_field_content_rects[x][y].h) / 2);
         }
     }
 }
@@ -115,7 +136,7 @@ int32_t gfx_game(void* p_data)
     SDL_Rect hover_x_rect;
     SDL_Rect hover_y_rect;
     SDL_Rect area_rect;
-    float field_width, field_height;
+    uint32_t field_width, field_height;
     SDL_Rect field_rects[TOWN_WIDTH][TOWN_HEIGHT];
     SDL_Rect field_content_rects[TOWN_WIDTH][TOWN_HEIGHT];
 
@@ -123,15 +144,15 @@ int32_t gfx_game(void* p_data)
     char hover_y[3] = "";
 
     struct Sprite sprite_ground;
+    struct Sprite sprite_hidden;
     struct Sprite sprite_hq;
     struct Sprite sprite_trees[TOWN_TREE_VARIETY_COUNT];
     struct Sprite sprite_hover_label;
     struct Sprite sprite_hover_x;
     struct Sprite sprite_hover_y;
 
-    uint32_t ground_angles[TOWN_WIDTH][TOWN_HEIGHT];
     SDL_RendererFlip ground_flip[TOWN_WIDTH][TOWN_HEIGHT];
-    uint32_t angle, flip; 
+    uint32_t flip; 
     SDL_Texture* area_content_textures[TOWN_WIDTH][TOWN_HEIGHT];
     SDL_Color font_color;
 
@@ -139,7 +160,7 @@ int32_t gfx_game(void* p_data)
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
         printf(MSG_ERR_SDL_INIT, SDL_GetError());
-        data->rsp = GRSP_STOPPED;
+        exit_game(&data->rsp, NULL, NULL);
         return 1;
     }
 
@@ -155,7 +176,7 @@ int32_t gfx_game(void* p_data)
     if (window == NULL)
     {
         printf(MSG_ERR_SDL_WINDOW, SDL_GetError());
-        data->rsp = GRSP_STOPPED;
+        exit_game(&data->rsp, NULL, NULL);
         return 2;
     }
 
@@ -165,7 +186,7 @@ int32_t gfx_game(void* p_data)
     if (renderer == NULL)
     {
         printf(MSG_ERR_SDL_RENDERER, SDL_GetError());
-        data->rsp = GRSP_STOPPED;
+        exit_game(&data->rsp, window, NULL);
         return 3;
     }
 
@@ -176,6 +197,7 @@ int32_t gfx_game(void* p_data)
     if (TTF_Init() != 0)
     {
         printf(MSG_ERR_TTF_INIT);
+        exit_game(&data->rsp, window, renderer);
         return 4;
     }
 
@@ -185,6 +207,7 @@ int32_t gfx_game(void* p_data)
     if (font == NULL)
     {
         printf(MSG_ERR_FONT_LOAD, data->cfg->path_font);
+        exit_game(&data->rsp, window, renderer);
         return 5;
     }
 
@@ -196,6 +219,7 @@ int32_t gfx_game(void* p_data)
 
     //load sprites and create text sprite
     if ((Sprite_from_image(&sprite_ground, renderer, PATH_TEXTURE_GROUND) != 0) ||
+        (Sprite_from_image(&sprite_hidden, renderer, PATH_TEXTURE_HIDDEN) != 0) ||
         (Sprite_from_image(&sprite_hq, renderer, PATH_TEXTURE_HQ) != 0) ||
         (Sprite_from_image(&sprite_trees[0], renderer, PATH_TEXTURE_TREE_0) != 0) ||
         (Sprite_from_image(&sprite_trees[1], renderer, PATH_TEXTURE_TREE_1) != 0) ||
@@ -206,7 +230,7 @@ int32_t gfx_game(void* p_data)
         (Sprite_from_text(&sprite_hover_x, renderer, "0", font, font_color) != 0) ||
         (Sprite_from_text(&sprite_hover_y, renderer, "0", font, font_color) != 0))
     {
-        data->rsp = GRSP_STOPPED;
+        exit_game(&data->rsp, window, renderer);
         return 6;
     }
 
@@ -223,15 +247,11 @@ int32_t gfx_game(void* p_data)
         field_rects,
         field_content_rects);
 
-    //generate texture rotation and flip
+    //generate texture flip
     for (uint32_t x = 0; x < TOWN_WIDTH; x++)
     {
         for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
         {
-            //ground texture angles
-            angle = rand() % 3;
-            ground_angles[x][y] = angle * 90;
-
             //ground texture flip
             flip = rand() % 3;
 
@@ -308,19 +328,17 @@ int32_t gfx_game(void* p_data)
                     //if hidden draw black, else ground with content
                     if (data->town->area_hidden[x][y] == true)
                     {
-                        SDL_SetRenderDrawColor(
-                            renderer,
-                            COLOR_FIELD_HIDDEN_RED,
-                            COLOR_FIELD_HIDDEN_GREEN, 
-                            COLOR_FIELD_HIDDEN_BLUE,
-                            COLOR_FIELD_HIDDEN_ALPHA);
-                        SDL_RenderFillRect(renderer, &field_rects[x][y]);
+                        //draw hidden
+                        SDL_RenderCopyEx(renderer, sprite_hidden.texture, NULL, &field_rects[x][y],
+                            0.0f,
+                            NULL,
+                            ground_flip[x][y]);
                     }
                     else
                     {
                         //draw ground
                         SDL_RenderCopyEx(renderer, sprite_ground.texture, NULL, &field_rects[x][y],
-                            ground_angles[x][y],
+                            0.0f,
                             NULL,
                             ground_flip[x][y]);
 
@@ -385,8 +403,8 @@ int32_t gfx_game(void* p_data)
                 if (SDL_PointInRect(&mouse, &area_rect) == true)
                 {
                     //calc in which
-                    sprintf(hover_x, "%u", (uint32_t) ((float) (mouse.x - area_rect.x) / field_width));
-                    sprintf(hover_y, "%u", (uint32_t) ((float) (mouse.y - area_rect.y) / field_height));
+                    sprintf(hover_x, "%u", ((mouse.x - area_rect.x) / field_width));
+                    sprintf(hover_y, "%u", ((mouse.y - area_rect.y) / field_height));
 
                     //reset sprites
                     Sprite_from_text(&sprite_hover_x, renderer, hover_x, font, font_color);
@@ -406,10 +424,10 @@ int32_t gfx_game(void* p_data)
                     SDL_GetWindowPosition(window, &window_x, &window_y);
                     SDL_GetWindowSize(window, &window_w, &window_h);
 
-                    data->cfg->gfx_window_x = (float) window_x - (float) border_l;
-                    data->cfg->gfx_window_y = (float) window_y - (float) border_t;
-                    data->cfg->gfx_window_w = (float) window_w;
-                    data->cfg->gfx_window_h = (float) window_h;
+                    data->cfg->gfx_window_x = window_x - border_l;
+                    data->cfg->gfx_window_y = window_y - border_t;
+                    data->cfg->gfx_window_w = window_w;
+                    data->cfg->gfx_window_h = window_h;
 
                     //recalc ui sizes and pos
                     calculate_ui(
@@ -433,18 +451,11 @@ int32_t gfx_game(void* p_data)
         }
     }
 
-    //send stop response
-    data->rsp = GRSP_STOPPED;
-
     //save config
     save_config(data->cfg);
 
-    //destroy window and renderer
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-
-    //quit sdl
-    SDL_Quit();
+    //quit systems
+    exit_game(&data->rsp, window, renderer);
 
     return 0;
 }
@@ -483,7 +494,8 @@ int32_t terminal_game(struct GameData* data)
             //reset argc
             argc = 0;
             
-            //take
+            //provide somy eyecandy for input, take input
+            printf("\n > ");
             fgets(input, TRM_MAX_IN_LEN, stdin);
 
             //replace linebreak with \0

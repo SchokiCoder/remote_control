@@ -25,10 +25,10 @@ struct Config
 {
     char path_font[CFG_SETTING_PATH_FONT_MAX_LEN];
     float gfx_framerate;
-    float gfx_window_x;
-    float gfx_window_y;
-    float gfx_window_w;
-    float gfx_window_h;
+    int32_t gfx_window_x;
+    int32_t gfx_window_y;
+    int32_t gfx_window_w;
+    int32_t gfx_window_h;
     uint8_t bg_red;
     uint8_t bg_green;
     uint8_t bg_blue;

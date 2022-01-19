@@ -118,19 +118,19 @@ int32_t load_config(struct Config* p_cfg)
         //window pos, size
         else if (strcmp(cfg_settings[i], CFG_SETTING_GFX_WINDOW_X) == 0)
         {
-            p_cfg->gfx_window_x = strtof(cfg_values[i], NULL);
+            p_cfg->gfx_window_x = strtol(cfg_values[i], NULL, 10);
         }
         else if(strcmp(cfg_settings[i], CFG_SETTING_GFX_WINDOW_Y) == 0)
         {
-            p_cfg->gfx_window_y = strtof(cfg_values[i], NULL);
+            p_cfg->gfx_window_y = strtol(cfg_values[i], NULL, 10);
         }
         else if(strcmp(cfg_settings[i], CFG_SETTING_GFX_WINDOW_W) == 0)
         {
-            p_cfg->gfx_window_w = strtof(cfg_values[i], NULL);
+            p_cfg->gfx_window_w = strtol(cfg_values[i], NULL, 10);
         }
         else if(strcmp(cfg_settings[i], CFG_SETTING_GFX_WINDOW_H) == 0)
         {
-            p_cfg->gfx_window_h = strtof(cfg_values[i], NULL);
+            p_cfg->gfx_window_h = strtol(cfg_values[i], NULL, 10);
         }
         
         //bg color
@@ -228,22 +228,22 @@ int32_t save_config(struct Config* p_cfg)
     //window pos, size
     fputs(CFG_SETTING_GFX_WINDOW_X, f);
     fputs(delim, f);
-    fprintf(f, "%f", p_cfg->gfx_window_x);
+    fprintf(f, "%i", p_cfg->gfx_window_x);
     fputc('\n', f);
 
     fputs(CFG_SETTING_GFX_WINDOW_Y, f);
     fputs(delim, f);
-    fprintf(f, "%f", p_cfg->gfx_window_y);
+    fprintf(f, "%i", p_cfg->gfx_window_y);
     fputc('\n', f);
 
     fputs(CFG_SETTING_GFX_WINDOW_W, f);
     fputs(delim, f);
-    fprintf(f, "%f", p_cfg->gfx_window_w);
+    fprintf(f, "%i", p_cfg->gfx_window_w);
     fputc('\n', f);
 
     fputs(CFG_SETTING_GFX_WINDOW_H, f);
     fputs(delim, f);
-    fprintf(f, "%f", p_cfg->gfx_window_h);
+    fprintf(f, "%i", p_cfg->gfx_window_h);
     fputc('\n', f);
     
     //bg color
