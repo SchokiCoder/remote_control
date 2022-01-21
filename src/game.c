@@ -43,6 +43,9 @@ void exit_game(enum GameResponse *p_response, SDL_Window *p_window, SDL_Renderer
         SDL_DestroyRenderer(p_renderer);
     }
 
+    //quit sdl ttf
+    TTF_Quit();
+    
     //quit sdl
     SDL_Quit();
 }
@@ -143,6 +146,7 @@ int32_t gfx_game(void* p_data)
     char hover_x[3] = "";
     char hover_y[3] = "";
 
+    struct Sprite sprite_icon;
     struct Sprite sprite_ground;
     struct Sprite sprite_hidden;
     struct Sprite sprite_hq;
@@ -218,7 +222,8 @@ int32_t gfx_game(void* p_data)
     font_color.a = data->cfg->font_alpha;
 
     //load sprites and create text sprite
-    if ((Sprite_from_image(&sprite_ground, renderer, PATH_TEXTURE_GROUND) != 0) ||
+    if ((Sprite_from_image(&sprite_icon, renderer, PATH_ICON) != 0) ||
+        (Sprite_from_image(&sprite_ground, renderer, PATH_TEXTURE_GROUND) != 0) ||
         (Sprite_from_image(&sprite_hidden, renderer, PATH_TEXTURE_HIDDEN) != 0) ||
         (Sprite_from_image(&sprite_hq, renderer, PATH_TEXTURE_HQ) != 0) ||
         (Sprite_from_image(&sprite_trees[0], renderer, PATH_TEXTURE_TREE_0) != 0) ||
@@ -307,6 +312,10 @@ int32_t gfx_game(void* p_data)
             }
         }
     }
+
+    //set window icon, and clear icon sprite
+    SDL_SetWindowIcon(window, sprite_icon.surface);
+    Sprite_clear(&sprite_icon);
 
     //send signal (init successful)
     data->rsp = GRSP_INIT;
@@ -419,13 +428,9 @@ int32_t gfx_game(void* p_data)
             case SDL_WINDOWEVENT:
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED)
                 {
-                    //set config window size and pos
-                    SDL_GetWindowBordersSize(window, &border_t, &border_l, NULL, NULL);
-                    SDL_GetWindowPosition(window, &window_x, &window_y);
+                    //set config window size
                     SDL_GetWindowSize(window, &window_w, &window_h);
-
-                    data->cfg->gfx_window_x = window_x - border_l;
-                    data->cfg->gfx_window_y = window_y - border_t;
+                    
                     data->cfg->gfx_window_w = window_w;
                     data->cfg->gfx_window_h = window_h;
 
@@ -442,6 +447,15 @@ int32_t gfx_game(void* p_data)
                         field_rects,
                         field_content_rects);
                 }
+                else if (event.window.event == SDL_WINDOWEVENT_MOVED)
+                {
+                    //set config window pos
+                    SDL_GetWindowBordersSize(window, &border_t, &border_l, NULL, NULL);
+                    SDL_GetWindowPosition(window, &window_x, &window_y);
+                    
+                    data->cfg->gfx_window_x = window_x - border_l;
+                    data->cfg->gfx_window_y = window_y - border_t;
+                }
                 break;
 
             case SDL_QUIT:
@@ -453,6 +467,20 @@ int32_t gfx_game(void* p_data)
 
     //save config
     save_config(data->cfg);
+
+    //free font and sprites
+    TTF_CloseFont(font);
+    Sprite_clear(&sprite_hover_label);
+    Sprite_clear(&sprite_hover_x);
+    Sprite_clear(&sprite_hover_y);
+    Sprite_clear(&sprite_ground);
+    Sprite_clear(&sprite_hidden);
+    Sprite_clear(&sprite_hq);
+
+    for (uint32_t i = 0; i < TOWN_TREE_VARIETY_COUNT; i++)
+    {
+        Sprite_clear(&sprite_trees[i]);
+    }
 
     //quit systems
     exit_game(&data->rsp, window, renderer);

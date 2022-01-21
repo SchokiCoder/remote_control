@@ -23,6 +23,9 @@
 
 int32_t Sprite_from_image(struct Sprite *self, SDL_Renderer *p_renderer, const char *p_filepath)
 {
+    //clear
+    Sprite_clear(self);
+    
     //load image
     self->surface = IMG_Load(p_filepath);
 
@@ -51,6 +54,9 @@ int32_t Sprite_from_text(
     TTF_Font *p_font,
     SDL_Color p_color)
 {
+    //clear
+    Sprite_clear(self);
+    
     //create text
     self->surface = TTF_RenderText_Solid(p_font, p_text, p_color);
     
@@ -74,6 +80,15 @@ int32_t Sprite_from_text(
 
 void Sprite_clear(struct Sprite* self)
 {
-    SDL_FreeSurface(self->surface);
-    SDL_DestroyTexture(self->texture);
+    if (self->surface != NULL)
+    {
+        SDL_FreeSurface(self->surface);
+        self->surface = NULL;
+    }
+
+    if (self->texture != NULL)
+    {
+        SDL_DestroyTexture(self->texture);
+        self->texture = NULL;
+    }
 }

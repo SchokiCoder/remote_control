@@ -96,6 +96,7 @@
 #define CFG_STD_FIELD_BORDER_ALPHA  50
 
 //asset paths
+#define PATH_ICON                   PATH_ASSETS APP_NAME "_1024.png"
 #define PATH_TEXTURE_GROUND         PATH_TEXTURES "ground.png"
 #define PATH_TEXTURE_HIDDEN         PATH_TEXTURES "hidden.png"
 #define PATH_TEXTURE_HQ             PATH_TEXTURES "headquarter.png"

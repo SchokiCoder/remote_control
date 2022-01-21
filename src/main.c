@@ -79,6 +79,7 @@ int main(int argc, char *argv[])
             case 5:
                 printf("Please enter the town name now: ");
                 scanf("%s", input);
+                while (getchar() != '\n');
                 
                 cmd_connect(input);
                 break;

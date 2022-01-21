@@ -193,13 +193,12 @@ void cmd_connect(char* p_town_name)
     struct Config cfg;
     struct GameData game_data;
     SDL_Thread* gfx_thread;
-    int32_t gfx_rc;
     
     //load game
     if (load_town(p_town_name, &town) != 0)
         return;
 
-    //set cfg to std values (so that if something is missing it is still set)
+    //set cfg to std values (set values will overwrite std)
     strcpy(cfg.path_font, CFG_STD_PATH_FONT);
     cfg.gfx_framerate = CFG_STD_GFX_FRAMERATE;
     cfg.gfx_window_x = CFG_STD_GFX_WINDOW_X;
@@ -230,13 +229,11 @@ void cmd_connect(char* p_town_name)
 
     //start gfx part in seperate thread
     gfx_thread = SDL_CreateThread(gfx_game, "thread_gfx", &game_data);
+    SDL_DetachThread(gfx_thread);
+    gfx_thread = NULL;
 
     //start terminal game part
     terminal_game(&game_data);
-
-    //wait for gfx thread to finish
-    SDL_WaitThread(gfx_thread, &gfx_rc);
-    gfx_thread = NULL;
 }
 
 void cmd_delete(char* p_town_name)
