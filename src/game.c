@@ -222,7 +222,7 @@ int32_t gfx_game(void* p_data)
     font_color.a = data->cfg->font_alpha;
 
     //load sprites and create text sprite
-    if ((Sprite_from_image(&sprite_icon, renderer, PATH_ICON) != 0) ||
+    if ((Sprite_from_image(&sprite_icon, renderer, PATH_TEXTURE_ICON) != 0) ||
         (Sprite_from_image(&sprite_ground, renderer, PATH_TEXTURE_GROUND) != 0) ||
         (Sprite_from_image(&sprite_hidden, renderer, PATH_TEXTURE_HIDDEN) != 0) ||
         (Sprite_from_image(&sprite_hq, renderer, PATH_TEXTURE_HQ) != 0) ||

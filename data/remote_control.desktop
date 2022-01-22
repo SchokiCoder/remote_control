@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Remote Control
+Icon=remote_control
+GenericName=Open-source building game
+Exec=remote_control
+Terminal=true
+StartupNotifiy=false
+Type=Application
+Categories=Game
+Keywords=game;
+PrefersNonDefaultGPU=true
