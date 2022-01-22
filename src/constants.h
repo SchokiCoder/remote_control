@@ -28,7 +28,7 @@
 "along with this program.  If not, see <https://www.gnu.org/licenses/>.\n"
 #define APP_SOURCE "https://github.com/SchokiCoder/remote_control"
 #define APP_MAJOR "0"
-#define APP_MINOR "1"
+#define APP_MINOR "2"
 #define APP_PATCH "0"
 
 #ifdef _WIN32
