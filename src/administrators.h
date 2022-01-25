@@ -58,4 +58,4 @@
 "Experienced, inducing fear amongst enemies and friends alike and should not be disappointed.\n" \
 "For the right payment, she can effectively turn tides in dire situations, with her methods of motivation."
 
-#endif
+#endif /* ADMINISTRATORS_H */

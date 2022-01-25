@@ -21,13 +21,12 @@
 
 #include <stdint.h>
 #include <SDL.h>
-
-struct TTF_Font;
+#include <SDL_ttf.h>
 
 struct Sprite
 {
-	SDL_Surface* surface;
-	SDL_Texture* texture;
+	SDL_Surface *surface;
+	SDL_Texture *texture;
 };
 
 void Sprite_new(struct Sprite *self);
@@ -41,6 +40,6 @@ int32_t Sprite_from_text(
 	TTF_Font *p_font,
 	SDL_Color p_color);
 
-void Sprite_clear(struct Sprite* self);
+void Sprite_clear(struct Sprite *self);
 
-#endif
+#endif /* SPRITE_H */

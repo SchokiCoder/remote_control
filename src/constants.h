@@ -35,7 +35,7 @@
 	#define SLASH "\\"
 #else
 	#define SLASH "/"
-#endif
+#endif /* _WIN32 */
 
 #define FILEPATH_MAX_LEN 1024
 
@@ -76,9 +76,9 @@
 	#define CFG_STD_PATH_FONT		"C:\\Windows\\Fonts\\Arial.ttf"
 #else
 	#define CFG_STD_PATH_FONT		"/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
-#endif
+#endif /* _WIN32 */
 
-#define CFG_STD_GFX_FRAMERATE		2.5f
+#define CFG_STD_GFX_FRAMERATE		10.0f
 #define CFG_STD_GFX_WINDOW_X		SDL_WINDOWPOS_CENTERED
 #define CFG_STD_GFX_WINDOW_Y		SDL_WINDOWPOS_CENTERED
 #define CFG_STD_GFX_WINDOW_W		600.0f
@@ -95,21 +95,25 @@
 #define CFG_STD_FIELD_BORDER_BLUE	255
 #define CFG_STD_FIELD_BORDER_ALPHA	50
 
-//asset paths
+//asset paths (and some data)
 #define PATH_TEXTURE_ICON			PATH_TEXTURES APP_NAME ".png"
 #define PATH_TEXTURE_GROUND			PATH_TEXTURES "ground.png"
 #define PATH_TEXTURE_HIDDEN			PATH_TEXTURES "hidden.png"
 #define PATH_TEXTURE_HQ				PATH_TEXTURES "headquarter.png"
+
+#define TOWN_TREE_VARIETY_COUNT		5
 #define PATH_TEXTURE_TREE_0			PATH_TEXTURES "tree_0.png"
 #define PATH_TEXTURE_TREE_1			PATH_TEXTURES "tree_1.png"
 #define PATH_TEXTURE_TREE_2			PATH_TEXTURES "tree_2.png"
 #define PATH_TEXTURE_TREE_3			PATH_TEXTURES "tree_3.png"
 #define PATH_TEXTURE_TREE_4			PATH_TEXTURES "tree_4.png"
+
 #define FILETYPE_TOWN	"twn"
 #define FILETYPE_BACKUP "bkp"
 
 //gameplay definitions
-#define GAME_TIME_BEGIN	6	/* round 0 plays at 06:00 am */
+#define GAME_TIME_BEGIN		6	/* round 0 plays at 06:00 am */
+#define GAME_START_MONEY	50
 
 //messages
 #define MSG_ERR		"ERROR: "
@@ -257,46 +261,38 @@ APP_SOURCE "\n"
 #define COLOR_FIELD_HIDDEN_ALPHA	255
 
 //gfx in-game sizes of displayed content in percent
-#define UI_AREA_X2				0.9f
-#define UI_AREA_Y				0.1f
-#define UI_AREA_H				0.8f
+#define HUD_AREA_X2				0.9f
+#define HUD_AREA_Y				0.1f
+#define HUD_AREA_H				0.8f
 
-#define UI_FIELD_CONTENT_SIZE	0.95f
+#define HUD_FIELD_CONTENT_SIZE	0.95f
 
-#define UI_FONT_SIZE			12.0f
+#define HUD_FONT_SIZE			14.0f
 
 #define HUD_TIME_DAY_LABEL_TEXT		"day:"
 #define HUD_TIME_HOUR_LABEL_TEXT	"at:"
-#define UI_TEXT_HOVER_LABEL			"field:"
+#define HUD_MONEY_LABEL_TEXT		"money:"
+#define HUD_HOVER_LABEL_TEXT		"field:"
 
 #define HUD_TIME_DAY_LABEL_X		0.005f
 #define HUD_TIME_DAY_LABEL_Y		0.005f
-#define HUD_TIME_DAY_LABEL_W		0.15f
-#define HUD_TIME_DAY_LABEL_H		0.05f
 #define HUD_TIME_DAY_X_DIST			0.01f					/* distance from previous widget on the left */
 #define HUD_TIME_DAY_Y				HUD_TIME_DAY_LABEL_Y
-#define HUD_TIME_DAY_W				0.03f
-#define HUD_TIME_DAY_H				HUD_TIME_DAY_LABEL_H
-#define HUD_TIME_HOUR_LABEL_X_DIST	(HUD_TIME_DAY_X_DIST * 3.0f)
-#define HUD_TIME_HOUR_LABEL_Y		HUD_TIME_DAY_LABEL_Y
-#define HUD_TIME_HOUR_LABEL_W		0.12f
-#define HUD_TIME_HOUR_LABEL_H		HUD_TIME_DAY_LABEL_H
+#define HUD_TIME_HOUR_LABEL_X		HUD_TIME_DAY_LABEL_X
+#define HUD_TIME_HOUR_LABEL_Y		(HUD_TIME_DAY_LABEL_Y + 0.025f)
 #define HUD_TIME_HOUR_X_DIST		HUD_TIME_DAY_X_DIST
-#define HUD_TIME_HOUR_Y				HUD_TIME_DAY_LABEL_Y
-#define HUD_TIME_HOUR_W				0.15f
-#define HUD_TIME_HOUR_H				HUD_TIME_DAY_LABEL_H
+#define HUD_TIME_HOUR_Y				HUD_TIME_HOUR_LABEL_Y
 
-#define UI_TEXT_HOVER_LABEL_X	0.005f
-#define UI_TEXT_HOVER_LABEL_Y	0.075f
-#define UI_TEXT_HOVER_LABEL_W	0.175f
-#define UI_TEXT_HOVER_LABEL_H	0.05f
-#define UI_TEXT_HOVER_X_X		(UI_TEXT_HOVER_LABEL_X + UI_TEXT_HOVER_LABEL_W + 0.025f)
-#define UI_TEXT_HOVER_X_Y		UI_TEXT_HOVER_LABEL_Y
-#define UI_TEXT_HOVER_X_W		0.065f
-#define UI_TEXT_HOVER_X_H		0.05f
-#define UI_TEXT_HOVER_Y_X		(UI_TEXT_HOVER_X_X + UI_TEXT_HOVER_X_W + 0.025f)
-#define UI_TEXT_HOVER_Y_Y		UI_TEXT_HOVER_X_Y
-#define UI_TEXT_HOVER_Y_W		UI_TEXT_HOVER_X_W
-#define UI_TEXT_HOVER_Y_H		UI_TEXT_HOVER_X_H
+#define HUD_MONEY_LABEL_X	0.15f
+#define HUD_MONEY_LABEL_Y	HUD_TIME_DAY_LABEL_Y
+#define HUD_MONEY_X_DIST	HUD_TIME_DAY_X_DIST
+#define HUD_MONEY_Y			HUD_MONEY_LABEL_Y
 
-#endif
+#define HUD_HOVER_LABEL_X	0.005f
+#define HUD_HOVER_LABEL_Y	0.075f
+#define HUD_HOVER_X_X_DIST	0.025f
+#define HUD_HOVER_X_Y		HUD_HOVER_LABEL_Y
+#define HUD_HOVER_Y_X_DIST	HUD_HOVER_X_X_DIST
+#define HUD_HOVER_Y_Y		HUD_HOVER_X_Y
+
+#endif /* CONSTANTS_H */

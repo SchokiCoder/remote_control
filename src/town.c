@@ -24,7 +24,7 @@
 #include "path.h"
 #include "town.h"
 
-void print_town(char* p_town_name, struct Town* p_in)
+void print_town(char *p_town_name, struct Town *p_in)
 {
 	//name
 	printf("%s\n\n", p_town_name);
@@ -54,11 +54,11 @@ void print_town(char* p_town_name, struct Town* p_in)
 	}
 }
 
-int32_t save_town(char* p_town_name, struct Town* p_in)
+int32_t save_town(char *p_town_name, struct Town *p_in)
 {
 	char filepath_save[FILEPATH_MAX_LEN] = "";
 	char filepath_bkp[FILEPATH_MAX_LEN] = "";
-	FILE* f;
+	FILE *f;
 	uint32_t town_width = TOWN_WIDTH;
 	uint32_t town_height = TOWN_HEIGHT;
 
@@ -100,6 +100,7 @@ int32_t save_town(char* p_town_name, struct Town* p_in)
 	//write header
 	fwrite(&p_in->admin_id, sizeof(p_in->admin_id), 1, f);
 	fwrite(&p_in->round, sizeof(p_in->round), 1, f);
+	fwrite(&p_in->money, sizeof(p_in->money), 1, f);
 	fwrite(&town_width, sizeof(uint32_t), 1, f);
 	fwrite(&town_height, sizeof(uint32_t), 1, f);
 	fputc('\n', f);
@@ -128,7 +129,7 @@ int32_t save_town(char* p_town_name, struct Town* p_in)
 	return 0;
 }
 
-int32_t load_town(char* p_town_name, struct Town* p_out)
+int32_t load_town(char *p_town_name, struct Town *p_out)
 {
 	FILE *f;
 	char filepath[FILEPATH_MAX_LEN] = "";
@@ -155,6 +156,7 @@ int32_t load_town(char* p_town_name, struct Town* p_out)
 	//read header
 	fread(&p_out->admin_id, sizeof(p_out->admin_id), 1, f);
 	fread(&p_out->round, sizeof(p_out->round), 1, f);
+	fread(&p_out->money, sizeof(p_out->money), 1, f);
 	fread(&town_width, sizeof(town_width), 1, f);
 	fread(&town_height, sizeof(town_height), 1, f);
 	fgetc(f);

@@ -36,7 +36,13 @@ void cmd_help_outgame()
 	printf("%s", HELP_TEXT_OUTSIDE);
 }
 
-void print_admin(uint32_t p_admin_id, char* p_lastname, char* p_firstname, uint8_t p_age, bool p_male, char* p_bio)
+void print_admin(
+	uint32_t p_admin_id,
+	char *p_lastname,
+	char *p_firstname,
+	uint8_t p_age,
+	bool p_male,
+	char *p_bio)
 {
 	printf("Admin ID:\t%i\nLastname:\t%s\nFirstname:\t%s\nAge:\t\t%i\nGender:\t\t%s\nBio:\n%s\n\n",
 		p_admin_id, p_lastname, p_firstname, p_age, (p_male == true ? "male" : "female"), p_bio);
@@ -49,14 +55,14 @@ void cmd_list_admins()
 	print_admin(ADMIN_3_ID, ADMIN_3_LASTNAME, ADMIN_3_FIRSTNAME, ADMIN_3_AGE, ADMIN_3_MALE, ADMIN_3_BIO);
 }
 
-void cmd_hire_admin(int32_t p_admin_id, char* p_town_name)
+void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 {
 	struct Town new_game;
 	uint32_t tree_chance;
 	uint32_t tree_variance;
 	time_t rng_seed;
 	char filepath[FILEPATH_MAX_LEN] = "";
-	FILE* f;
+	FILE *f;
 	char confirmation;
 	
 	time(&rng_seed);
@@ -100,6 +106,7 @@ void cmd_hire_admin(int32_t p_admin_id, char* p_town_name)
 	//set values
 	new_game.admin_id = p_admin_id;
 	new_game.round = GAME_TIME_BEGIN;
+	new_game.money = GAME_START_MONEY;
 	
 	//hide fields, generate trees
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
@@ -154,9 +161,9 @@ void cmd_hire_admin(int32_t p_admin_id, char* p_town_name)
 void cmd_list_towns()
 {
 	char path[FILEPATH_MAX_LEN] = "";
-	DIR* dir;
-	struct dirent* d_ent;
-	char* substr = NULL;
+	DIR *dir;
+	struct dirent *d_ent;
+	char *substr = NULL;
 
 	//open town dir
 	if (get_town_path(path) != 0)
@@ -188,12 +195,12 @@ void cmd_list_towns()
 	printf("\n");
 }
 
-void cmd_connect(char* p_town_name)
+void cmd_connect(char *p_town_name)
 {
 	struct Town town;
 	struct Config cfg;
 	struct GameData game_data;
-	SDL_Thread* gfx_thread;
+	SDL_Thread *gfx_thread;
 	
 	//load game
 	if (load_town(p_town_name, &town) != 0)
@@ -237,7 +244,7 @@ void cmd_connect(char* p_town_name)
 	terminal_game(&game_data);
 }
 
-void cmd_delete(char* p_town_name)
+void cmd_delete(char *p_town_name)
 {
 	char filepath[FILEPATH_MAX_LEN] = "";
 

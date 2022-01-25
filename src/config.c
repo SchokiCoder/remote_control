@@ -25,7 +25,7 @@
 #include "path.h"
 #include "config.h"
 
-int32_t load_config(struct Config* p_cfg)
+int32_t load_config(struct Config *p_cfg)
 {
 	FILE *f;
 	char filepath[FILEPATH_MAX_LEN] = "";
@@ -195,11 +195,11 @@ int32_t load_config(struct Config* p_cfg)
 	return 0;
 }
 
-int32_t save_config(struct Config* p_cfg)
+int32_t save_config(struct Config *p_cfg)
 {
 	FILE *f;
 	char filepath[FILEPATH_MAX_LEN] = "";
-	const char* delim = " = ";
+	const char *delim = " = ";
 
 	//get path
 	if (get_config_path(filepath) != 0)

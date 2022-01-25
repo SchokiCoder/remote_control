@@ -23,8 +23,6 @@
 #include <stdbool.h>
 #include "constants.h"
 
-#define TOWN_TREE_VARIETY_COUNT 5
-
 enum Field
 {
 	FIELD_EMPTY,
@@ -40,12 +38,13 @@ struct Town
 {
 	uint8_t admin_id;
 	uint32_t round;
+	uint32_t money;
 	enum Field area_content[TOWN_WIDTH][TOWN_HEIGHT];
 	bool area_hidden[TOWN_WIDTH][TOWN_HEIGHT];
 };
 
-void print_town(char* p_town_name, struct Town* p_in);
-int32_t save_town(char* p_town_name, struct Town* p_in);
-int32_t load_town(char* p_town_name, struct Town* p_out);
+void print_town(char *p_town_name, struct Town *p_in);
+int32_t save_town(char *p_town_name, struct Town *p_in);
+int32_t load_town(char *p_town_name, struct Town *p_out);
 
-#endif
+#endif /* TOWN_H */

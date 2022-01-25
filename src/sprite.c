@@ -84,7 +84,7 @@ int32_t Sprite_from_text(
 	return 0;
 }
 
-void Sprite_clear(struct Sprite* self)
+void Sprite_clear(struct Sprite *self)
 {
 	if (self->surface != NULL)
 	{

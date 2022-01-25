@@ -42,7 +42,7 @@ struct Config
 	uint8_t field_border_alpha;
 };
 
-int32_t load_config(struct Config* p_cfg);
-int32_t save_config(struct Config* p_cfg);
+int32_t load_config(struct Config *p_cfg);
+int32_t save_config(struct Config *p_cfg);
 
-#endif
+#endif /* CONFIG_H */

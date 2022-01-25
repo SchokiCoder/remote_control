@@ -24,19 +24,19 @@
 #include "config.h"
 #include "game_commands.h"
 
-void gm_cmd_save(char* p_town_name, struct Town* p_in)
+void gm_cmd_save(char *p_town_name, struct Town *p_in)
 {
 	if (save_town(p_town_name, p_in) == 0)
 		printf(MSG_FILE_TOWN_SAVE);
 }
 
-void gm_cmd_save_as(char* p_town_name, struct Town* p_in)
+void gm_cmd_save_as(char *p_town_name, struct Town *p_in)
 {
 	if (save_town(p_town_name, p_in) == 0)
 		printf(MSG_FILE_TOWN_SAVE_AS, p_town_name);
 }
 
-void gm_cmd_set(struct Config* p_cfg, char* p_setting_name, char* p_setting_value)
+void gm_cmd_set(struct Config *p_cfg, char *p_setting_name, char *p_setting_value)
 {
 	//check which setting should be changed -etc
 	if (strcmp(p_setting_name, CFG_SETTING_PATH_FONT) == 0)
@@ -126,7 +126,7 @@ void gm_cmd_set(struct Config* p_cfg, char* p_setting_name, char* p_setting_valu
 	save_config(p_cfg);
 }
 
-void gm_cmd_show_config(struct Config* p_cfg)
+void gm_cmd_show_config(struct Config *p_cfg)
 {
 	printf("" \
 		CFG_SETTING_PATH_FONT ": %s\n"

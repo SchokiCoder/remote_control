@@ -16,38 +16,29 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef GAME_H
-#define GAME_H
+#ifndef WIDGET_H
+#define WIDGET_H
 
-#include <stdint.h>
+#include <SDL.h>
+#include "sprite.h"
 
-struct Town;
-struct Config;
-
-enum GameCmd
+struct Widget
 {
-	GCMD_NONE,
-	GCMD_STOP
+	char text[64];
+	SDL_Rect rect;
+	struct Sprite sprite;
 };
 
-enum GameResponse
-{
-	GRSP_NONE,
-	GRSP_INIT,
-	GRSP_STOPPED
-};
+void Widget_new(struct Widget *self);
 
-struct GameData
-{
-	char *town_name;
-	struct Town *town;
-	struct Config *cfg;
-	volatile enum GameCmd cmd;			/* 1-way stream to inform gfx-window what to do */
-	volatile enum GameResponse rsp;		/* 1-way stream to provide feedback from the gfx-window */
-};
+int32_t Widget_generate_sprite(
+	struct Widget *self,
+	SDL_Renderer *p_renderer,
+	TTF_Font *p_font,
+	SDL_Color p_font_color);
 
-int32_t gfx_game(void *p_data);
+void Widget_draw(struct Widget *self, SDL_Renderer *p_renderer);
 
-int32_t terminal_game(struct GameData *data);
+void Widget_clear(struct Widget *self);
 
-#endif /* GAME_H */
+#endif /* WIDGET_H */
