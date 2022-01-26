@@ -20,7 +20,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "constants.h"
+#include "definitions/def_gameplay.h"
+#include "definitions/def_files.h"
+#include "definitions/def_messages.h"
 #include "path.h"
 #include "town.h"
 

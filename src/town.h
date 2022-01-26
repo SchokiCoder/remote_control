@@ -21,7 +21,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "constants.h"
+#include "definitions/def_gameplay.h"
 
 enum Field
 {

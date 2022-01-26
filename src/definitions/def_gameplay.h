@@ -16,33 +16,24 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef DEF_GAMEPLAY_H
+#define DEF_GAMEPLAY_H
 
-#include "definitions/def_config.h"
+//town generation
+#define TOWN_WIDTH					15
+#define TOWN_HEIGHT					15
+#define TOWN_EXPOSURE_AREA_BEGIN_X	4
+#define TOWN_EXPOSURE_AREA_BEGIN_Y	4
+#define TOWN_EXPOSURE_AREA_END_X	11
+#define TOWN_EXPOSURE_AREA_END_Y	11
+#define TOWN_TREEFREE_AREA_BEGIN_X	5
+#define TOWN_TREEFREE_AREA_BEGIN_Y	5
+#define TOWN_TREEFREE_AREA_END_X	10
+#define TOWN_TREEFREE_AREA_END_Y	10
+#define TOWN_GEN_TREE_THRESHOLD		40	/* from 0 to 100 */
+#define TOWN_HQ_SPAWN_X				7
+#define TOWN_HQ_SPAWN_Y				7
+#define TOWN_TIME_BEGIN				6	/* round 0 plays at 06:00 am */
+#define TOWN_START_MONEY			50
 
-struct Config
-{
-	char path_font[CFG_SETTING_PATH_FONT_MAX_LEN];
-	float gfx_framerate;
-	int32_t gfx_window_x;
-	int32_t gfx_window_y;
-	int32_t gfx_window_w;
-	int32_t gfx_window_h;
-	uint8_t bg_red;
-	uint8_t bg_green;
-	uint8_t bg_blue;
-	uint8_t font_red;
-	uint8_t font_green;
-	uint8_t font_blue;
-	uint8_t font_alpha;
-	uint8_t field_border_red;
-	uint8_t field_border_green;
-	uint8_t field_border_blue;
-	uint8_t field_border_alpha;
-};
-
-int32_t load_config(struct Config *p_cfg);
-int32_t save_config(struct Config *p_cfg);
-
-#endif /* CONFIG_H */
+#endif /* DEF_GAMEPLAY_H */

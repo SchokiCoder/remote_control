@@ -16,33 +16,16 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef DEF_APP_H
+#define DEF_APP_H
 
-#include "definitions/def_config.h"
+#define APP_NAME "remote_control"
+#define APP_LICENSE "GPLv3"
+#define APP_LICENSE_NOTICE "You should have received a copy of the GNU General Public License\n" \
+"along with this program.  If not, see <https://www.gnu.org/licenses/>.\n"
+#define APP_SOURCE "https://github.com/SchokiCoder/remote_control"
+#define APP_MAJOR "0"
+#define APP_MINOR "2"
+#define APP_PATCH "0"
 
-struct Config
-{
-	char path_font[CFG_SETTING_PATH_FONT_MAX_LEN];
-	float gfx_framerate;
-	int32_t gfx_window_x;
-	int32_t gfx_window_y;
-	int32_t gfx_window_w;
-	int32_t gfx_window_h;
-	uint8_t bg_red;
-	uint8_t bg_green;
-	uint8_t bg_blue;
-	uint8_t font_red;
-	uint8_t font_green;
-	uint8_t font_blue;
-	uint8_t font_alpha;
-	uint8_t field_border_red;
-	uint8_t field_border_green;
-	uint8_t field_border_blue;
-	uint8_t field_border_alpha;
-};
-
-int32_t load_config(struct Config *p_cfg);
-int32_t save_config(struct Config *p_cfg);
-
-#endif /* CONFIG_H */
+#endif /* DEF_APP_H */

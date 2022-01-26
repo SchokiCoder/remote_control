@@ -27,7 +27,8 @@ struct Config;
 enum GameCmd
 {
 	GCMD_NONE,
-	GCMD_STOP
+	GCMD_STOP,
+	GCMD_PASS
 };
 
 enum GameResponse
@@ -37,6 +38,12 @@ enum GameResponse
 	GRSP_STOPPED
 };
 
+enum RoundReport
+{
+	RPT_NONE,
+	RPT_FAILURE_COST
+};
+
 struct GameData
 {
 	char *town_name;
@@ -44,6 +51,7 @@ struct GameData
 	struct Config *cfg;
 	volatile enum GameCmd cmd;			/* 1-way stream to inform gfx-window what to do */
 	volatile enum GameResponse rsp;		/* 1-way stream to provide feedback from the gfx-window */
+	volatile enum RoundReport rpt;		/* 1-way stream to tell what happens after the round ended */
 };
 
 int32_t gfx_game(void *p_data);

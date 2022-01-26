@@ -21,7 +21,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "constants.h"
+#include "definitions/def_messages.h"
+#include "definitions/def_config.h"
+#include "definitions/def_files.h"
 #include "path.h"
 #include "config.h"
 

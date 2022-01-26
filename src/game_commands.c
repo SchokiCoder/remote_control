@@ -19,7 +19,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "constants.h"
+#include "definitions/def_config.h"
+#include "definitions/def_messages.h"
 #include "town.h"
 #include "config.h"
 #include "game_commands.h"

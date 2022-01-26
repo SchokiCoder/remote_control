@@ -22,13 +22,18 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <SDL.h>
-#include "constants.h"
+#include <SDL_ttf.h>
+#include "definitions/def_gameplay.h"
 #include "widget.h"
 #include "sprite.h"
 #include "town.h"
 
 struct Hud
 {
+	/* font */
+	TTF_Font *font;
+	SDL_Color font_color;
+		
 	/* widgets */
 	struct Widget time_day_label;
 	struct Widget time_day;
@@ -41,6 +46,7 @@ struct Hud
 	struct Widget hover_y;
 
 	/* graphical data for area and fields */
+	SDL_Color field_border;
 	uint32_t field_width;
 	uint32_t field_height;
 	SDL_Rect rect_area;
@@ -57,30 +63,25 @@ struct Hud
 	struct Sprite spr_trees[TOWN_TREE_VARIETY_COUNT];
 };
 
-void Hud_new(struct Hud *self);
+int32_t Hud_new(struct Hud *self, char *p_path_font);
 
 void Hud_update_time(
 	struct Hud *self,
-	uint32_t p_round);
+	uint32_t p_round,
+	SDL_Renderer *p_renderer);
 
 void Hud_update_money(
 	struct Hud *self,
 	uint32_t p_money,
-	SDL_Renderer *p_renderer,
-	TTF_Font *p_font,
-	SDL_Color p_font_color);
+	SDL_Renderer *p_renderer);
 
 void Hud_update_hover(
 	struct Hud *self,
-	SDL_Renderer *p_renderer,
-	TTF_Font *p_font,
-	SDL_Color p_font_color);
+	SDL_Renderer *p_renderer);
 
-int32_t Hud_generate_widget_sprites(
+int32_t Hud_init_widgets(
 	struct Hud *self,
-	SDL_Renderer *p_renderer,
-	TTF_Font *p_font,
-	SDL_Color p_font_color);
+	SDL_Renderer *p_renderer);
 
 int32_t Hud_load_sprites(struct Hud *self, SDL_Renderer *p_renderer);
 
@@ -95,11 +96,7 @@ void Hud_map_textures(
 
 void Hud_draw(
 	struct Hud *self,
-	SDL_Renderer *p_renderer,
-	uint8_t p_field_border_red,
-	uint8_t p_field_border_green,
-	uint8_t p_field_border_blue,
-	uint8_t p_field_border_alpha);
+	SDL_Renderer *p_renderer);
 
 void Hud_clear(struct Hud *self);
 

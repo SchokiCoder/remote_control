@@ -20,7 +20,10 @@
 #include <SDL_ttf.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "constants.h"
+#include "definitions/def_commands.h"
+#include "definitions/def_messages.h"
+#include "definitions/def_files.h"
+#include "definitions/def_admins.h"
 #include "town.h"
 #include "config.h"
 #include "sprite.h"
@@ -28,11 +31,61 @@
 #include "hud.h"
 #include "game.h"
 
+struct GamePlayData
+{
+	uint32_t admin_salary;
+};
+
+/* gameplay functions */
+void gp_end_round(
+	struct Town *p_town,
+	struct GamePlayData *p_gpd,
+	volatile enum RoundReport *p_rpt,
+	struct Hud *p_hud,
+	SDL_Renderer *p_renderer)
+{
+	uint32_t cost = 0;
+	
+	//get running cost for admin and hq
+	cost += p_gpd->admin_salary;
+	cost += COST_HQ;
+
+	/* per building
+	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
+	{
+		for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
+		{
+			switch (p_town->field[x][y])
+			{
+			}
+		}
+	}*/
+	
+	//if cost is not higher than current money
+	if (cost < p_town->money)
+	{
+		//subtract running cost from players money
+		p_town->money -= cost;
+	}
+	else
+	{
+		//gameover
+		*p_rpt = RPT_FAILURE_COST;
+		return;
+	}
+	
+	//increment time
+	p_town->round++;
+
+	//update hud
+	Hud_update_time(p_hud, p_town->round, p_renderer);
+	Hud_update_money(p_hud, p_town->money, p_renderer);
+}
+
 void exit_game(
 	volatile enum GameResponse *p_response,
 	SDL_Window *p_window,
 	SDL_Renderer *p_renderer,
-	TTF_Font *p_font,
 	struct Hud *p_hud)
 {
 	//send stop response
@@ -40,9 +93,6 @@ void exit_game(
 
 	//clear hud
 	Hud_clear(p_hud);
-
-	//free font
-	TTF_CloseFont(p_font);
 
 	//if given, destroy window and renderer
 	if (p_window != NULL)
@@ -67,32 +117,27 @@ int32_t gfx_game(void *p_data)
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 
-	TTF_Font *font;
-
 	bool active = true;
 	uint32_t ts_now = 0;
 	uint32_t ts_render = 0;
 
 	struct GameData *data = (struct GameData*) (p_data);
+	struct GamePlayData gameplay_data;
 
 	SDL_Event event;
 	int32_t border_t, border_l;
 	int32_t window_x, window_y;
 	int32_t window_w, window_h;
 
-	SDL_Color font_color;
 	struct Hud hud;
 
 	struct Sprite spr_icon;
-
-	//init values
-	Hud_new(&hud);
 
 	//init SDL
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 	{
 		printf(MSG_ERR_SDL_INIT, SDL_GetError());
-		exit_game(&data->rsp, NULL, NULL, NULL, NULL);
+		exit_game(&data->rsp, NULL, NULL, NULL);
 		return 1;
 	}
 
@@ -108,7 +153,7 @@ int32_t gfx_game(void *p_data)
 	if (window == NULL)
 	{
 		printf(MSG_ERR_SDL_WINDOW, SDL_GetError());
-		exit_game(&data->rsp, NULL, NULL, NULL, NULL);
+		exit_game(&data->rsp, NULL, NULL, NULL);
 		return 2;
 	}
 
@@ -118,7 +163,7 @@ int32_t gfx_game(void *p_data)
 	if (renderer == NULL)
 	{
 		printf(MSG_ERR_SDL_RENDERER, SDL_GetError());
-		exit_game(&data->rsp, window, NULL, NULL, NULL);
+		exit_game(&data->rsp, window, NULL, NULL);
 		return 3;
 	}
 
@@ -129,34 +174,34 @@ int32_t gfx_game(void *p_data)
 	if (TTF_Init() != 0)
 	{
 		printf(MSG_ERR_TTF_INIT);
-		exit_game(&data->rsp, window, renderer, NULL, NULL);
+		exit_game(&data->rsp, window, renderer, NULL);
 		return 4;
 	}
 
-	//load font
-	font = TTF_OpenFont(data->cfg->path_font, HUD_FONT_SIZE);
-
-	if (font == NULL)
+	//init hud
+	if (Hud_new(&hud, data->cfg->path_font) != 0)
 	{
-		printf(MSG_ERR_FONT_LOAD, data->cfg->path_font);
-		exit_game(&data->rsp, window, renderer, NULL, NULL);
+		exit_game(&data->rsp, window, renderer, &hud);
 		return 5;
 	}
 
 	//set font color
-	font_color.r = data->cfg->font_red;
-	font_color.g = data->cfg->font_green;
-	font_color.b = data->cfg->font_blue;
-	font_color.a = data->cfg->font_alpha;
+	hud.font_color.r = data->cfg->font_red;
+	hud.font_color.g = data->cfg->font_green;
+	hud.font_color.b = data->cfg->font_blue;
+	hud.font_color.a = data->cfg->font_alpha;
+
+	//update some widgets
+	Hud_update_time(&hud, data->town->round, renderer);
+	Hud_update_money(&hud, data->town->money, renderer);
+	Hud_update_hover(&hud, renderer);
 
 	//make all sprites
-	Hud_update_time(&hud, data->town->round);
-
 	if ((Sprite_from_image(&spr_icon, renderer, PATH_TEXTURE_ICON) != 0) ||
 		(Hud_load_sprites(&hud, renderer) != 0) ||
-		(Hud_generate_widget_sprites(&hud, renderer, font, font_color) != 0))
+		(Hud_init_widgets(&hud, renderer) != 0))
 	{
-		exit_game(&data->rsp, window, renderer, font, &hud);
+		exit_game(&data->rsp, window, renderer, &hud);
 		return 6;
 	}
 
@@ -169,9 +214,21 @@ int32_t gfx_game(void *p_data)
 	SDL_SetWindowIcon(window, spr_icon.surface);
 	Sprite_clear(&spr_icon);
 
-	//update some widgets
-	Hud_update_hover(&hud, renderer, font, font_color);
-	Hud_update_money(&hud, data->town->money, renderer, font, font_color);
+	//prepare gameplay data		
+	switch (data->town->admin_id)
+	{
+	case ADMIN_1_ID:
+		gameplay_data.admin_salary = ADMIN_1_SALARY;
+		break;
+
+	case ADMIN_2_ID:
+		gameplay_data.admin_salary = ADMIN_2_SALARY;
+		break;
+
+	case ADMIN_3_ID:
+		gameplay_data.admin_salary = ADMIN_3_SALARY;
+		break;
+	}
 
 	//send signal (init successful)
 	data->rsp = GRSP_INIT;
@@ -186,13 +243,7 @@ int32_t gfx_game(void *p_data)
 			SDL_RenderClear(renderer);
 
 			//draw hud
-			Hud_draw(
-				&hud,
-				renderer,
-				data->cfg->field_border_red,
-				data->cfg->field_border_green,
-				data->cfg->field_border_blue,
-				data->cfg->field_border_alpha);
+			Hud_draw(&hud, renderer);
 
 			//show image, save time
 			SDL_RenderPresent(renderer);
@@ -211,6 +262,20 @@ int32_t gfx_game(void *p_data)
 		case GCMD_STOP:
 			active = false;
 			break;
+
+		case GCMD_PASS:
+			//function to process end of round
+			gp_end_round(data->town, &gameplay_data, &data->rpt, &hud, renderer);
+			
+			//check if player failed the game
+			if (data->rpt != RPT_NONE)
+			{
+				//player lost, stop gfx mainloop
+				active = false;
+			}
+			
+			data->cmd = GCMD_NONE;	/* TODO yes i know, i'll fix it later */
+			break;
 		}
 
 		//handle sdl-events
@@ -219,7 +284,7 @@ int32_t gfx_game(void *p_data)
 			switch (event.type)
 			{
 			case SDL_MOUSEMOTION:
-				Hud_update_hover(&hud, renderer, font, font_color);
+				Hud_update_hover(&hud, renderer);
 				break;
 
 			case SDL_WINDOWEVENT:
@@ -259,7 +324,7 @@ int32_t gfx_game(void *p_data)
 	save_config(data->cfg);
 
 	//quit routine
-	exit_game(&data->rsp, window, renderer, font, &hud);
+	exit_game(&data->rsp, window, renderer, &hud);
 
 	return 0;
 }
@@ -282,10 +347,12 @@ int32_t terminal_game(struct GameData *data)
 		case GRSP_NONE:
 			break;
 
+		//game initialized
 		case GRSP_INIT:
 			enabled = true;
 			break;
 
+		//game stopped
 		case GRSP_STOPPED:
 			enabled = false;
 			active = false;
@@ -404,12 +471,43 @@ int32_t terminal_game(struct GameData *data)
 
 				gm_cmd_set(data->cfg, argv[1], argv[2]);
 			}
+			else if (strcmp(argv[0], GM_CMD_PASS) == 0)
+			{
+				//check arg max
+				if (argc > 3)
+				{
+					printf(MSG_WARN_ARG_MAX);
+				}
+
+				//send signal
+				data->cmd = GCMD_PASS;
+			}
 			else
 			{
 				printf(MSG_ERR_UNKNOWN_COMMAND);
 			}
 		}
 	}
+
+	//if player failed, print
+	if (data->rpt != RPT_NONE)
+	{
+		//"you failed"
+		printf(MSG_PLAYER_FAILURE);
+
+		//reason
+		switch (data->rpt)
+		{
+		case RPT_NONE:
+			break;
+			
+		case RPT_FAILURE_COST:
+			printf(MSG_FAILURE_COST);
+		}
+	}
+
+	//print
+	printf(MSG_CONNECTION_CLOSED);
 
 	return 0;
 }

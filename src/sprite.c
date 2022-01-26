@@ -18,7 +18,7 @@
 
 #include <SDL_image.h>
 #include <SDL_ttf.h>
-#include "constants.h"
+#include "definitions/def_messages.h"
 #include "sprite.h"
 
 void Sprite_new(struct Sprite *self)

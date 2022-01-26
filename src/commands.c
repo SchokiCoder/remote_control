@@ -23,8 +23,10 @@
 #include <string.h>
 #include <dirent.h>
 #include <SDL.h>
-#include "constants.h"
-#include "administrators.h"
+#include "definitions/def_gameplay.h"
+#include "definitions/def_admins.h"
+#include "definitions/def_messages.h"
+#include "definitions/def_files.h"
 #include "town.h"
 #include "config.h"
 #include "path.h"
@@ -105,8 +107,8 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 
 	//set values
 	new_game.admin_id = p_admin_id;
-	new_game.round = GAME_TIME_BEGIN;
-	new_game.money = GAME_START_MONEY;
+	new_game.round = TOWN_TIME_BEGIN;
+	new_game.money = TOWN_START_MONEY;
 	
 	//hide fields, generate trees
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
@@ -234,6 +236,7 @@ void cmd_connect(char *p_town_name)
 	game_data.cfg = &cfg;
 	game_data.cmd = GCMD_NONE;
 	game_data.rsp = GRSP_NONE;
+	game_data.rpt = RPT_NONE;
 
 	//start gfx part in seperate thread
 	gfx_thread = SDL_CreateThread(gfx_game, "thread_gfx", &game_data);

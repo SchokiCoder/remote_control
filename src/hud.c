@@ -17,10 +17,22 @@
 */
 
 #include <string.h>
+#include "definitions/def_files.h"
+#include "definitions/def_messages.h"
+#include "definitions/def_hud.h"
 #include "hud.h"
 
-void Hud_new(struct Hud *self)
+int32_t Hud_new(struct Hud *self, char *p_path_font)
 {
+	//load font
+	self->font = TTF_OpenFont(p_path_font, HUD_FONT_SIZE);
+
+	if (self->font == NULL)
+	{
+		printf(MSG_ERR_FONT_LOAD, p_path_font);
+		return 1;
+	}
+
 	//init widgets
 	Widget_new(&self->time_day_label);
 	Widget_new(&self->time_day);
@@ -48,30 +60,37 @@ void Hud_new(struct Hud *self)
 	strcpy(self->hover_label.text, HUD_HOVER_LABEL_TEXT);
 	strcpy(self->hover_x.text, "0");
 	strcpy(self->hover_y.text, "0");
+
+	return 0;
 }
 
-void Hud_update_time(struct Hud *self, uint32_t p_round)
+void Hud_update_time(
+	struct Hud *self,
+	uint32_t p_round,
+	SDL_Renderer *p_renderer)
 {
 	//create widget strings
 	sprintf(self->time_day.text, "%u", (p_round / 24));
 	sprintf(self->time_hour.text, "%02u:00", p_round);
+
+	//gen widgets
+	Widget_generate_sprite(&self->time_day, p_renderer, self->font, self->font_color);
+	Widget_generate_sprite(&self->time_hour, p_renderer, self->font, self->font_color);
 }
 
 void Hud_update_money(
 	struct Hud *self,
 	uint32_t p_money,
-	SDL_Renderer *p_renderer,
-	TTF_Font *p_font,
-	SDL_Color p_font_color)
+	SDL_Renderer *p_renderer)
 {
 	//create widget strings
 	sprintf(self->money.text, "%u", p_money);
 
 	//gen widget
-	Widget_generate_sprite(&self->money, p_renderer, p_font, p_font_color);
+	Widget_generate_sprite(&self->money, p_renderer, self->font, self->font_color);
 }
 
-void Hud_update_hover(struct Hud *self, SDL_Renderer *p_renderer, TTF_Font *p_font, SDL_Color p_font_color)
+void Hud_update_hover(struct Hud *self, SDL_Renderer *p_renderer)
 {
 	SDL_Point mouse;
 
@@ -85,8 +104,8 @@ void Hud_update_hover(struct Hud *self, SDL_Renderer *p_renderer, TTF_Font *p_fo
 		sprintf(self->hover_y.text, "%u", ((mouse.y - self->rect_area.y) / self->field_height));
 
 		//reset sprites
-		Widget_generate_sprite(&self->hover_x, p_renderer, p_font, p_font_color);
-		Widget_generate_sprite(&self->hover_y, p_renderer, p_font, p_font_color);
+		Widget_generate_sprite(&self->hover_x, p_renderer, self->font, self->font_color);
+		Widget_generate_sprite(&self->hover_y, p_renderer, self->font, self->font_color);
 	}
 	else
 	{
@@ -94,22 +113,15 @@ void Hud_update_hover(struct Hud *self, SDL_Renderer *p_renderer, TTF_Font *p_fo
 	}
 }
 
-int32_t Hud_generate_widget_sprites(
+int32_t Hud_init_widgets(
 	struct Hud *self,
-	SDL_Renderer *p_renderer,
-	TTF_Font *p_font,
-	SDL_Color p_font_color)
+	SDL_Renderer *p_renderer)
 {
 	//create widget sprites
-	if ((Widget_generate_sprite(&self->time_day_label, p_renderer, p_font, p_font_color) != 0) ||
-		(Widget_generate_sprite(&self->time_day, p_renderer, p_font, p_font_color) != 0) ||
-		(Widget_generate_sprite(&self->time_hour_label, p_renderer, p_font, p_font_color) != 0) ||
-		(Widget_generate_sprite(&self->time_hour, p_renderer, p_font, p_font_color) != 0) ||
-		(Widget_generate_sprite(&self->money_label, p_renderer, p_font, p_font_color) != 0) ||
-		(Widget_generate_sprite(&self->money, p_renderer, p_font, p_font_color) != 0) ||
-		(Widget_generate_sprite(&self->hover_label, p_renderer, p_font, p_font_color) != 0) ||
-		(Widget_generate_sprite(&self->hover_x, p_renderer, p_font, p_font_color) != 0) ||
-		(Widget_generate_sprite(&self->hover_y, p_renderer, p_font, p_font_color) != 0))
+	if ((Widget_generate_sprite(&self->time_day_label, p_renderer, self->font, self->font_color) != 0) ||
+		(Widget_generate_sprite(&self->time_hour_label, p_renderer, self->font, self->font_color) != 0) ||
+		(Widget_generate_sprite(&self->money_label, p_renderer, self->font, self->font_color) != 0) ||
+		(Widget_generate_sprite(&self->hover_label, p_renderer, self->font, self->font_color) != 0))
 	{
 		return 1;
 	}
@@ -305,11 +317,7 @@ void Hud_map_textures(
 
 void Hud_draw(
 	struct Hud *self,
-	SDL_Renderer *p_renderer,
-	uint8_t p_field_border_red,
-	uint8_t p_field_border_green,
-	uint8_t p_field_border_blue,
-	uint8_t p_field_border_alpha)
+	SDL_Renderer *p_renderer)
 {
 	//draw fields
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
@@ -333,10 +341,10 @@ void Hud_draw(
 			//draw field border
 			SDL_SetRenderDrawColor(
 				p_renderer,
-				p_field_border_red,
-				p_field_border_green,
-				p_field_border_blue,
-				p_field_border_alpha);
+				self->field_border.r,
+				self->field_border.g,
+				self->field_border.b,
+				self->field_border.a);
 			SDL_RenderDrawRect(p_renderer, &self->rects_field[x][y]);
 		}
 	}
@@ -362,6 +370,8 @@ void Hud_draw(
 
 void Hud_clear(struct Hud *self)
 {
+	TTF_CloseFont(self->font);
+
 	Widget_clear(&self->time_day_label);
 	Widget_clear(&self->time_day);
 	Widget_clear(&self->time_hour_label);
