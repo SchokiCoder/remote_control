@@ -34,15 +34,16 @@ int32_t Hud_new(struct Hud *self, char *p_path_font)
 	}
 
 	//init widgets
-	Widget_new(&self->time_day_label);
-	Widget_new(&self->time_day);
-	Widget_new(&self->time_hour_label);
-	Widget_new(&self->time_hour);
-	Widget_new(&self->money_label);
-	Widget_new(&self->money);
-	Widget_new(&self->hover_label);
-	Widget_new(&self->hover_x);
-	Widget_new(&self->hover_y);
+	Widget_new(&self->lbl_time_day);
+	Widget_new(&self->lbl_time_day_val);
+	Widget_new(&self->lbl_time_hour);
+	Widget_new(&self->lbl_time_hour_val);
+	Widget_new(&self->lbl_money);
+	Widget_new(&self->lbl_money_val);
+	Widget_new(&self->lbl_hover);
+	Widget_new(&self->lbl_hover_x_val);
+	Widget_new(&self->lbl_hover_y_val);
+	Widget_new(&self->btn_pass);
 
 	//init sprites
 	Sprite_new(&self->spr_ground);
@@ -53,13 +54,14 @@ int32_t Hud_new(struct Hud *self, char *p_path_font)
 		Sprite_new(&self->spr_trees[i]);
 
 	//set widget texts
-	strcpy(self->time_day_label.text, HUD_TIME_DAY_LABEL_TEXT);
-	strcpy(self->time_hour_label.text, HUD_TIME_HOUR_LABEL_TEXT);
-	strcpy(self->money_label.text, HUD_MONEY_LABEL_TEXT);
-	strcpy(self->money.text, "0");
-	strcpy(self->hover_label.text, HUD_HOVER_LABEL_TEXT);
-	strcpy(self->hover_x.text, "0");
-	strcpy(self->hover_y.text, "0");
+	strcpy(self->lbl_time_day.text, HUD_LBL_TIME_DAY_TEXT);
+	strcpy(self->lbl_time_hour.text, HUD_LBL_TIME_HOUR_TEXT);
+	strcpy(self->lbl_money.text, HUD_LBL_MONEY_TEXT);
+	strcpy(self->lbl_money_val.text, "0");
+	strcpy(self->lbl_hover.text, HUD_LBL_HOVER_TEXT);
+	strcpy(self->lbl_hover_x_val.text, "0");
+	strcpy(self->lbl_hover_y_val.text, "0");
+	strcpy(self->btn_pass.text, HUD_BTN_PASS_TEXT);
 
 	return 0;
 }
@@ -70,12 +72,12 @@ void Hud_update_time(
 	SDL_Renderer *p_renderer)
 {
 	//create widget strings
-	sprintf(self->time_day.text, "%u", (p_round / 24));
-	sprintf(self->time_hour.text, "%02u:00", p_round);
+	sprintf(self->lbl_time_day_val.text, "%u", (p_round / 24));
+	sprintf(self->lbl_time_hour_val.text, "%02u:00", p_round);
 
 	//gen widgets
-	Widget_generate_sprite(&self->time_day, p_renderer, self->font, self->font_color);
-	Widget_generate_sprite(&self->time_hour, p_renderer, self->font, self->font_color);
+	Widget_generate_sprite(&self->lbl_time_day_val, p_renderer, self->font, self->font_color);
+	Widget_generate_sprite(&self->lbl_time_hour_val, p_renderer, self->font, self->font_color);
 }
 
 void Hud_update_money(
@@ -84,44 +86,22 @@ void Hud_update_money(
 	SDL_Renderer *p_renderer)
 {
 	//create widget strings
-	sprintf(self->money.text, "%u", p_money);
+	sprintf(self->lbl_money_val.text, "%u", p_money);
 
 	//gen widget
-	Widget_generate_sprite(&self->money, p_renderer, self->font, self->font_color);
-}
-
-void Hud_update_hover(struct Hud *self, SDL_Renderer *p_renderer)
-{
-	SDL_Point mouse;
-
-	//if mouse hovers in field
-	SDL_GetMouseState(&mouse.x, &mouse.y);
-
-	if (SDL_PointInRect(&mouse, &self->rect_area) == true)
-	{
-		//calc in which
-		sprintf(self->hover_x.text, "%u", ((mouse.x - self->rect_area.x) / self->field_width));
-		sprintf(self->hover_y.text, "%u", ((mouse.y - self->rect_area.y) / self->field_height));
-
-		//reset sprites
-		Widget_generate_sprite(&self->hover_x, p_renderer, self->font, self->font_color);
-		Widget_generate_sprite(&self->hover_y, p_renderer, self->font, self->font_color);
-	}
-	else
-	{
-		self->hover_x.text[0] = '\0';
-	}
+	Widget_generate_sprite(&self->lbl_money_val, p_renderer, self->font, self->font_color);
 }
 
 int32_t Hud_init_widgets(
 	struct Hud *self,
 	SDL_Renderer *p_renderer)
 {
-	//create widget sprites
-	if ((Widget_generate_sprite(&self->time_day_label, p_renderer, self->font, self->font_color) != 0) ||
-		(Widget_generate_sprite(&self->time_hour_label, p_renderer, self->font, self->font_color) != 0) ||
-		(Widget_generate_sprite(&self->money_label, p_renderer, self->font, self->font_color) != 0) ||
-		(Widget_generate_sprite(&self->hover_label, p_renderer, self->font, self->font_color) != 0))
+	//create sprites of widgets, that wont change their sprite
+	if ((Widget_generate_sprite(&self->lbl_time_day, p_renderer, self->font, self->font_color) != 0) ||
+		(Widget_generate_sprite(&self->lbl_time_hour, p_renderer, self->font, self->font_color) != 0) ||
+		(Widget_generate_sprite(&self->lbl_money, p_renderer, self->font, self->font_color) != 0) ||
+		(Widget_generate_sprite(&self->lbl_hover, p_renderer, self->font, self->font_color) != 0) ||
+		(Widget_generate_sprite(&self->btn_pass, p_renderer, self->font, self->font_color) != 0))
 	{
 		return 1;
 	}
@@ -149,40 +129,46 @@ int32_t Hud_load_sprites(struct Hud *self, SDL_Renderer *p_renderer)
 
 void Hud_calc(struct Hud *self,	int32_t p_window_w,	int32_t p_window_h)
 {
-	//calc time widgets
-	self->time_day_label.rect.x = p_window_w * HUD_TIME_DAY_LABEL_X;
-	self->time_day_label.rect.y = p_window_h * HUD_TIME_DAY_LABEL_Y;
+	//calc time widgets position
+	self->lbl_time_day.rect.x = p_window_w * HUD_LBL_TIME_DAY_X;
+	self->lbl_time_day.rect.y = p_window_h * HUD_LBL_TIME_DAY_Y;
 
-	self->time_day.rect.x = (self->time_day_label.rect.x + self->time_day_label.rect.w) +
-		(p_window_w * HUD_TIME_DAY_X_DIST);
-	self->time_day.rect.y = p_window_h * HUD_TIME_DAY_Y;
+	self->lbl_time_day_val.rect.x = (self->lbl_time_day.rect.x + self->lbl_time_day.rect.w) +
+		(p_window_w * HUD_LBL_TIME_DAY_VAL_X_DIST);
+	self->lbl_time_day_val.rect.y = p_window_h * HUD_LBL_TIME_DAY_VAL_Y;
 
-	self->time_hour_label.rect.x = p_window_w * HUD_TIME_HOUR_LABEL_X;
-	self->time_hour_label.rect.y = p_window_h * HUD_TIME_HOUR_LABEL_Y;
+	self->lbl_time_hour.rect.x = p_window_w * HUD_LBL_TIME_HOUR_X;
+	self->lbl_time_hour.rect.y = p_window_h * HUD_LBL_TIME_HOUR_Y;
 
-	self->time_hour.rect.x = (self->time_hour_label.rect.x + self->time_hour_label.rect.w) +
-		(p_window_w * HUD_TIME_HOUR_X_DIST);
-	self->time_hour.rect.y = p_window_h * HUD_TIME_HOUR_Y;
+	self->lbl_time_hour_val.rect.x = (self->lbl_time_hour.rect.x + self->lbl_time_hour.rect.w) +
+		(p_window_w * HUD_LBL_TIME_HOUR_VAL_X_DIST);
+	self->lbl_time_hour_val.rect.y = p_window_h * HUD_LBL_TIME_HOUR_VAL_Y;
 
 	//money widgets
-	self->money_label.rect.x = p_window_w * HUD_MONEY_LABEL_X;
-	self->money_label.rect.y = p_window_h * HUD_MONEY_LABEL_Y;
+	self->lbl_money.rect.x = p_window_w * HUD_LBL_MONEY_X;
+	self->lbl_money.rect.y = p_window_h * HUD_LBL_MONEY_Y;
 
-	self->money.rect.x = (self->money_label.rect.x + self->money_label.rect.w) +
-		(p_window_w * HUD_MONEY_X_DIST);
-	self->money.rect.y = p_window_h * HUD_MONEY_Y;
+	self->lbl_money_val.rect.x = (self->lbl_money.rect.x + self->lbl_money.rect.w) +
+		(p_window_w * HUD_LBL_MONEY_VAL_X_DIST);
+	self->lbl_money_val.rect.y = p_window_h * HUD_LBL_MONEY_VAL_Y;
 
 	//calc hover widgets
-	self->hover_label.rect.x = p_window_w * HUD_HOVER_LABEL_X;
-	self->hover_label.rect.y = p_window_h * HUD_HOVER_LABEL_Y;
+	self->lbl_hover.rect.x = p_window_w * HUD_LBL_HOVER_X;
+	self->lbl_hover.rect.y = p_window_h * HUD_LBL_HOVER_Y;
 
-	self->hover_x.rect.x = (self->hover_label.rect.x + self->hover_label.rect.w) +
-		(p_window_w * HUD_HOVER_X_X_DIST);
-	self->hover_x.rect.y = p_window_h * HUD_HOVER_X_Y;
+	self->lbl_hover_x_val.rect.x = (self->lbl_hover.rect.x + self->lbl_hover.rect.w) +
+		(p_window_w * HUD_LBL_HOVER_X_VAL_X_DIST);
+	self->lbl_hover_x_val.rect.y = p_window_h * HUD_LBL_HOVER_X_VAL_Y;
 
-	self->hover_y.rect.x = (self->hover_x.rect.x + self->hover_x.rect.w) +
-		(p_window_w * HUD_HOVER_Y_X_DIST);
-	self->hover_y.rect.y = p_window_h * HUD_HOVER_Y_Y;
+	self->lbl_hover_y_val.rect.x = (self->lbl_hover_x_val.rect.x + self->lbl_hover_x_val.rect.w) +
+		(p_window_w * HUD_LBL_HOVER_Y_VAL_X_DIST);
+	self->lbl_hover_y_val.rect.y = p_window_h * HUD_LBL_HOVER_Y_VAL_Y;
+
+	//calc pass button
+	self->btn_pass.rect.x = p_window_w * HUD_BTN_PASS_X;
+	self->btn_pass.rect.y = p_window_h * HUD_BTN_PASS_Y;
+	self->btn_pass.rect.w = p_window_w * HUD_BTN_PASS_W;
+	self->btn_pass.rect.h = p_window_h * HUD_BTN_PASS_H;
 
 	/* calculate area pos and size
 		-as wide as high
@@ -341,30 +327,56 @@ void Hud_draw(
 			//draw field border
 			SDL_SetRenderDrawColor(
 				p_renderer,
-				self->field_border.r,
-				self->field_border.g,
-				self->field_border.b,
-				self->field_border.a);
+				self->field_border_color.r,
+				self->field_border_color.g,
+				self->field_border_color.b,
+				self->field_border_color.a);
 			SDL_RenderDrawRect(p_renderer, &self->rects_field[x][y]);
 		}
 	}
 
 	//draw time widgets
-	Widget_draw(&self->time_day_label, p_renderer);
-	Widget_draw(&self->time_day, p_renderer);
-	Widget_draw(&self->time_hour_label, p_renderer);
-	Widget_draw(&self->time_hour, p_renderer);
+	Widget_draw(&self->lbl_time_day, p_renderer);
+	Widget_draw(&self->lbl_time_day_val, p_renderer);
+	Widget_draw(&self->lbl_time_hour, p_renderer);
+	Widget_draw(&self->lbl_time_hour_val, p_renderer);
 
 	//draw money widgets
-	Widget_draw(&self->money_label, p_renderer);
-	Widget_draw(&self->money, p_renderer);
+	Widget_draw(&self->lbl_money, p_renderer);
+	Widget_draw(&self->lbl_money_val, p_renderer);
+
+	//draw pass button
+	Widget_draw(&self->btn_pass, p_renderer);
 
 	//if mouse hovers on area, draw hover widgets
-	if (self->hover_x.text[0] != '\0' && self->hover_y.text[0] != '\0')
+	if (self->lbl_hover_x_val.text[0] != '\0' && self->lbl_hover_y_val.text[0] != '\0')
 	{
-		Widget_draw(&self->hover_label, p_renderer);
-		Widget_draw(&self->hover_x, p_renderer);
-		Widget_draw(&self->hover_y, p_renderer);
+		Widget_draw(&self->lbl_hover, p_renderer);
+		Widget_draw(&self->lbl_hover_x_val, p_renderer);
+		Widget_draw(&self->lbl_hover_y_val, p_renderer);
+	}
+}
+
+void Hud_update_hover(struct Hud *self, SDL_Renderer *p_renderer)
+{
+	SDL_Point mouse;
+
+	//if mouse hovers in field
+	SDL_GetMouseState(&mouse.x, &mouse.y);
+
+	if (SDL_PointInRect(&mouse, &self->rect_area) == true)
+	{
+		//calc in which
+		sprintf(self->lbl_hover_x_val.text, "%u", ((mouse.x - self->rect_area.x) / self->field_width));
+		sprintf(self->lbl_hover_y_val.text, "%u", ((mouse.y - self->rect_area.y) / self->field_height));
+
+		//reset sprites
+		Widget_generate_sprite(&self->lbl_hover_x_val, p_renderer, self->font, self->font_color);
+		Widget_generate_sprite(&self->lbl_hover_y_val, p_renderer, self->font, self->font_color);
+	}
+	else
+	{
+		self->lbl_hover_x_val.text[0] = '\0';
 	}
 }
 
@@ -372,13 +384,13 @@ void Hud_clear(struct Hud *self)
 {
 	TTF_CloseFont(self->font);
 
-	Widget_clear(&self->time_day_label);
-	Widget_clear(&self->time_day);
-	Widget_clear(&self->time_hour_label);
-	Widget_clear(&self->time_hour);
-	Widget_clear(&self->hover_label);
-	Widget_clear(&self->hover_x);
-	Widget_clear(&self->hover_y);
+	Widget_clear(&self->lbl_time_day);
+	Widget_clear(&self->lbl_time_day_val);
+	Widget_clear(&self->lbl_time_hour);
+	Widget_clear(&self->lbl_time_hour_val);
+	Widget_clear(&self->lbl_hover);
+	Widget_clear(&self->lbl_hover_x_val);
+	Widget_clear(&self->lbl_hover_y_val);
 
 	Sprite_clear(&self->spr_ground);
 	Sprite_clear(&self->spr_hidden);

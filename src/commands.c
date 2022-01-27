@@ -66,7 +66,7 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 	char filepath[FILEPATH_MAX_LEN] = "";
 	FILE *f;
 	char confirmation;
-	
+
 	time(&rng_seed);
 	srand(rng_seed);
 
@@ -109,14 +109,14 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 	new_game.admin_id = p_admin_id;
 	new_game.round = TOWN_TIME_BEGIN;
 	new_game.money = TOWN_START_MONEY;
-	
+
 	//hide fields, generate trees
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
 		for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
 		{
 			tree_chance = rand() % 100;
-			
+
 			//chance to generate tree
 			if (tree_chance > TOWN_GEN_TREE_THRESHOLD)
 			{
@@ -201,9 +201,7 @@ void cmd_connect(char *p_town_name)
 {
 	struct Town town;
 	struct Config cfg;
-	struct GameData game_data;
-	SDL_Thread *gfx_thread;
-	
+
 	//load game
 	if (load_town(p_town_name, &town) != 0)
 		return;
@@ -230,21 +228,11 @@ void cmd_connect(char *p_town_name)
 	//read config
 	load_config(&cfg);
 
-	//prepare game data
-	game_data.town_name = p_town_name;
-	game_data.town = &town;
-	game_data.cfg = &cfg;
-	game_data.cmd = GCMD_NONE;
-	game_data.rsp = GRSP_NONE;
-	game_data.rpt = RPT_NONE;
+	//start game part
+	gp_main(p_town_name, &town, &cfg);
 
-	//start gfx part in seperate thread
-	gfx_thread = SDL_CreateThread(gfx_game, "thread_gfx", &game_data);
-	SDL_DetachThread(gfx_thread);
-	gfx_thread = NULL;
-
-	//start terminal game part
-	terminal_game(&game_data);
+	//end print
+	printf(MSG_CONNECTION_CLOSED);
 }
 
 void cmd_delete(char *p_town_name)
@@ -254,12 +242,12 @@ void cmd_delete(char *p_town_name)
 	//get path
 	if (get_town_path(filepath) != 0)
 		return;
-	
+
 	//glue file part to path
 	strcat(filepath, p_town_name);
 	strcat(filepath, ".");
 	strcat(filepath, FILETYPE_TOWN);
-	
+
 	if (remove(filepath) != 0)
 		printf(MSG_ERR_FILE_TOWN_DELETE);
 

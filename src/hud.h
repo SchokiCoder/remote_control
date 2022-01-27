@@ -1,4 +1,4 @@
-/*
+#/*
 	remote_control
 	Copyright (C) 2021	Andy Frank Schoknecht
 
@@ -28,25 +28,28 @@
 #include "sprite.h"
 #include "town.h"
 
+struct GameData;
+
 struct Hud
 {
 	/* font */
 	TTF_Font *font;
 	SDL_Color font_color;
-		
+
 	/* widgets */
-	struct Widget time_day_label;
-	struct Widget time_day;
-	struct Widget time_hour_label;
-	struct Widget time_hour;
-	struct Widget money_label;
-	struct Widget money;
-	struct Widget hover_label;
-	struct Widget hover_x;
-	struct Widget hover_y;
+	struct Widget lbl_time_day;
+	struct Widget lbl_time_day_val;
+	struct Widget lbl_time_hour;
+	struct Widget lbl_time_hour_val;
+	struct Widget lbl_money;
+	struct Widget lbl_money_val;
+	struct Widget lbl_hover;
+	struct Widget lbl_hover_x_val;
+	struct Widget lbl_hover_y_val;
+	struct Widget btn_pass;
 
 	/* graphical data for area and fields */
-	SDL_Color field_border;
+	SDL_Color field_border_color;
 	uint32_t field_width;
 	uint32_t field_height;
 	SDL_Rect rect_area;
@@ -75,10 +78,6 @@ void Hud_update_money(
 	uint32_t p_money,
 	SDL_Renderer *p_renderer);
 
-void Hud_update_hover(
-	struct Hud *self,
-	SDL_Renderer *p_renderer);
-
 int32_t Hud_init_widgets(
 	struct Hud *self,
 	SDL_Renderer *p_renderer);
@@ -94,9 +93,9 @@ void Hud_map_textures(
 	bool p_fields_hidden[TOWN_WIDTH][TOWN_HEIGHT],
 	enum Field p_fields_content[TOWN_WIDTH][TOWN_HEIGHT]);
 
-void Hud_draw(
-	struct Hud *self,
-	SDL_Renderer *p_renderer);
+void Hud_draw(struct Hud *self, SDL_Renderer *p_renderer);
+
+void Hud_update_hover(struct Hud *self, SDL_Renderer *p_renderer);
 
 void Hud_clear(struct Hud *self);
 
