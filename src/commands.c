@@ -199,6 +199,7 @@ void cmd_list_towns()
 
 void cmd_connect(char *p_town_name)
 {
+	struct GameData game_data;
 	struct Town town;
 	struct Config cfg;
 
@@ -228,8 +229,40 @@ void cmd_connect(char *p_town_name)
 	//read config
 	load_config(&cfg);
 
+	//prepare gameplay data
+	game_data.town_name = p_town_name;
+	game_data.town = &town;
+	game_data.cfg = &cfg;
+	game_data.game_state = GS_ACTIVE;
+
+	switch (town.admin_id)
+	{
+	case ADMIN_1_ID:
+		game_data.admin_salary = ADMIN_1_SALARY;
+		break;
+
+	case ADMIN_2_ID:
+		game_data.admin_salary = ADMIN_2_SALARY;
+		break;
+
+	case ADMIN_3_ID:
+		game_data.admin_salary = ADMIN_3_SALARY;
+		break;
+	}
+
 	//start game part
-	gp_main(p_town_name, &town, &cfg);
+	gp_main(&game_data);
+
+	//if gameover print reason
+	switch (game_data.game_state)
+	{
+	case GS_FAILURE_COST:
+		printf(MSG_FAILURE_COST);
+		break;
+
+	default:
+		break;
+	}
 
 	//end print
 	printf(MSG_CONNECTION_CLOSED);

@@ -40,6 +40,8 @@
 #define PATH_TEXTURE_GROUND			PATH_TEXTURES "ground.png"
 #define PATH_TEXTURE_HIDDEN			PATH_TEXTURES "hidden.png"
 #define PATH_TEXTURE_HQ				PATH_TEXTURES "headquarter.png"
+#define PATH_TEXTURE_CONSTRUCTION	PATH_TEXTURES "construction.png"
+#define PATH_TEXTURE_QUARRY			PATH_TEXTURES "quarry.png"
 
 #define TOWN_TREE_VARIETY_COUNT		5
 #define PATH_TEXTURE_TREE_0			PATH_TEXTURES "tree_0.png"

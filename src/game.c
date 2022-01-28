@@ -59,10 +59,7 @@ void exit_game(
 }
 
 /* gameplay functions */
-void gp_end_round(
-	struct GameData *p_game_data,
-	struct Hud *p_hud,
-	SDL_Renderer *p_renderer)
+void gp_end_round(struct GameData *p_game_data, struct Hud *p_hud)
 {
 	uint32_t cost = 0;
 
@@ -87,30 +84,30 @@ void gp_end_round(
 		//subtract running cost from players money
 		p_game_data->town->money -= cost;
 	}
-	/*else
+	else
 	{
 		//gameover
-
-	}*/
+		p_game_data->game_state = GS_FAILURE_COST;
+	}
 
 	//increment time
 	p_game_data->town->round++;
 
 	//update hud
-	Hud_update_time(p_hud, p_game_data->town->round, p_renderer);
-	Hud_update_money(p_hud, p_game_data->town->money, p_renderer);
+	Hud_update_time(p_hud, p_game_data->town->round);
+	Hud_update_money(p_hud, p_game_data->town->money);
 }
 
-int32_t gp_main(char *p_town_name, struct Town *p_town, struct Config *p_cfg)
+int32_t gp_main(struct GameData *p_game_data)
 {
+	struct GameData *game_data = p_game_data;	/* just for now out of laziness */
+												/* TODO remove later and use actual parameter */
+
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 
-	bool active = true;
 	uint32_t ts_now = 0;
 	uint32_t ts_render = 0;
-
-	struct GameData game_data;
 
 	SDL_Event event;
 	int32_t border_t, border_l;
@@ -122,26 +119,6 @@ int32_t gp_main(char *p_town_name, struct Town *p_town, struct Config *p_cfg)
 
 	struct Sprite spr_icon;
 
-	//prepare gameplay data
-	game_data.town_name = p_town_name;
-	game_data.town = p_town;
-	game_data.cfg = p_cfg;
-
-	switch (p_town->admin_id)
-	{
-	case ADMIN_1_ID:
-		game_data.admin_salary = ADMIN_1_SALARY;
-		break;
-
-	case ADMIN_2_ID:
-		game_data.admin_salary = ADMIN_2_SALARY;
-		break;
-
-	case ADMIN_3_ID:
-		game_data.admin_salary = ADMIN_3_SALARY;
-		break;
-	}
-
 	//init SDL
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 	{
@@ -152,11 +129,11 @@ int32_t gp_main(char *p_town_name, struct Town *p_town, struct Config *p_cfg)
 
 	//create window
 	window = SDL_CreateWindow(
-		game_data.town_name,
-		game_data.cfg->gfx_window_x,
-		game_data.cfg->gfx_window_y,
-		game_data.cfg->gfx_window_w,
-		game_data.cfg->gfx_window_h,
+		game_data->town_name,
+		game_data->cfg->gfx_window_x,
+		game_data->cfg->gfx_window_y,
+		game_data->cfg->gfx_window_w,
+		game_data->cfg->gfx_window_h,
 		(SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE));
 
 	if (window == NULL)
@@ -188,56 +165,55 @@ int32_t gp_main(char *p_town_name, struct Town *p_town, struct Config *p_cfg)
 	}
 
 	//init hud
-	if (Hud_new(&hud, game_data.cfg->path_font) != 0)
+	if (Hud_new(&hud, renderer, game_data->cfg->path_font) != 0)
 	{
 		exit_game(window, renderer, &hud);
 		return 5;
 	}
 
 	//set font color
-	hud.font_color.r = game_data.cfg->font_red;
-	hud.font_color.g = game_data.cfg->font_green;
-	hud.font_color.b = game_data.cfg->font_blue;
-	hud.font_color.a = game_data.cfg->font_alpha;
+	hud.font_color.r = game_data->cfg->font_red;
+	hud.font_color.g = game_data->cfg->font_green;
+	hud.font_color.b = game_data->cfg->font_blue;
+	hud.font_color.a = game_data->cfg->font_alpha;
 
 	//update some widgets
-	Hud_update_time(&hud, game_data.town->round, renderer);
-	Hud_update_money(&hud, game_data.town->money, renderer);
-	Hud_update_hover(&hud, renderer);
+	Hud_update_time(&hud, game_data->town->round);
+	Hud_update_money(&hud, game_data->town->money);
 
 	//make all sprites
 	if ((Sprite_from_image(&spr_icon, renderer, PATH_TEXTURE_ICON) != 0) ||
-		(Hud_load_sprites(&hud, renderer) != 0) ||
-		(Hud_init_widgets(&hud, renderer) != 0))
+		(Hud_load_sprites(&hud) != 0) ||
+		(Hud_init_widgets(&hud) != 0))
 	{
 		exit_game(window, renderer, &hud);
 		return 6;
 	}
 
 	//calculate ui sizes and positions
-	Hud_calc(&hud, game_data.cfg->gfx_window_w,	game_data.cfg->gfx_window_h);
+	Hud_calc(&hud, game_data->cfg->gfx_window_w, game_data->cfg->gfx_window_h);
 	Hud_generate_flips(&hud);
-	Hud_map_textures(&hud, game_data.town->area_hidden, game_data.town->area_content);
+	Hud_map_textures(&hud, game_data->town->area_hidden, game_data->town->area_content);
 
 	//set window icon, and clear icon sprite
 	SDL_SetWindowIcon(window, spr_icon.surface);
 	Sprite_clear(&spr_icon);
 
 	//mainloop
-	while (active)
+	while (game_data->game_state == GS_ACTIVE)
 	{
-		if (ts_now > (ts_render + (1000.0f / game_data.cfg->gfx_framerate)))
+		if (ts_now > (ts_render + (1000.0f / game_data->cfg->gfx_framerate)))
 		{
 			//clear screen
 			SDL_SetRenderDrawColor(renderer,
-				game_data.cfg->bg_red,
-				game_data.cfg->bg_green,
-				game_data.cfg->bg_blue,
+				game_data->cfg->bg_red,
+				game_data->cfg->bg_green,
+				game_data->cfg->bg_blue,
 				255);
 			SDL_RenderClear(renderer);
 
 			//draw hud
-			Hud_draw(&hud, renderer);
+			Hud_draw(&hud);
 
 			//show image, save time
 			SDL_RenderPresent(renderer);
@@ -247,23 +223,20 @@ int32_t gp_main(char *p_town_name, struct Town *p_town, struct Config *p_cfg)
 		//update time
 		ts_now = SDL_GetTicks();
 
+		//update mouse coords
+		SDL_GetMouseState(&mouse.x, &mouse.y);
+
 		//handle sdl-events
 		while (SDL_PollEvent(&event))
 		{
 			switch (event.type)
 			{
-			case SDL_MOUSEMOTION:
-				Hud_update_hover(&hud, renderer);
+			case SDL_MOUSEBUTTONUP:
+				Hud_handle_click(&hud, mouse, game_data);
 				break;
 
-			case SDL_MOUSEBUTTONUP:
-				SDL_GetMouseState(&mouse.x, &mouse.y);
-
-				//if pass button pressed, end round
-				if (SDL_PointInRect(&mouse, &hud.btn_pass.rect) == true)
-				{
-					gp_end_round(&game_data, &hud, renderer);
-				}
+			case SDL_MOUSEMOTION:
+				Hud_handle_hover(&hud, mouse);
 				break;
 
 			case SDL_WINDOWEVENT:
@@ -272,14 +245,14 @@ int32_t gp_main(char *p_town_name, struct Town *p_town, struct Config *p_cfg)
 					//set config window size
 					SDL_GetWindowSize(window, &window_w, &window_h);
 
-					game_data.cfg->gfx_window_w = window_w;
-					game_data.cfg->gfx_window_h = window_h;
+					game_data->cfg->gfx_window_w = window_w;
+					game_data->cfg->gfx_window_h = window_h;
 
 					//recalc ui sizes and pos
 					Hud_calc(
 						&hud,
-						game_data.cfg->gfx_window_w,
-						game_data.cfg->gfx_window_h);
+						game_data->cfg->gfx_window_w,
+						game_data->cfg->gfx_window_h);
 				}
 				else if (event.window.event == SDL_WINDOWEVENT_MOVED)
 				{
@@ -287,20 +260,20 @@ int32_t gp_main(char *p_town_name, struct Town *p_town, struct Config *p_cfg)
 					SDL_GetWindowBordersSize(window, &border_t, &border_l, NULL, NULL);
 					SDL_GetWindowPosition(window, &window_x, &window_y);
 
-					game_data.cfg->gfx_window_x = window_x - border_l;
-					game_data.cfg->gfx_window_y = window_y - border_t;
+					game_data->cfg->gfx_window_x = window_x - border_l;
+					game_data->cfg->gfx_window_y = window_y - border_t;
 				}
 				break;
 
 			case SDL_QUIT:
-				active = false;
+				game_data->game_state = GS_CLOSE;
 				break;
 			}
 		}
 	}
 
 	//save config
-	save_config(game_data.cfg);
+	save_config(game_data->cfg);
 
 	//quit routine
 	exit_game(window, renderer, &hud);

@@ -19,11 +19,20 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include <stdbool.h>
 #include <stdint.h>
+#include <SDL.h>
 
 struct Town;
 struct Config;
 struct Hud;
+
+enum GameState
+{
+	GS_ACTIVE,
+	GS_CLOSE,
+	GS_FAILURE_COST
+};
 
 struct GameData
 {
@@ -31,14 +40,12 @@ struct GameData
 	struct Town *town;
 	struct Config *cfg;
 
+	enum GameState game_state;
 	uint32_t admin_salary;
 };
 
-void gp_end_round(
-	struct GameData *p_game_data,
-	struct Hud *p_hud,
-	SDL_Renderer *p_renderer);
+void gp_end_round(struct GameData *p_game_data, struct Hud *p_hud);
 
-int32_t gp_main(char *p_town_name, struct Town *p_town, struct Config *p_cfg);
+int32_t gp_main(struct GameData *p_game_data);
 
 #endif /* GAME_H */

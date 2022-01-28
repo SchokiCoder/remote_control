@@ -30,11 +30,33 @@
 
 struct GameData;
 
+enum HudHoverMode
+{
+	HHM_NONE,
+	HHM_CONSTRUCT
+};
+
+enum HudState
+{
+	HS_NORMAL,
+	HS_CONSTRUCT
+};
+
 struct Hud
 {
+	SDL_Renderer *renderer;
+
 	/* font */
 	TTF_Font *font;
 	SDL_Color font_color;
+
+	/* data */
+	enum HudState state;
+	enum HudHoverMode hover_mode;
+	SDL_Point hover_field;
+	enum Field hover_construct;
+	SDL_Texture *texture_hover_construct;
+	SDL_Rect rect_hover_construct;
 
 	/* widgets */
 	struct Widget lbl_time_day;
@@ -43,10 +65,11 @@ struct Hud
 	struct Widget lbl_time_hour_val;
 	struct Widget lbl_money;
 	struct Widget lbl_money_val;
-	struct Widget lbl_hover;
-	struct Widget lbl_hover_x_val;
-	struct Widget lbl_hover_y_val;
+	struct Widget btn_construct;
 	struct Widget btn_pass;
+
+	/* construct menu widgets */
+	struct Widget btn_construct_quarry;
 
 	/* graphical data for area and fields */
 	SDL_Color field_border_color;
@@ -62,27 +85,21 @@ struct Hud
 	/* shared sprites */
 	struct Sprite spr_ground;
 	struct Sprite spr_hidden;
-	struct Sprite spr_hq;
 	struct Sprite spr_trees[TOWN_TREE_VARIETY_COUNT];
+	struct Sprite spr_hq;
+	struct Sprite spr_construction;
+	struct Sprite spr_quarry;
 };
 
-int32_t Hud_new(struct Hud *self, char *p_path_font);
+int32_t Hud_new(struct Hud *self, SDL_Renderer *p_renderer, char *p_path_font);
 
-void Hud_update_time(
-	struct Hud *self,
-	uint32_t p_round,
-	SDL_Renderer *p_renderer);
+void Hud_update_time(struct Hud *self, uint32_t p_round);
 
-void Hud_update_money(
-	struct Hud *self,
-	uint32_t p_money,
-	SDL_Renderer *p_renderer);
+void Hud_update_money(struct Hud *self, uint32_t p_money);
 
-int32_t Hud_init_widgets(
-	struct Hud *self,
-	SDL_Renderer *p_renderer);
+int32_t Hud_init_widgets(struct Hud *self);
 
-int32_t Hud_load_sprites(struct Hud *self, SDL_Renderer *p_renderer);
+int32_t Hud_load_sprites(struct Hud *self);
 
 void Hud_calc(struct Hud *self,	int32_t p_window_w,	int32_t p_window_h);
 
@@ -93,9 +110,19 @@ void Hud_map_textures(
 	bool p_fields_hidden[TOWN_WIDTH][TOWN_HEIGHT],
 	enum Field p_fields_content[TOWN_WIDTH][TOWN_HEIGHT]);
 
-void Hud_draw(struct Hud *self, SDL_Renderer *p_renderer);
+void Hud_draw(struct Hud *self);
 
-void Hud_update_hover(struct Hud *self, SDL_Renderer *p_renderer);
+SDL_Point Hud_mouse_to_field(struct Hud *self, SDL_Point p_mouse);
+
+void Hud_handle_click(struct Hud *self, SDL_Point p_mouse, struct GameData *p_game_data);
+
+void Hud_handle_hover(struct Hud *self, SDL_Point p_mouse);
+
+void Hud_set_field(
+	struct Hud *self,
+	struct GameData *p_game_data,
+	SDL_Point p_field,
+	enum Field p_field_content);
 
 void Hud_clear(struct Hud *self);
 
