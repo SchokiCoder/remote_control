@@ -27,15 +27,11 @@
 #include "town.h"
 #include "config.h"
 #include "sprite.h"
-#include "game_commands.h"
 #include "hud.h"
 #include "game.h"
 
 /* technical functions */
-void exit_game(
-	SDL_Window *p_window,
-	SDL_Renderer *p_renderer,
-	struct Hud *p_hud)
+void Game_exit(SDL_Window *p_window, SDL_Renderer *p_renderer, struct Hud *p_hud)
 {
 	//clear hud
 	Hud_clear(p_hud);
@@ -59,50 +55,125 @@ void exit_game(
 }
 
 /* gameplay functions */
-void gp_end_round(struct GameData *p_game_data, struct Hud *p_hud)
+void Game_end_round(struct Game *self, struct Hud *p_hud)
 {
 	uint32_t cost = 0;
 
-	//get running cost for admin and hq
-	cost += p_game_data->admin_salary;
-	cost += COST_HQ;
+	//get running cost for admin
+	cost += self->admin_salary;
 
-	/* per building
+	//for each building, add cost
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
 		for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
 		{
-			switch (p_town->field[x][y])
+			switch (self->town->area_content[x][y])
 			{
+			//buildings without cost
+			case FIELD_EMPTY:
+				break;
+			case FIELD_TREE_0:
+				break;
+			case FIELD_TREE_1:
+				break;
+			case FIELD_TREE_2:
+				break;
+			case FIELD_TREE_3:
+				break;
+			case FIELD_TREE_4:
+				break;
+			case FIELD_CONSTRUCTION:
+				break;
+
+			//buildings with cost
+			case FIELD_ADMINISTRATION:
+				cost += HQ_RUNNING_COST;
+				break;
+
+            case FIELD_QUARRY:
+            	cost += QUARRY_RUNNING_COST;
+            	break;
 			}
 		}
-	}*/
+	}
 
 	//if cost is not higher than current money
-	if (cost < p_game_data->town->money)
+	if (cost < self->town->money)
 	{
 		//subtract running cost from players money
-		p_game_data->town->money -= cost;
+		self->town->money -= cost;
 	}
 	else
 	{
 		//gameover
-		p_game_data->game_state = GS_FAILURE_COST;
+		self->game_state = GS_FAILURE_COST;
+	}
+
+	//for all constructions
+	for (uint32_t i = 0; i < self->town->construction_count; i++)
+	{
+		//increment progress
+		self->town->constructions[i].progress++;
+
+		//if building is done
+		if (self->town->constructions[i].progress >=
+			self->town->constructions[i].time)
+		{
+            //set field to actual building
+            self->town->area_content
+            	[self->town->constructions[i].field.x]
+            	[self->town->constructions[i].field.y]
+            	= self->town->constructions[i].building;
+
+            //update hud
+            Hud_set_field(
+            	p_hud,
+            	self->town->constructions[self->town->construction_count - 1].field,
+            	self->town->constructions[self->town->construction_count - 1].texture);
+
+            //remove entry from construction list
+            Town_construction_list_remove(self->town, i);
+		}
 	}
 
 	//increment time
-	p_game_data->town->round++;
+	self->town->round++;
+
+	//save file
+	Town_save(self->town, self->town_name);
 
 	//update hud
-	Hud_update_time(p_hud, p_game_data->town->round);
-	Hud_update_money(p_hud, p_game_data->town->money);
+	Hud_update_time(p_hud, self->town->round);
+	Hud_update_money(p_hud, self->town->money);
 }
 
-int32_t gp_main(struct GameData *p_game_data)
+void Game_build(
+	struct Game *self,
+	SDL_Point p_field,
+	enum Field p_building,
+	struct Hud *p_hud,
+	SDL_Texture *p_texture)
 {
-	struct GameData *game_data = p_game_data;	/* just for now out of laziness */
-												/* TODO remove later and use actual parameter */
+	//change field
+	self->town->area_content[p_field.x][p_field.y] = FIELD_CONSTRUCTION;
 
+	//add building to construction list
+	self->town->construction_count++;
+	self->town->constructions[self->town->construction_count - 1].building = p_building;
+	self->town->constructions[self->town->construction_count - 1].field = p_field;
+	self->town->constructions[self->town->construction_count - 1].progress = 0;
+	self->town->constructions[self->town->construction_count - 1].time = get_construction_time(p_building);
+	self->town->constructions[self->town->construction_count - 1].texture = p_texture;
+
+	//subtract cost of building
+	self->town->money -= get_construction_cost(p_building);
+
+	//update hud
+	Hud_update_money(p_hud, self->town->money);
+}
+
+int32_t Game_main(struct Game *self)
+{
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 
@@ -123,23 +194,23 @@ int32_t gp_main(struct GameData *p_game_data)
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 	{
 		printf(MSG_ERR_SDL_INIT, SDL_GetError());
-		exit_game(NULL, NULL, NULL);
+		Game_exit(NULL, NULL, NULL);
 		return 1;
 	}
 
 	//create window
 	window = SDL_CreateWindow(
-		game_data->town_name,
-		game_data->cfg->gfx_window_x,
-		game_data->cfg->gfx_window_y,
-		game_data->cfg->gfx_window_w,
-		game_data->cfg->gfx_window_h,
+		self->town_name,
+		self->cfg->gfx_window_x,
+		self->cfg->gfx_window_y,
+		self->cfg->gfx_window_w,
+		self->cfg->gfx_window_h,
 		(SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE));
 
 	if (window == NULL)
 	{
 		printf(MSG_ERR_SDL_WINDOW, SDL_GetError());
-		exit_game(NULL, NULL, NULL);
+		Game_exit(NULL, NULL, NULL);
 		return 2;
 	}
 
@@ -149,7 +220,7 @@ int32_t gp_main(struct GameData *p_game_data)
 	if (renderer == NULL)
 	{
 		printf(MSG_ERR_SDL_RENDERER, SDL_GetError());
-		exit_game(window, NULL, NULL);
+		Game_exit(window, NULL, NULL);
 		return 3;
 	}
 
@@ -160,55 +231,55 @@ int32_t gp_main(struct GameData *p_game_data)
 	if (TTF_Init() != 0)
 	{
 		printf(MSG_ERR_TTF_INIT);
-		exit_game(window, renderer, NULL);
+		Game_exit(window, renderer, NULL);
 		return 4;
 	}
 
 	//init hud
-	if (Hud_new(&hud, renderer, game_data->cfg->path_font) != 0)
+	if (Hud_new(&hud, renderer, self->cfg->path_font) != 0)
 	{
-		exit_game(window, renderer, &hud);
+		Game_exit(window, renderer, &hud);
 		return 5;
 	}
 
 	//set font color
-	hud.font_color.r = game_data->cfg->font_red;
-	hud.font_color.g = game_data->cfg->font_green;
-	hud.font_color.b = game_data->cfg->font_blue;
-	hud.font_color.a = game_data->cfg->font_alpha;
+	hud.font_color.r = self->cfg->font_red;
+	hud.font_color.g = self->cfg->font_green;
+	hud.font_color.b = self->cfg->font_blue;
+	hud.font_color.a = self->cfg->font_alpha;
 
 	//update some widgets
-	Hud_update_time(&hud, game_data->town->round);
-	Hud_update_money(&hud, game_data->town->money);
+	Hud_update_time(&hud, self->town->round);
+	Hud_update_money(&hud, self->town->money);
 
 	//make all sprites
 	if ((Sprite_from_image(&spr_icon, renderer, PATH_TEXTURE_ICON) != 0) ||
 		(Hud_load_sprites(&hud) != 0) ||
 		(Hud_init_widgets(&hud) != 0))
 	{
-		exit_game(window, renderer, &hud);
+		Game_exit(window, renderer, &hud);
 		return 6;
 	}
 
 	//calculate ui sizes and positions
-	Hud_calc(&hud, game_data->cfg->gfx_window_w, game_data->cfg->gfx_window_h);
+	Hud_calc(&hud, self->cfg->gfx_window_w, self->cfg->gfx_window_h);
 	Hud_generate_flips(&hud);
-	Hud_map_textures(&hud, game_data->town->area_hidden, game_data->town->area_content);
+	Hud_map_textures(&hud, self->town->area_hidden, self->town->area_content);
 
 	//set window icon, and clear icon sprite
 	SDL_SetWindowIcon(window, spr_icon.surface);
 	Sprite_clear(&spr_icon);
 
 	//mainloop
-	while (game_data->game_state == GS_ACTIVE)
+	while (self->game_state == GS_ACTIVE)
 	{
-		if (ts_now > (ts_render + (1000.0f / game_data->cfg->gfx_framerate)))
+		if (ts_now > (ts_render + (1000.0f / self->cfg->gfx_framerate)))
 		{
 			//clear screen
 			SDL_SetRenderDrawColor(renderer,
-				game_data->cfg->bg_red,
-				game_data->cfg->bg_green,
-				game_data->cfg->bg_blue,
+				self->cfg->bg_red,
+				self->cfg->bg_green,
+				self->cfg->bg_blue,
 				255);
 			SDL_RenderClear(renderer);
 
@@ -232,7 +303,7 @@ int32_t gp_main(struct GameData *p_game_data)
 			switch (event.type)
 			{
 			case SDL_MOUSEBUTTONUP:
-				Hud_handle_click(&hud, mouse, game_data);
+				Hud_handle_click(&hud, mouse, self);
 				break;
 
 			case SDL_MOUSEMOTION:
@@ -245,14 +316,14 @@ int32_t gp_main(struct GameData *p_game_data)
 					//set config window size
 					SDL_GetWindowSize(window, &window_w, &window_h);
 
-					game_data->cfg->gfx_window_w = window_w;
-					game_data->cfg->gfx_window_h = window_h;
+					self->cfg->gfx_window_w = window_w;
+					self->cfg->gfx_window_h = window_h;
 
 					//recalc ui sizes and pos
 					Hud_calc(
 						&hud,
-						game_data->cfg->gfx_window_w,
-						game_data->cfg->gfx_window_h);
+						self->cfg->gfx_window_w,
+						self->cfg->gfx_window_h);
 				}
 				else if (event.window.event == SDL_WINDOWEVENT_MOVED)
 				{
@@ -260,23 +331,23 @@ int32_t gp_main(struct GameData *p_game_data)
 					SDL_GetWindowBordersSize(window, &border_t, &border_l, NULL, NULL);
 					SDL_GetWindowPosition(window, &window_x, &window_y);
 
-					game_data->cfg->gfx_window_x = window_x - border_l;
-					game_data->cfg->gfx_window_y = window_y - border_t;
+					self->cfg->gfx_window_x = window_x - border_l;
+					self->cfg->gfx_window_y = window_y - border_t;
 				}
 				break;
 
 			case SDL_QUIT:
-				game_data->game_state = GS_CLOSE;
+				self->game_state = GS_CLOSE;
 				break;
 			}
 		}
 	}
 
 	//save config
-	save_config(game_data->cfg);
+	Config_save(self->cfg);
 
 	//quit routine
-	exit_game(window, renderer, &hud);
+	Game_exit(window, renderer, &hud);
 
 	return 0;
 }

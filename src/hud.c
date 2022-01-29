@@ -82,7 +82,7 @@ void Hud_update_time(struct Hud *self, uint32_t p_round)
 {
 	//create widget strings
 	sprintf(self->lbl_time_day_val.text, "%u", (p_round / 24));
-	sprintf(self->lbl_time_hour_val.text, "%02u:00", p_round);
+	sprintf(self->lbl_time_hour_val.text, "%02u:00", (p_round % 24));
 
 	//gen widgets
 	Widget_generate_sprite(&self->lbl_time_day_val, self->renderer, self->font, self->font_color);
@@ -321,8 +321,7 @@ void Hud_map_textures(
 	}
 }
 
-void Hud_draw(
-	struct Hud *self)
+void Hud_draw(struct Hud *self)
 {
 	//draw fields
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
@@ -402,7 +401,7 @@ SDL_Point Hud_mouse_to_field(struct Hud *self, SDL_Point p_mouse)
 	return result;
 }
 
-void Hud_handle_click(struct Hud *self, SDL_Point p_mouse, struct GameData *p_game_data)
+void Hud_handle_click(struct Hud *self, SDL_Point p_mouse, struct Game *p_game)
 {
 	SDL_Point temp;
 
@@ -412,7 +411,7 @@ void Hud_handle_click(struct Hud *self, SDL_Point p_mouse, struct GameData *p_ga
 		//if pass button pressed
 		if (SDL_PointInRect(&p_mouse, &self->btn_pass.rect) == true)
 		{
-			gp_end_round(p_game_data, self);
+			Game_end_round(p_game, self);
 		}
 
 		//if construct button pressed
@@ -437,9 +436,12 @@ void Hud_handle_click(struct Hud *self, SDL_Point p_mouse, struct GameData *p_ga
 		//if field clicked
 		if (SDL_PointInRect(&p_mouse, &self->rect_area))
 		{
-			//construct
+			//get field coord
 			temp = Hud_mouse_to_field(self, p_mouse);
-			Hud_set_field(self, p_game_data, temp, self->hover_construct);
+
+			//update game and hud
+			Game_build(p_game, temp, self->hover_construct, self, self->texture_hover_construct);
+			Hud_set_field(self, temp, self->spr_construction.texture);
 		}
 
 		//stop construct mode
@@ -475,54 +477,9 @@ void Hud_handle_hover(struct Hud *self, SDL_Point p_mouse)
 	}
 }
 
-void Hud_set_field(
-	struct Hud *self,
-	struct GameData *p_game_data,
-	SDL_Point p_field,
-	enum Field p_field_content)
+void Hud_set_field(struct Hud *self, SDL_Point p_field, SDL_Texture *p_texture)
 {
-	//update game
-	p_game_data->town->area_content[p_field.x][p_field.y] = p_field_content;
-
-	//update hud
-	switch (p_field_content)
-	{
-	case FIELD_EMPTY:
-		self->textures_field_content[p_field.x][p_field.y] = NULL;
-		break;
-
-	case FIELD_TREE_0:
-		self->textures_field_content[p_field.x][p_field.y] = self->spr_trees[0].texture;
-		break;
-
-	case FIELD_TREE_1:
-		self->textures_field_content[p_field.x][p_field.y] = self->spr_trees[1].texture;
-		break;
-
-	case FIELD_TREE_2:
-		self->textures_field_content[p_field.x][p_field.y] = self->spr_trees[2].texture;
-		break;
-
-	case FIELD_TREE_3:
-		self->textures_field_content[p_field.x][p_field.y] = self->spr_trees[3].texture;
-		break;
-
-	case FIELD_TREE_4:
-		self->textures_field_content[p_field.x][p_field.y] = self->spr_trees[4].texture;
-		break;
-
-	case FIELD_ADMINISTRATION:
-		self->textures_field_content[p_field.x][p_field.y] = self->spr_hq.texture;
-		break;
-
-	case FIELD_CONSTRUCTION:
-		self->textures_field_content[p_field.x][p_field.y] = self->spr_construction.texture;
-		break;
-
-	case FIELD_QUARRY:
-		self->textures_field_content[p_field.x][p_field.y] = self->spr_quarry.texture;
-		break;
-	}
+	self->textures_field_content[p_field.x][p_field.y] = p_texture;
 }
 
 void Hud_clear(struct Hud *self)

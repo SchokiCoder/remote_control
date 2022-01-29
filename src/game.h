@@ -22,8 +22,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <SDL.h>
+#include "town.h"
 
-struct Town;
 struct Config;
 struct Hud;
 
@@ -34,7 +34,7 @@ enum GameState
 	GS_FAILURE_COST
 };
 
-struct GameData
+struct Game
 {
 	char *town_name;
 	struct Town *town;
@@ -44,8 +44,15 @@ struct GameData
 	uint32_t admin_salary;
 };
 
-void gp_end_round(struct GameData *p_game_data, struct Hud *p_hud);
+void Game_end_round(struct Game *self, struct Hud *p_hud);
 
-int32_t gp_main(struct GameData *p_game_data);
+void Game_build(
+	struct Game *self,
+	SDL_Point p_field,
+	enum Field p_building,
+	struct Hud *p_hud,
+	SDL_Texture *p_texture);
+
+int32_t Game_main(struct Game *self);
 
 #endif /* GAME_H */

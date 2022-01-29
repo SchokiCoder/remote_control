@@ -59,7 +59,7 @@ void cmd_list_admins()
 
 void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 {
-	struct Town new_game;
+	struct Town new_town;
 	uint32_t tree_chance;
 	uint32_t tree_variance;
 	time_t rng_seed;
@@ -106,9 +106,8 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 	}
 
 	//set values
-	new_game.admin_id = p_admin_id;
-	new_game.round = TOWN_TIME_BEGIN;
-	new_game.money = TOWN_START_MONEY;
+	Town_new(&new_town);
+	new_town.admin_id = p_admin_id;
 
 	//hide fields, generate trees
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
@@ -122,15 +121,15 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 			{
 				//chance for species
 				tree_variance = rand() % TOWN_TREE_VARIETY_COUNT;
-				new_game.area_content[x][y] = (FIELD_TREE_0 + tree_variance);
+				new_town.area_content[x][y] = (FIELD_TREE_0 + tree_variance);
 			}
 			else
 			{
-				new_game.area_content[x][y] = FIELD_EMPTY;
+				new_town.area_content[x][y] = FIELD_EMPTY;
 			}
 
 			//hide field
-			new_game.area_hidden[x][y] = true;
+			new_town.area_hidden[x][y] = true;
 		}
 	}
 
@@ -139,7 +138,7 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 	{
 		for (uint32_t y = TOWN_EXPOSURE_AREA_BEGIN_Y; y < TOWN_EXPOSURE_AREA_END_Y; y++)
 		{
-			new_game.area_hidden[x][y] = false;
+			new_town.area_hidden[x][y] = false;
 		}
 	}
 
@@ -148,15 +147,15 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 	{
 		for (uint32_t y = TOWN_TREEFREE_AREA_BEGIN_Y; y < TOWN_TREEFREE_AREA_END_Y; y++)
 		{
-			new_game.area_content[x][y] = FIELD_EMPTY;
+			new_town.area_content[x][y] = FIELD_EMPTY;
 		}
 	}
 
 	//set headquarter
-	new_game.area_content[TOWN_HQ_SPAWN_X][TOWN_HQ_SPAWN_Y] = FIELD_ADMINISTRATION;
+	new_town.area_content[TOWN_HQ_SPAWN_X][TOWN_HQ_SPAWN_Y] = FIELD_ADMINISTRATION;
 
 	//save town to file
-	if(save_town(p_town_name, &new_game) == 0)
+	if(Town_save(&new_town, p_town_name) == 0)
 		printf(MSG_FILE_TOWN_CREATE);
 }
 
@@ -199,12 +198,14 @@ void cmd_list_towns()
 
 void cmd_connect(char *p_town_name)
 {
-	struct GameData game_data;
+	struct Game game;
 	struct Town town;
 	struct Config cfg;
 
 	//load game
-	if (load_town(p_town_name, &town) != 0)
+	Town_new(&town);
+
+	if (Town_load(&town, p_town_name) != 0)
 		return;
 
 	//set cfg to std values (set values will overwrite std)
@@ -227,34 +228,34 @@ void cmd_connect(char *p_town_name)
 	cfg.field_border_alpha = CFG_STD_FIELD_BORDER_ALPHA;
 
 	//read config
-	load_config(&cfg);
+	Config_load(&cfg);
 
 	//prepare gameplay data
-	game_data.town_name = p_town_name;
-	game_data.town = &town;
-	game_data.cfg = &cfg;
-	game_data.game_state = GS_ACTIVE;
+	game.town_name = p_town_name;
+	game.town = &town;
+	game.cfg = &cfg;
+	game.game_state = GS_ACTIVE;
 
 	switch (town.admin_id)
 	{
 	case ADMIN_1_ID:
-		game_data.admin_salary = ADMIN_1_SALARY;
+		game.admin_salary = ADMIN_1_SALARY;
 		break;
 
 	case ADMIN_2_ID:
-		game_data.admin_salary = ADMIN_2_SALARY;
+		game.admin_salary = ADMIN_2_SALARY;
 		break;
 
 	case ADMIN_3_ID:
-		game_data.admin_salary = ADMIN_3_SALARY;
+		game.admin_salary = ADMIN_3_SALARY;
 		break;
 	}
 
 	//start game part
-	gp_main(&game_data);
+	Game_main(&game);
 
 	//if gameover print reason
-	switch (game_data.game_state)
+	switch (game.game_state)
 	{
 	case GS_FAILURE_COST:
 		printf(MSG_FAILURE_COST);

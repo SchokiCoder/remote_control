@@ -26,17 +26,17 @@
 #include "path.h"
 #include "town.h"
 
-void print_town(char *p_town_name, struct Town *p_in)
+void Town_print(struct Town *self, char *p_town_name)
 {
 	//name
 	printf("%s\n\n", p_town_name);
-	
+
 	//exposure
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
 		for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
 		{
-			printf("%i", p_in->area_hidden[x][y]);
+			printf("%i", self->area_hidden[x][y]);
 		}
 
 		printf("\n");
@@ -49,14 +49,22 @@ void print_town(char *p_town_name, struct Town *p_in)
 	{
 		for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
 		{
-			printf("%i", p_in->area_content[x][y]);
+			printf("%i", self->area_content[x][y]);
 		}
 
 		printf("\n");
 	}
 }
 
-int32_t save_town(char *p_town_name, struct Town *p_in)
+void Town_new(struct Town *self)
+{
+	self->admin_id = 0;
+	self->construction_count = 0;
+	self->money = TOWN_START_MONEY;
+	self->round = TOWN_TIME_BEGIN;
+}
+
+int32_t Town_save(struct Town *self, char *p_town_name)
 {
 	char filepath_save[FILEPATH_MAX_LEN] = "";
 	char filepath_bkp[FILEPATH_MAX_LEN] = "";
@@ -67,7 +75,7 @@ int32_t save_town(char *p_town_name, struct Town *p_in)
 	//get path
 	if (get_town_path(filepath_save) != 0)
 		return 1;
-	
+
 	//glue file part to path
 	strcat(filepath_save, p_town_name);
 	strcat(filepath_save, ".");
@@ -100,9 +108,9 @@ int32_t save_town(char *p_town_name, struct Town *p_in)
 	}
 
 	//write header
-	fwrite(&p_in->admin_id, sizeof(p_in->admin_id), 1, f);
-	fwrite(&p_in->round, sizeof(p_in->round), 1, f);
-	fwrite(&p_in->money, sizeof(p_in->money), 1, f);
+	fwrite(&self->admin_id, sizeof(self->admin_id), 1, f);
+	fwrite(&self->round, sizeof(self->round), 1, f);
+	fwrite(&self->money, sizeof(self->money), 1, f);
 	fwrite(&town_width, sizeof(uint32_t), 1, f);
 	fwrite(&town_height, sizeof(uint32_t), 1, f);
 	fputc('\n', f);
@@ -110,13 +118,29 @@ int32_t save_town(char *p_town_name, struct Town *p_in)
 	//write exposure data
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
-		fwrite(p_in->area_hidden[x], sizeof(p_in->area_hidden[x][0]), TOWN_HEIGHT, f);
+		fwrite(self->area_hidden[x], sizeof(self->area_hidden[x][0]), TOWN_HEIGHT, f);
 	}
 
 	//write content data
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
-		fwrite(p_in->area_content[x], sizeof(p_in->area_content[x][0]), TOWN_HEIGHT, f);
+		fwrite(self->area_content[x], sizeof(self->area_content[x][0]), TOWN_HEIGHT, f);
+	}
+
+	fputc('\n', f);
+
+	//write construction list data
+	fwrite(&self->construction_count, sizeof(self->construction_count), 1, f);
+	fputc('\n', f);
+
+	//write construction list
+	for (uint32_t i = 0; i < self->construction_count; i++)
+	{
+		fwrite(&self->constructions[i].building, sizeof(self->constructions[i].building), 1, f);
+		fwrite(&self->constructions[i].field.x, sizeof(self->constructions[i].field.x), 1, f);
+		fwrite(&self->constructions[i].field.y, sizeof(self->constructions[i].field.y), 1, f);
+		fwrite(&self->constructions[i].progress, sizeof(self->constructions[i].progress), 1, f);
+		fwrite(&self->constructions[i].time, sizeof(self->constructions[i].time), 1, f);
 	}
 
 	//check and done
@@ -126,17 +150,17 @@ int32_t save_town(char *p_town_name, struct Town *p_in)
 		fclose(f);
 		return 3;
 	}
-	
+
 	fclose(f);
 	return 0;
 }
 
-int32_t load_town(char *p_town_name, struct Town *p_out)
+int32_t Town_load(struct Town *self, char *p_town_name)
 {
 	FILE *f;
 	char filepath[FILEPATH_MAX_LEN] = "";
 	uint32_t town_width, town_height;
-	
+
 	//get path
 	if (get_town_path(filepath) != 0)
 		return 1;
@@ -156,9 +180,9 @@ int32_t load_town(char *p_town_name, struct Town *p_out)
 	}
 
 	//read header
-	fread(&p_out->admin_id, sizeof(p_out->admin_id), 1, f);
-	fread(&p_out->round, sizeof(p_out->round), 1, f);
-	fread(&p_out->money, sizeof(p_out->money), 1, f);
+	fread(&self->admin_id, sizeof(self->admin_id), 1, f);
+	fread(&self->round, sizeof(self->round), 1, f);
+	fread(&self->money, sizeof(self->money), 1, f);
 	fread(&town_width, sizeof(town_width), 1, f);
 	fread(&town_height, sizeof(town_height), 1, f);
 	fgetc(f);
@@ -176,13 +200,28 @@ int32_t load_town(char *p_town_name, struct Town *p_out)
 	//read exposure data
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
-		fread(p_out->area_hidden[x], sizeof(p_out->area_hidden[x][0]), TOWN_HEIGHT, f);
+		fread(self->area_hidden[x], sizeof(self->area_hidden[x][0]), TOWN_HEIGHT, f);
 	}
 
 	//read content data
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
-		fread(p_out->area_content[x], sizeof(p_out->area_content[x][0]), TOWN_HEIGHT, f);
+		fread(self->area_content[x], sizeof(self->area_content[x][0]), TOWN_HEIGHT, f);
+	}
+	fgetc(f);
+
+	//read construction list data
+	fread(&self->construction_count, sizeof(self->construction_count), 1, f);
+	fgetc(f);
+
+	//read construction list
+	for (uint32_t i = 0; i < self->construction_count; i++)
+	{
+		fread(&self->constructions[i].building, sizeof(self->constructions[i].building), 1, f);
+		fread(&self->constructions[i].field.x, sizeof(self->constructions[i].field.x), 1, f);
+		fread(&self->constructions[i].field.y, sizeof(self->constructions[i].field.y), 1, f);
+		fread(&self->constructions[i].progress, sizeof(self->constructions[i].progress), 1, f);
+		fread(&self->constructions[i].time, sizeof(self->constructions[i].time), 1, f);
 	}
 
 	//check and done
@@ -192,8 +231,86 @@ int32_t load_town(char *p_town_name, struct Town *p_out)
 		fclose(f);
 		return 4;
 	}
-	
+
 	printf(MSG_FILE_TOWN_LOAD);
 	fclose(f);
+	return 0;
+}
+
+void Town_construction_list_remove(struct Town *self, uint32_t p_index)
+{
+	//beginning at index, for each entry overwrite with next entry
+	for (uint32_t i = p_index; i < self->construction_count; i++)
+	{
+		self->constructions[i] = self->constructions[i + 1];
+	}
+
+	//decrement count
+	self->construction_count--;
+}
+
+uint32_t get_construction_cost(enum Field p_field)
+{
+	/*	return construction cost for each building
+		this technically does not need breaks but i'll do them anyway :) */
+	switch (p_field)
+	{
+	//not buildable
+	case FIELD_EMPTY:
+		break;
+	case FIELD_TREE_0:
+		break;
+	case FIELD_TREE_1:
+		break;
+	case FIELD_TREE_2:
+		break;
+	case FIELD_TREE_3:
+		break;
+	case FIELD_TREE_4:
+		break;
+	case FIELD_ADMINISTRATION:
+		break;
+	case FIELD_CONSTRUCTION:
+		break;
+
+	//buildable
+	case FIELD_QUARRY:
+		return QUARRY_CONSTRUCTION_COST;
+		break;
+	}
+
+	return 0;
+}
+
+uint32_t get_construction_time(enum Field p_field)
+{
+		/*	return construction cost for each building
+		this technically does not need breaks but i'll do them anyway :) */
+	switch (p_field)
+	{
+	//not buildable
+	case FIELD_EMPTY:
+		break;
+	case FIELD_TREE_0:
+		break;
+	case FIELD_TREE_1:
+		break;
+	case FIELD_TREE_2:
+		break;
+	case FIELD_TREE_3:
+		break;
+	case FIELD_TREE_4:
+		break;
+	case FIELD_ADMINISTRATION:
+		break;
+	case FIELD_CONSTRUCTION:
+		break;
+
+	//buildable
+	case FIELD_QUARRY:
+		return QUARRY_CONSTRUCTION_TIME;
+		break;
+	}
+
 	return 0;
 }

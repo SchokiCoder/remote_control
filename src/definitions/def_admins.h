@@ -23,7 +23,6 @@
 #include <stdbool.h>
 
 #define COST_ADMIN_BASE	10
-#define COST_HQ			20
 
 #define ADMIN_1_ID 54
 #define ADMIN_1_FIRSTNAME "Debbie"

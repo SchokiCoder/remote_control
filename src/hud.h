@@ -28,7 +28,7 @@
 #include "sprite.h"
 #include "town.h"
 
-struct GameData;
+struct Game;
 
 enum HudHoverMode
 {
@@ -114,15 +114,11 @@ void Hud_draw(struct Hud *self);
 
 SDL_Point Hud_mouse_to_field(struct Hud *self, SDL_Point p_mouse);
 
-void Hud_handle_click(struct Hud *self, SDL_Point p_mouse, struct GameData *p_game_data);
+void Hud_handle_click(struct Hud *self, SDL_Point p_mouse, struct Game *p_game);
 
 void Hud_handle_hover(struct Hud *self, SDL_Point p_mouse);
 
-void Hud_set_field(
-	struct Hud *self,
-	struct GameData *p_game_data,
-	SDL_Point p_field,
-	enum Field p_field_content);
+void Hud_set_field(struct Hud *self, SDL_Point p_field, SDL_Texture *p_texture);
 
 void Hud_clear(struct Hud *self);
 

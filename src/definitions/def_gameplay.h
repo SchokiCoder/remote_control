@@ -34,6 +34,17 @@
 #define TOWN_HQ_SPAWN_X				7
 #define TOWN_HQ_SPAWN_Y				7
 #define TOWN_TIME_BEGIN				6	/* round 0 plays at 06:00 am */
-#define TOWN_START_MONEY			50
+#define TOWN_START_MONEY			2000
+
+//building system
+#define TOWN_MAX_CONSTRUCTIONS		(TOWN_WIDTH * TOWN_HEIGHT)
+
+/* building definitions */
+
+#define HQ_RUNNING_COST				20
+
+#define QUARRY_CONSTRUCTION_COST	20
+#define QUARRY_CONSTRUCTION_TIME	2
+#define QUARRY_RUNNING_COST			10
 
 #endif /* DEF_GAMEPLAY_H */
