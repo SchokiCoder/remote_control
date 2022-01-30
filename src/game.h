@@ -41,7 +41,6 @@ struct Game
 	struct Config *cfg;
 
 	enum GameState game_state;
-	uint32_t admin_salary;
 };
 
 void Game_end_round(struct Game *self, struct Hud *p_hud);

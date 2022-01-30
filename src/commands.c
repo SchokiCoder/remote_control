@@ -38,23 +38,19 @@ void cmd_help_outgame()
 	printf("%s", HELP_TEXT_OUTSIDE);
 }
 
-void print_admin(
-	uint32_t p_admin_id,
-	char *p_lastname,
-	char *p_firstname,
-	uint8_t p_age,
-	bool p_male,
-	char *p_bio)
-{
-	printf("Admin ID:\t%i\nLastname:\t%s\nFirstname:\t%s\nAge:\t\t%i\nGender:\t\t%s\nBio:\n%s\n\n",
-		p_admin_id, p_lastname, p_firstname, p_age, (p_male == true ? "male" : "female"), p_bio);
-}
-
 void cmd_list_admins()
 {
-	print_admin(ADMIN_1_ID, ADMIN_1_LASTNAME, ADMIN_1_FIRSTNAME, ADMIN_1_AGE, ADMIN_1_MALE, ADMIN_1_BIO);
-	print_admin(ADMIN_2_ID, ADMIN_2_LASTNAME, ADMIN_2_FIRSTNAME, ADMIN_2_AGE, ADMIN_2_MALE, ADMIN_2_BIO);
-	print_admin(ADMIN_3_ID, ADMIN_3_LASTNAME, ADMIN_3_FIRSTNAME, ADMIN_3_AGE, ADMIN_3_MALE, ADMIN_3_BIO);
+	for (uint32_t i = 0; i < (sizeof(ADMIN_ID) / sizeof(ADMIN_ID[0])); i++)
+	{
+		printf(
+			"Admin ID:\t%i\nLastname:\t%s\nFirstname:\t%s\nAge:\t\t%i\nGender:\t\t%s\nBio:\n%s\n\n",
+			ADMIN_ID[i],
+			ADMIN_LASTNAME[i],
+			ADMIN_FIRSTNAME[i],
+			ADMIN_AGE[i],
+			(ADMIN_MALE[i] == true ? "male" : "female"),
+			ADMIN_BIO[i]);
+	}
 }
 
 void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
@@ -71,9 +67,9 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 	srand(rng_seed);
 
 	//check given admin id
-	if ((p_admin_id != ADMIN_1_ID) &
-		(p_admin_id != ADMIN_2_ID) &
-		(p_admin_id != ADMIN_3_ID))
+	if ((p_admin_id != ADMIN_ID[0]) &
+		(p_admin_id != ADMIN_ID[1]) &
+		(p_admin_id != ADMIN_ID[2]))
 	{
 		printf(MSG_ERR_ADMIN_ID);
 		return;
@@ -121,15 +117,15 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 			{
 				//chance for species
 				tree_variance = rand() % TOWN_TREE_VARIETY_COUNT;
-				new_town.area_content[x][y] = (FIELD_TREE_0 + tree_variance);
+				new_town.field[x][y] = (FIELD_TREE_0 + tree_variance);
 			}
 			else
 			{
-				new_town.area_content[x][y] = FIELD_EMPTY;
+				new_town.field[x][y] = FIELD_EMPTY;
 			}
 
 			//hide field
-			new_town.area_hidden[x][y] = true;
+			new_town.hidden[x][y] = true;
 		}
 	}
 
@@ -138,7 +134,7 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 	{
 		for (uint32_t y = TOWN_EXPOSURE_AREA_BEGIN_Y; y < TOWN_EXPOSURE_AREA_END_Y; y++)
 		{
-			new_town.area_hidden[x][y] = false;
+			new_town.hidden[x][y] = false;
 		}
 	}
 
@@ -147,12 +143,12 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 	{
 		for (uint32_t y = TOWN_TREEFREE_AREA_BEGIN_Y; y < TOWN_TREEFREE_AREA_END_Y; y++)
 		{
-			new_town.area_content[x][y] = FIELD_EMPTY;
+			new_town.field[x][y] = FIELD_EMPTY;
 		}
 	}
 
 	//set headquarter
-	new_town.area_content[TOWN_HQ_SPAWN_X][TOWN_HQ_SPAWN_Y] = FIELD_ADMINISTRATION;
+	new_town.field[TOWN_HQ_SPAWN_X][TOWN_HQ_SPAWN_Y] = FIELD_ADMINISTRATION;
 
 	//save town to file
 	if(Town_save(&new_town, p_town_name) == 0)
@@ -235,21 +231,6 @@ void cmd_connect(char *p_town_name)
 	game.town = &town;
 	game.cfg = &cfg;
 	game.game_state = GS_ACTIVE;
-
-	switch (town.admin_id)
-	{
-	case ADMIN_1_ID:
-		game.admin_salary = ADMIN_1_SALARY;
-		break;
-
-	case ADMIN_2_ID:
-		game.admin_salary = ADMIN_2_SALARY;
-		break;
-
-	case ADMIN_3_ID:
-		game.admin_salary = ADMIN_3_SALARY;
-		break;
-	}
 
 	//start game part
 	Game_main(&game);

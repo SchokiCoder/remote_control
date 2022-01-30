@@ -24,27 +24,11 @@
 #include <SDL.h>
 #include "definitions/def_gameplay.h"
 
-enum Field
-{
-	FIELD_EMPTY,
-	FIELD_TREE_0,
-	FIELD_TREE_1,
-	FIELD_TREE_2,
-	FIELD_TREE_3,
-	FIELD_TREE_4,
-	FIELD_ADMINISTRATION,
-	FIELD_CONSTRUCTION,
-	FIELD_QUARRY
-
-};
-
 struct Construction
 {
-	enum Field building;
-	SDL_Point field;
+	enum Field field;
+	SDL_Point coords;
 	uint32_t progress;
-	uint32_t time;		/* how long does it take to build */
-	SDL_Texture *texture;
 };
 
 struct Town
@@ -52,8 +36,8 @@ struct Town
 	uint8_t admin_id;
 	uint32_t round;
 	uint32_t money;
-	enum Field area_content[TOWN_WIDTH][TOWN_HEIGHT];
-	bool area_hidden[TOWN_WIDTH][TOWN_HEIGHT];
+	enum Field field[TOWN_WIDTH][TOWN_HEIGHT];
+	bool hidden[TOWN_WIDTH][TOWN_HEIGHT];
 
 	uint32_t construction_count;
 	struct Construction constructions[TOWN_MAX_CONSTRUCTIONS];
@@ -68,9 +52,5 @@ int32_t Town_save(struct Town *self, char *p_town_name);
 int32_t Town_load(struct Town *self, char *p_town_name);
 
 void Town_construction_list_remove(struct Town *self, uint32_t p_index);
-
-uint32_t get_construction_cost(enum Field p_field);
-
-uint32_t get_construction_time(enum Field p_field);
 
 #endif /* TOWN_H */

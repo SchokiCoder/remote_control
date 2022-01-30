@@ -120,6 +120,8 @@ void Hud_handle_hover(struct Hud *self, SDL_Point p_mouse);
 
 void Hud_set_field(struct Hud *self, SDL_Point p_field, SDL_Texture *p_texture);
 
+SDL_Texture* Hud_get_field_texture(struct Hud *self, enum Field p_field);
+
 void Hud_clear(struct Hud *self);
 
 #endif /* HUD_H */

@@ -482,6 +482,49 @@ void Hud_set_field(struct Hud *self, SDL_Point p_field, SDL_Texture *p_texture)
 	self->textures_field_content[p_field.x][p_field.y] = p_texture;
 }
 
+SDL_Texture* Hud_get_field_texture(struct Hud *self, enum Field p_field)
+{
+	switch (p_field)
+	{
+	case FIELD_EMPTY:
+		break;
+
+	case FIELD_TREE_0:
+		return self->spr_trees[0].texture;
+		break;
+
+	case FIELD_TREE_1:
+		return self->spr_trees[1].texture;
+		break;
+
+	case FIELD_TREE_2:
+		return self->spr_trees[2].texture;
+		break;
+
+	case FIELD_TREE_3:
+		return self->spr_trees[3].texture;
+		break;
+
+	case FIELD_TREE_4:
+		return self->spr_trees[4].texture;
+		break;
+
+	case FIELD_ADMINISTRATION:
+		return self->spr_hq.texture;
+		break;
+
+	case FIELD_CONSTRUCTION:
+		return self->spr_construction.texture;
+		break;
+
+	case FIELD_QUARRY:
+		return self->spr_quarry.texture;
+		break;
+	}
+
+	return NULL;
+}
+
 void Hud_clear(struct Hud *self)
 {
 	TTF_CloseFont(self->font);

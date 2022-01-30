@@ -39,12 +39,60 @@
 //building system
 #define TOWN_MAX_CONSTRUCTIONS		(TOWN_WIDTH * TOWN_HEIGHT)
 
-/* building definitions */
+//fields
+enum Field
+{
+	FIELD_EMPTY,
+	FIELD_TREE_0,
+	FIELD_TREE_1,
+	FIELD_TREE_2,
+	FIELD_TREE_3,
+	FIELD_TREE_4,
+	FIELD_ADMINISTRATION,
+	FIELD_CONSTRUCTION,
+	FIELD_QUARRY
+};
 
-#define HQ_RUNNING_COST				20
+//construction costs
+static const uint32_t FIELD_CONSTRUCTION_COST[] =
+{
+	0,	/* empty */
+	0,	/* trees */
+	0,
+	0,
+	0,
+	0,	/* trees */
+	0,	/* headquarter */
+	0,	/* construction */
+	20	/* quarry */
+};
 
-#define QUARRY_CONSTRUCTION_COST	20
-#define QUARRY_CONSTRUCTION_TIME	2
-#define QUARRY_RUNNING_COST			10
+//construction time
+static const uint32_t FIELD_CONSTRUCTION_TIME[] =
+{
+	0,	/* empty */
+	0,	/* trees */
+	0,
+	0,
+	0,
+	0,	/* trees */
+	0,	/* headquarter */
+	0,	/* construction */
+	2	/* quarry */
+};
+
+//running costs
+static const uint32_t FIELD_RUNNING_COST[] =
+{
+	0,	/* empty */
+	0,	/* trees */
+	0,
+	0,
+	0,
+	0,	/* trees */
+	20,	/* headquarter */
+	0,	/* construction */
+	10	/* quarry */
+};
 
 #endif /* DEF_GAMEPLAY_H */

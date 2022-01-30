@@ -36,7 +36,7 @@ void Town_print(struct Town *self, char *p_town_name)
 	{
 		for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
 		{
-			printf("%i", self->area_hidden[x][y]);
+			printf("%i", self->hidden[x][y]);
 		}
 
 		printf("\n");
@@ -49,7 +49,7 @@ void Town_print(struct Town *self, char *p_town_name)
 	{
 		for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
 		{
-			printf("%i", self->area_content[x][y]);
+			printf("%i", self->field[x][y]);
 		}
 
 		printf("\n");
@@ -118,13 +118,13 @@ int32_t Town_save(struct Town *self, char *p_town_name)
 	//write exposure data
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
-		fwrite(self->area_hidden[x], sizeof(self->area_hidden[x][0]), TOWN_HEIGHT, f);
+		fwrite(self->hidden[x], sizeof(self->hidden[x][0]), TOWN_HEIGHT, f);
 	}
 
 	//write content data
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
-		fwrite(self->area_content[x], sizeof(self->area_content[x][0]), TOWN_HEIGHT, f);
+		fwrite(self->field[x], sizeof(self->field[x][0]), TOWN_HEIGHT, f);
 	}
 
 	fputc('\n', f);
@@ -136,11 +136,10 @@ int32_t Town_save(struct Town *self, char *p_town_name)
 	//write construction list
 	for (uint32_t i = 0; i < self->construction_count; i++)
 	{
-		fwrite(&self->constructions[i].building, sizeof(self->constructions[i].building), 1, f);
-		fwrite(&self->constructions[i].field.x, sizeof(self->constructions[i].field.x), 1, f);
-		fwrite(&self->constructions[i].field.y, sizeof(self->constructions[i].field.y), 1, f);
+		fwrite(&self->constructions[i].field, sizeof(self->constructions[i].field), 1, f);
+		fwrite(&self->constructions[i].coords.x, sizeof(self->constructions[i].coords.x), 1, f);
+		fwrite(&self->constructions[i].coords.y, sizeof(self->constructions[i].coords.y), 1, f);
 		fwrite(&self->constructions[i].progress, sizeof(self->constructions[i].progress), 1, f);
-		fwrite(&self->constructions[i].time, sizeof(self->constructions[i].time), 1, f);
 	}
 
 	//check and done
@@ -200,13 +199,13 @@ int32_t Town_load(struct Town *self, char *p_town_name)
 	//read exposure data
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
-		fread(self->area_hidden[x], sizeof(self->area_hidden[x][0]), TOWN_HEIGHT, f);
+		fread(self->hidden[x], sizeof(self->hidden[x][0]), TOWN_HEIGHT, f);
 	}
 
 	//read content data
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
-		fread(self->area_content[x], sizeof(self->area_content[x][0]), TOWN_HEIGHT, f);
+		fread(self->field[x], sizeof(self->field[x][0]), TOWN_HEIGHT, f);
 	}
 	fgetc(f);
 
@@ -217,11 +216,10 @@ int32_t Town_load(struct Town *self, char *p_town_name)
 	//read construction list
 	for (uint32_t i = 0; i < self->construction_count; i++)
 	{
-		fread(&self->constructions[i].building, sizeof(self->constructions[i].building), 1, f);
-		fread(&self->constructions[i].field.x, sizeof(self->constructions[i].field.x), 1, f);
-		fread(&self->constructions[i].field.y, sizeof(self->constructions[i].field.y), 1, f);
+		fread(&self->constructions[i].field, sizeof(self->constructions[i].field), 1, f);
+		fread(&self->constructions[i].coords.x, sizeof(self->constructions[i].coords.x), 1, f);
+		fread(&self->constructions[i].coords.y, sizeof(self->constructions[i].coords.y), 1, f);
 		fread(&self->constructions[i].progress, sizeof(self->constructions[i].progress), 1, f);
-		fread(&self->constructions[i].time, sizeof(self->constructions[i].time), 1, f);
 	}
 
 	//check and done
@@ -247,70 +245,4 @@ void Town_construction_list_remove(struct Town *self, uint32_t p_index)
 
 	//decrement count
 	self->construction_count--;
-}
-
-uint32_t get_construction_cost(enum Field p_field)
-{
-	/*	return construction cost for each building
-		this technically does not need breaks but i'll do them anyway :) */
-	switch (p_field)
-	{
-	//not buildable
-	case FIELD_EMPTY:
-		break;
-	case FIELD_TREE_0:
-		break;
-	case FIELD_TREE_1:
-		break;
-	case FIELD_TREE_2:
-		break;
-	case FIELD_TREE_3:
-		break;
-	case FIELD_TREE_4:
-		break;
-	case FIELD_ADMINISTRATION:
-		break;
-	case FIELD_CONSTRUCTION:
-		break;
-
-	//buildable
-	case FIELD_QUARRY:
-		return QUARRY_CONSTRUCTION_COST;
-		break;
-	}
-
-	return 0;
-}
-
-uint32_t get_construction_time(enum Field p_field)
-{
-		/*	return construction cost for each building
-		this technically does not need breaks but i'll do them anyway :) */
-	switch (p_field)
-	{
-	//not buildable
-	case FIELD_EMPTY:
-		break;
-	case FIELD_TREE_0:
-		break;
-	case FIELD_TREE_1:
-		break;
-	case FIELD_TREE_2:
-		break;
-	case FIELD_TREE_3:
-		break;
-	case FIELD_TREE_4:
-		break;
-	case FIELD_ADMINISTRATION:
-		break;
-	case FIELD_CONSTRUCTION:
-		break;
-
-	//buildable
-	case FIELD_QUARRY:
-		return QUARRY_CONSTRUCTION_TIME;
-		break;
-	}
-
-	return 0;
 }

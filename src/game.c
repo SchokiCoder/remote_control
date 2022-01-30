@@ -30,7 +30,6 @@
 #include "hud.h"
 #include "game.h"
 
-/* technical functions */
 void Game_exit(SDL_Window *p_window, SDL_Renderer *p_renderer, struct Hud *p_hud)
 {
 	//clear hud
@@ -54,46 +53,19 @@ void Game_exit(SDL_Window *p_window, SDL_Renderer *p_renderer, struct Hud *p_hud
 	SDL_Quit();
 }
 
-/* gameplay functions */
 void Game_end_round(struct Game *self, struct Hud *p_hud)
 {
 	uint32_t cost = 0;
 
 	//get running cost for admin
-	cost += self->admin_salary;
+	cost += ADMIN_SALARY[self->town->admin_id];
 
 	//for each building, add cost
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
 		for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
 		{
-			switch (self->town->area_content[x][y])
-			{
-			//buildings without cost
-			case FIELD_EMPTY:
-				break;
-			case FIELD_TREE_0:
-				break;
-			case FIELD_TREE_1:
-				break;
-			case FIELD_TREE_2:
-				break;
-			case FIELD_TREE_3:
-				break;
-			case FIELD_TREE_4:
-				break;
-			case FIELD_CONSTRUCTION:
-				break;
-
-			//buildings with cost
-			case FIELD_ADMINISTRATION:
-				cost += HQ_RUNNING_COST;
-				break;
-
-            case FIELD_QUARRY:
-            	cost += QUARRY_RUNNING_COST;
-            	break;
-			}
+			cost += FIELD_RUNNING_COST[self->town->field[x][y]];
 		}
 	}
 
@@ -107,6 +79,7 @@ void Game_end_round(struct Game *self, struct Hud *p_hud)
 	{
 		//gameover
 		self->game_state = GS_FAILURE_COST;
+		return;
 	}
 
 	//for all constructions
@@ -117,19 +90,19 @@ void Game_end_round(struct Game *self, struct Hud *p_hud)
 
 		//if building is done
 		if (self->town->constructions[i].progress >=
-			self->town->constructions[i].time)
+			FIELD_CONSTRUCTION_TIME[self->town->constructions[i].field])
 		{
             //set field to actual building
-            self->town->area_content
-            	[self->town->constructions[i].field.x]
-            	[self->town->constructions[i].field.y]
-            	= self->town->constructions[i].building;
+            self->town->field
+            	[self->town->constructions[i].coords.x]
+            	[self->town->constructions[i].coords.y]
+            	= self->town->constructions[i].field;
 
             //update hud
             Hud_set_field(
             	p_hud,
-            	self->town->constructions[self->town->construction_count - 1].field,
-            	self->town->constructions[self->town->construction_count - 1].texture);
+            	self->town->constructions[self->town->construction_count - 1].coords,
+            	Hud_get_field_texture(p_hud, self->town->constructions[i].field));
 
             //remove entry from construction list
             Town_construction_list_remove(self->town, i);
@@ -149,24 +122,22 @@ void Game_end_round(struct Game *self, struct Hud *p_hud)
 
 void Game_build(
 	struct Game *self,
-	SDL_Point p_field,
-	enum Field p_building,
+	SDL_Point p_coords,
+	enum Field p_field,
 	struct Hud *p_hud,
 	SDL_Texture *p_texture)
 {
 	//change field
-	self->town->area_content[p_field.x][p_field.y] = FIELD_CONSTRUCTION;
+	self->town->field[p_coords.x][p_coords.y] = FIELD_CONSTRUCTION;
 
 	//add building to construction list
 	self->town->construction_count++;
-	self->town->constructions[self->town->construction_count - 1].building = p_building;
 	self->town->constructions[self->town->construction_count - 1].field = p_field;
+	self->town->constructions[self->town->construction_count - 1].coords = p_coords;
 	self->town->constructions[self->town->construction_count - 1].progress = 0;
-	self->town->constructions[self->town->construction_count - 1].time = get_construction_time(p_building);
-	self->town->constructions[self->town->construction_count - 1].texture = p_texture;
 
 	//subtract cost of building
-	self->town->money -= get_construction_cost(p_building);
+	self->town->money -= FIELD_CONSTRUCTION_COST[p_field];
 
 	//update hud
 	Hud_update_money(p_hud, self->town->money);
@@ -264,7 +235,7 @@ int32_t Game_main(struct Game *self)
 	//calculate ui sizes and positions
 	Hud_calc(&hud, self->cfg->gfx_window_w, self->cfg->gfx_window_h);
 	Hud_generate_flips(&hud);
-	Hud_map_textures(&hud, self->town->area_hidden, self->town->area_content);
+	Hud_map_textures(&hud, self->town->hidden, self->town->field);
 
 	//set window icon, and clear icon sprite
 	SDL_SetWindowIcon(window, spr_icon.surface);
