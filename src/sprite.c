@@ -29,24 +29,24 @@ void Sprite_new(struct Sprite *self)
 
 int32_t Sprite_from_image(struct Sprite *self, SDL_Renderer *p_renderer, const char *p_filepath)
 {
-	//clear
+	/* clear */
 	Sprite_clear(self);
-	
-	//load image
+
+	/* load image */
 	self->surface = IMG_Load(p_filepath);
 
 	if (self->surface == NULL)
 	{
-		printf(MSG_ERR_IMAGE_LOAD, p_filepath);
+		printf(MSG_ERR_IMAGE_LOAD, MSG_ERR, p_filepath);
 		return 1;
 	}
 
-	//create texture
+	/* create texture */
 	self->texture = SDL_CreateTextureFromSurface(p_renderer, self->surface);
 
 	if (self->texture == NULL)
 	{
-		printf(MSG_ERR_TEXTURE_CREATE, p_filepath);
+		printf(MSG_ERR_TEXTURE_CREATE, MSG_ERR, p_filepath);
 		return 2;
 	}
 
@@ -60,24 +60,24 @@ int32_t Sprite_from_text(
 	TTF_Font *p_font,
 	SDL_Color p_color)
 {
-	//clear
+	/* clear */
 	Sprite_clear(self);
-	
-	//create text
+
+	/* create text */
 	self->surface = TTF_RenderText_Solid(p_font, p_text, p_color);
-	
+
 	if (self->surface == NULL)
 	{
-		printf(MSG_ERR_TEXT_CREATE, p_text);
+		printf(MSG_ERR_TEXT_CREATE, MSG_ERR, p_text);
 		return 1;
 	}
-	
-	//create texture
+
+	/* create texture */
 	self->texture = SDL_CreateTextureFromSurface(p_renderer, self->surface);
 
 	if (self->texture == NULL)
 	{
-		printf(MSG_ERR_TEXTURE_CREATE, p_text);
+		printf(MSG_ERR_TEXTURE_CREATE, MSG_ERR, p_text);
 		return 2;
 	}
 

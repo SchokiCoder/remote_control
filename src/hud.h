@@ -1,4 +1,4 @@
-#/*
+/*
 	remote_control
 	Copyright (C) 2021	Andy Frank Schoknecht
 
@@ -97,9 +97,9 @@ void Hud_update_time(struct Hud *self, uint32_t p_round);
 
 void Hud_update_money(struct Hud *self, uint32_t p_money);
 
-int32_t Hud_init_widgets(struct Hud *self);
-
 int32_t Hud_load_sprites(struct Hud *self);
+
+int32_t Hud_init_widgets(struct Hud *self);
 
 void Hud_calc(struct Hud *self,	int32_t p_window_w,	int32_t p_window_h);
 

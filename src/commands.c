@@ -33,9 +33,23 @@
 #include "game.h"
 #include "commands.h"
 
-void cmd_help_outgame()
+void cmd_help_menu()
 {
-	printf("%s", HELP_TEXT_OUTSIDE);
+	printf(HELP_1ST_STEPS);
+}
+
+void cmd_help_full()
+{
+	cmd_help_menu();
+	printf(
+		HELP_COMMANDS,
+		APP_NAME,
+		CMD_HELP_LONG, CMD_HELP,
+		CMD_LIST_ADMINS_LONG, CMD_LIST_ADMINS,
+		CMD_HIRE_ADMIN_LONG, CMD_HIRE_ADMIN,
+		CMD_LIST_TOWNS_LONG, CMD_LIST_TOWNS,
+		CMD_CONNECT_LONG, CMD_CONNECT,
+		CMD_DELETE_TOWN_LONG);
 }
 
 void cmd_list_admins()
@@ -66,16 +80,16 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 	time(&rng_seed);
 	srand(rng_seed);
 
-	//check given admin id
+	/* check given admin id */
 	if ((p_admin_id != ADMIN_ID[0]) &
 		(p_admin_id != ADMIN_ID[1]) &
 		(p_admin_id != ADMIN_ID[2]))
 	{
-		printf(MSG_ERR_ADMIN_ID);
+		printf(MSG_ERR_ADMIN_ID, MSG_ERR, CMD_LIST_ADMINS_LONG);
 		return;
 	}
 
-	//check if town file already exists (by trying to read it)
+	/* check if town file already exists (by trying to read it) */
 	if (get_town_path(filepath) != 0)
 		return;
 
@@ -87,7 +101,7 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 
 	if (f != NULL)
 	{
-		printf(MSG_WARN_FILE_TOWN_EXIST);
+		printf(MSG_WARN_FILE_TOWN_EXIST, MSG_WARN);
 		confirmation = getchar();
 	}
 	else
@@ -101,21 +115,21 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 		return;
 	}
 
-	//set values
+	/* set values */
 	Town_new(&new_town);
 	new_town.admin_id = p_admin_id;
 
-	//hide fields, generate trees
+	/* hide fields, generate trees */
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
 		for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
 		{
 			tree_chance = rand() % 100;
 
-			//chance to generate tree
+			/* chance to generate tree */
 			if (tree_chance > TOWN_GEN_TREE_THRESHOLD)
 			{
-				//chance for species
+				/* chance for species */
 				tree_variance = rand() % TOWN_TREE_VARIETY_COUNT;
 				new_town.field[x][y] = (FIELD_TREE_0 + tree_variance);
 			}
@@ -124,12 +138,12 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 				new_town.field[x][y] = FIELD_EMPTY;
 			}
 
-			//hide field
+			/* hide field */
 			new_town.hidden[x][y] = true;
 		}
 	}
 
-	//expose starting area
+	/* expose starting area */
 	for (uint32_t x = TOWN_EXPOSURE_AREA_BEGIN_X; x < TOWN_EXPOSURE_AREA_END_X; x++)
 	{
 		for (uint32_t y = TOWN_EXPOSURE_AREA_BEGIN_Y; y < TOWN_EXPOSURE_AREA_END_Y; y++)
@@ -138,7 +152,7 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 		}
 	}
 
-	//clear tree-free zone from trees
+	/* clear tree-free zone from trees */
 	for (uint32_t x = TOWN_TREEFREE_AREA_BEGIN_X; x < TOWN_TREEFREE_AREA_END_X; x++)
 	{
 		for (uint32_t y = TOWN_TREEFREE_AREA_BEGIN_Y; y < TOWN_TREEFREE_AREA_END_Y; y++)
@@ -147,10 +161,10 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 		}
 	}
 
-	//set headquarter
+	/* set headquarter */
 	new_town.field[TOWN_HQ_SPAWN_X][TOWN_HQ_SPAWN_Y] = FIELD_ADMINISTRATION;
 
-	//save town to file
+	/* save town to file */
 	if(Town_save(&new_town, p_town_name) == 0)
 		printf(MSG_FILE_TOWN_CREATE);
 }
@@ -162,7 +176,7 @@ void cmd_list_towns()
 	struct dirent *d_ent;
 	char *substr = NULL;
 
-	//open town dir
+	/* open town dir */
 	if (get_town_path(path) != 0)
 		return;
 
@@ -170,16 +184,16 @@ void cmd_list_towns()
 
 	if (dir == NULL)
 	{
-		printf(MSG_ERR_DIR_TOWNS);
+		printf(MSG_ERR_DIR_TOWNS, MSG_ERR);
 	}
 
-	//for all dirents
+	/* for all dirents */
 	while ((d_ent = readdir(dir)) != NULL)
 	{
-		//see if name contains filetype
+		/* see if name contains filetype */
 		substr = strstr(d_ent->d_name, FILETYPE_TOWN);
 
-		//if so, print and reset substr
+		/* if so, print and reset substr */
 		if (substr != NULL)
 		{
 			printf("%s\n", d_ent->d_name);
@@ -198,13 +212,13 @@ void cmd_connect(char *p_town_name)
 	struct Town town;
 	struct Config cfg;
 
-	//load game
+	/* load game */
 	Town_new(&town);
 
 	if (Town_load(&town, p_town_name) != 0)
 		return;
 
-	//set cfg to std values (set values will overwrite std)
+	/* set cfg to std values (set values will overwrite std) */
 	strcpy(cfg.path_font, CFG_STD_PATH_FONT);
 	cfg.gfx_framerate = CFG_STD_GFX_FRAMERATE;
 	cfg.gfx_window_x = CFG_STD_GFX_WINDOW_X;
@@ -223,19 +237,19 @@ void cmd_connect(char *p_town_name)
 	cfg.field_border_blue = CFG_STD_FIELD_BORDER_BLUE;
 	cfg.field_border_alpha = CFG_STD_FIELD_BORDER_ALPHA;
 
-	//read config
+	/* read config */
 	Config_load(&cfg);
 
-	//prepare gameplay data
+	/* prepare gameplay data */
 	game.town_name = p_town_name;
 	game.town = &town;
 	game.cfg = &cfg;
 	game.game_state = GS_ACTIVE;
 
-	//start game part
+	/* start game part */
 	Game_main(&game);
 
-	//if gameover print reason
+	/* if gameover print reason */
 	switch (game.game_state)
 	{
 	case GS_FAILURE_COST:
@@ -246,7 +260,7 @@ void cmd_connect(char *p_town_name)
 		break;
 	}
 
-	//end print
+	/* end print */
 	printf(MSG_CONNECTION_CLOSED);
 }
 
@@ -254,17 +268,17 @@ void cmd_delete(char *p_town_name)
 {
 	char filepath[FILEPATH_MAX_LEN] = "";
 
-	//get path
+	/* get path */
 	if (get_town_path(filepath) != 0)
 		return;
 
-	//glue file part to path
+	/* glue file part to path */
 	strcat(filepath, p_town_name);
 	strcat(filepath, ".");
 	strcat(filepath, FILETYPE_TOWN);
 
 	if (remove(filepath) != 0)
-		printf(MSG_ERR_FILE_TOWN_DELETE);
+		printf(MSG_ERR_FILE_TOWN_DELETE, MSG_ERR);
 
 	else
 		printf(MSG_FILE_TOWN_DELETE);

@@ -50,7 +50,7 @@ install:
 	mkdir -p ${INSTALL_ASSETS_DIR}
 	mkdir -p ${INSTALL_TEXTURES_DIR}
 	cp assets/textures/* ${INSTALL_TEXTURES_DIR}
-	cp data/${APP_NAME}_1024.png ${INSTALL_TEXTURES_DIR}/${APP_NAME}.png
+	cp data/${APP_NAME}_1024.png ${INSTALL_TEXTURES_DIR}/icon.png
 
 	#move data
 	mkdir -p ${INSTALL_DESKTOP_DIR}

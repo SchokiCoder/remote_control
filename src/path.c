@@ -27,16 +27,17 @@
 #include "path.h"
 
 int32_t get_base_path(char *p_out)
-{  
+{
 	int32_t rc;
-	
-	//get path
+
+	/* get path */
 	strcat(p_out, getenv("HOME"));
 	strcat(p_out, SLASH);
-	strcat(p_out, PATH_BASE);
+	strcat(p_out, ".");
+	strcat(p_out, APP_NAME);
 	strcat(p_out, SLASH);
 
-	//in case, create dir
+	/* in case, create dir */
 	errno = 0;
 
 	#ifdef _WIN32
@@ -49,7 +50,7 @@ int32_t get_base_path(char *p_out)
 	{
 		if (errno != EEXIST)
 		{
-			printf(MSG_ERR_DIR_BASE);
+			printf(MSG_ERR_DIR_BASE, MSG_ERR);
 			return 1;
 		}
 	}
@@ -61,30 +62,30 @@ int32_t get_town_path(char *p_out)
 {
 	int32_t rc;
 
-	//get base path
+	/* get base path */
 	rc = get_base_path(p_out);
 
 	if (rc != 0)
 		return rc;
 
-	//get path
+	/* get path */
 	strcat(p_out, PATH_TOWNS);
 	strcat(p_out, SLASH);
 
-	//in case, create dir
+	/* in case, create dir */
 	errno = 0;
-	
+
 	#ifdef _WIN32
 		rc = mkdir(p_out);
 	#else
 		rc = mkdir(p_out, S_IRWXU);
 	#endif
-	
+
 	if (rc == -1)
 	{
 		if (errno != EEXIST)
 		{
-			printf(MSG_ERR_DIR_TOWNS_CREATE);
+			printf(MSG_ERR_DIR_TOWNS_CREATE, MSG_ERR);
 			return 1;
 		}
 	}
@@ -96,13 +97,13 @@ int32_t get_config_path(char *p_out)
 {
 	int32_t rc;
 
-	//get base path
+	/* get base path */
 	rc = get_base_path(p_out);
 
 	if (rc != 0)
 		return rc;
 
-	//get path
+	/* get path */
 	strcat(p_out, PATH_CONFIG);
 
 	return 0;

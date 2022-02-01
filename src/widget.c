@@ -33,10 +33,10 @@ int32_t Widget_generate_sprite(
 {
 	int32_t rc_gen = 0;
 
-	//gen sprite
+	/* gen sprite */
 	rc_gen = Sprite_from_text(&self->sprite, p_renderer, self->text, p_font, p_font_color);
 
-	//if successful, update width and height of widget
+	/* if successful, update width and height of widget */
 	if (rc_gen == 0)
 	{
 		self->rect.w = self->sprite.surface->w;

@@ -26,8 +26,8 @@
 #include "commands.h"
 
 int main(int argc, char **argv)
-{		
-	//if no args given
+{
+	/* if no args given */
 	if (argc < 2)
 	{
 		uint32_t option = 0;
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 
 		while (option != 7)
 		{
-			//ask
+			/* ask */
 			printf("\nwhat do you wish to do?\n"
 				"1) help\n"
 				"2) list available administrators\n"
@@ -49,13 +49,13 @@ int main(int argc, char **argv)
 				"7) exit\n");
 			scanf("%s", input);
 
-			//parse
+			/* parse */
 			option = strtol(input, NULL, 10);
 
 			switch(option)
 			{
 			case 1:
-				cmd_help_outgame();
+				cmd_help_menu();
 				break;
 
 			case 2:
@@ -81,21 +81,21 @@ int main(int argc, char **argv)
 				printf("Please enter the town name now: ");
 				scanf("%s", input);
 				while (getchar() != '\n');
-				
+
 				cmd_connect(input);
 				break;
 
 			case 6:
-				//confirm deletion
+				/* confirm deletion */
 				printf("Are you sure, to delete the town's files? (y)\n");
 				scanf("%s", input);
 
 				if (input[0] != 'y')
 					break;
 
-				//delete
+				/* delete */
 				printf("Please enter the town name now: ");
-				scanf("%s", input);				  
+				scanf("%s", input);
 
 				cmd_delete(input);
 				break;
@@ -113,25 +113,25 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	//interpret command
+	/* interpret command */
 	if ((strcmp(argv[1], CMD_HELP) == 0) |
 		(strcmp(argv[1], CMD_HELP_LONG) == 0))
 	{
-		//check argc max
+		/* check argc max */
 		if (argc > 2)
 		{
-			printf(MSG_WARN_ARG_MAX);
+			printf(MSG_WARN_ARG_MAX, MSG_WARN);
 		}
-		
-		cmd_help_outgame();
+
+		cmd_help_full();
 	}
 	else if ((strcmp(argv[1], CMD_LIST_ADMINS) == 0) |
 		(strcmp(argv[1], CMD_LIST_ADMINS_LONG) == 0))
 	{
-		//check argc max
+		/* check argc max */
 		if (argc > 2)
 		{
-			printf(MSG_WARN_ARG_MAX);
+			printf(MSG_WARN_ARG_MAX, MSG_WARN);
 		}
 
 		cmd_list_admins();
@@ -139,31 +139,31 @@ int main(int argc, char **argv)
 	else if ((strcmp(argv[1], CMD_HIRE_ADMIN) == 0) |
 		(strcmp(argv[1], CMD_HIRE_ADMIN_LONG) == 0))
 	{
-		//check argc min
+		/* check argc min */
 		if (argc < 4)
 		{
-			printf(MSG_ERR_ARG_MIN);
+			printf(MSG_ERR_ARG_MIN, MSG_ERR);
 			return 0;
 		}
 
-		//check argc max
+		/* check argc max */
 		if (argc > 4)
 		{
-			printf(MSG_WARN_ARG_MAX);
+			printf(MSG_WARN_ARG_MAX, MSG_WARN);
 		}
-		
-		//parse args
+
+		/* parse args */
 		int32_t admin_id = strtol(argv[2], NULL, 10);
-		
+
 		cmd_hire_admin(admin_id, argv[3]);
 	}
 	else if ((strcmp(argv[1], CMD_LIST_TOWNS) == 0) |
 		(strcmp(argv[1], CMD_LIST_TOWNS_LONG) == 0))
 	{
-		//check argc max
+		/* check argc max */
 		if (argc > 2)
 		{
-			printf(MSG_WARN_ARG_MAX);
+			printf(MSG_WARN_ARG_MAX, MSG_WARN);
 		}
 
 		cmd_list_towns();
@@ -171,42 +171,42 @@ int main(int argc, char **argv)
 	else if ((strcmp(argv[1], CMD_CONNECT) == 0) |
 		(strcmp(argv[1], CMD_CONNECT_LONG) == 0))
 	{
-		//check argc min
+		/* check argc min */
 		if (argc < 3)
 		{
-			printf(MSG_ERR_ARG_MIN);
+			printf(MSG_ERR_ARG_MIN, MSG_ERR);
 			return 0;
 		}
 
-		//check argc max
+		/* check argc max */
 		if (argc > 3)
 		{
-			printf(MSG_WARN_ARG_MAX);
+			printf(MSG_WARN_ARG_MAX, MSG_WARN);
 		}
 
 		cmd_connect(argv[2]);
 	}
 	else if (strcmp(argv[1], CMD_DELETE_TOWN_LONG) == 0)
 	{
-		//check argc min
+		/* check argc min */
 		if (argc < 3)
 		{
-			printf(MSG_ERR_ARG_MIN);
+			printf(MSG_ERR_ARG_MIN, MSG_ERR);
 			return 0;
 		}
 
-		//check argc max
+		/* check argc max */
 		if (argc > 3)
 		{
-			printf(MSG_WARN_ARG_MAX);
+			printf(MSG_WARN_ARG_MAX, MSG_WARN);
 		}
-		
+
 		cmd_delete(argv[2]);
 	}
 	else
 	{
-		printf(MSG_ERR_UNKNOWN_COMMAND);
+		printf(MSG_ERR_UNKNOWN_COMMAND, MSG_ERR, CMD_HELP_LONG);
 	}
-	
+
 	return 0;
 }

@@ -19,46 +19,46 @@
 #ifndef DEF_HUD_H
 #define DEF_HUD_H
 
-#define HUD_AREA_X2				0.9f
-#define HUD_AREA_Y				0.1f
-#define HUD_AREA_H				0.8f
+static const float HUD_AREA_X2 =	0.9f;
+static const float HUD_AREA_Y =		0.1f;
+static const float HUD_AREA_H =		0.8f;
 
-#define HUD_FIELD_CONTENT_SIZE	0.95f
+static const float HUD_FIELD_CONTENT_SIZE =	0.95f;
 
-#define HUD_FONT_SIZE			14.0f
+static const float HUD_FONT_SIZE =	14.0f;
 
-#define HUD_LBL_TIME_DAY_TEXT	"day:"
-#define HUD_LBL_TIME_HOUR_TEXT	"at:"
-#define HUD_LBL_MONEY_TEXT		"money:"
-#define HUD_BTN_PASS_TEXT		"->"
+static const char HUD_LBL_TIME_DAY_TEXT[] =		"day:";
+static const char HUD_LBL_TIME_HOUR_TEXT[] =	"at:";
+static const char HUD_LBL_MONEY_TEXT[] =		"money:";
+static const char HUD_BTN_PASS_TEXT[] =			"->";
 
-#define HUD_LBL_TIME_DAY_X				0.005f
-#define HUD_LBL_TIME_DAY_Y				0.005f
-#define HUD_LBL_TIME_DAY_VAL_X_DIST		0.01f			/* distance from previous widget on the left */
-#define HUD_LBL_TIME_DAY_VAL_Y			HUD_LBL_TIME_DAY_Y
-#define HUD_LBL_TIME_HOUR_X				HUD_LBL_TIME_DAY_X
-#define HUD_LBL_TIME_HOUR_Y				(HUD_LBL_TIME_DAY_Y + 0.025f)
-#define HUD_LBL_TIME_HOUR_VAL_X_DIST	HUD_LBL_TIME_DAY_VAL_X_DIST
-#define HUD_LBL_TIME_HOUR_VAL_Y			HUD_LBL_TIME_HOUR_Y
+static const float HUD_LBL_TIME_DAY_X =				0.005f;
+static const float HUD_LBL_TIME_DAY_Y =				0.005f;
+static const float HUD_LBL_TIME_DAY_VAL_X_DIST =	0.01f;
+static const float HUD_LBL_TIME_DAY_VAL_Y =			HUD_LBL_TIME_DAY_Y;
+static const float HUD_LBL_TIME_HOUR_X =			HUD_LBL_TIME_DAY_X;
+static const float HUD_LBL_TIME_HOUR_Y =			(HUD_LBL_TIME_DAY_Y + 0.025f);
+static const float HUD_LBL_TIME_HOUR_VAL_X_DIST =	HUD_LBL_TIME_DAY_VAL_X_DIST;
+static const float HUD_LBL_TIME_HOUR_VAL_Y =		HUD_LBL_TIME_HOUR_Y;
 
-#define HUD_LBL_MONEY_X				0.15f
-#define HUD_LBL_MONEY_Y				HUD_LBL_TIME_DAY_Y
-#define HUD_LBL_MONEY_VAL_X_DIST	HUD_LBL_TIME_DAY_VAL_X_DIST
-#define HUD_LBL_MONEY_VAL_Y			HUD_LBL_MONEY_Y
+static const float HUD_LBL_MONEY_X =			0.15f;
+static const float HUD_LBL_MONEY_Y =			HUD_LBL_TIME_DAY_Y;
+static const float HUD_LBL_MONEY_VAL_X_DIST =	HUD_LBL_TIME_DAY_VAL_X_DIST;
+static const float HUD_LBL_MONEY_VAL_Y =		HUD_LBL_MONEY_Y;
 
-#define HUD_BTN_CONSTRUCT_X 0.05f
-#define HUD_BTN_CONSTRUCT_Y 0.30f
-#define HUD_BTN_CONSTRUCT_W 0.05f
-#define HUD_BTN_CONSTRUCT_H 0.05f
+static const float HUD_BTN_CONSTRUCT_X =	0.05f;
+static const float HUD_BTN_CONSTRUCT_Y =	0.30f;
+static const float HUD_BTN_CONSTRUCT_W =	0.05f;
+static const float HUD_BTN_CONSTRUCT_H =	0.05f;
 
-#define HUD_BTN_PASS_X	0.05f
-#define HUD_BTN_PASS_Y	0.4f
-#define HUD_BTN_PASS_W	0.05f
-#define HUD_BTN_PASS_H	0.05f
+static const float HUD_BTN_PASS_X =	0.05f;
+static const float HUD_BTN_PASS_Y =	0.4f;
+static const float HUD_BTN_PASS_W =	0.05f;
+static const float HUD_BTN_PASS_H =	0.05f;
 
-#define HUD_BTN_CONSTRUCT_QUARRY_X	0.05f
-#define HUD_BTN_CONSTRUCT_QUARRY_Y	0.90f
-#define HUD_BTN_CONSTRUCT_QUARRY_W	0.05f
-#define HUD_BTN_CONSTRUCT_QUARRY_H	0.05f
+static const float HUD_BTN_CONSTRUCT_QUARRY_X =	0.05f;
+static const float HUD_BTN_CONSTRUCT_QUARRY_Y =	0.90f;
+static const float HUD_BTN_CONSTRUCT_QUARRY_W =	0.05f;
+static const float HUD_BTN_CONSTRUCT_QUARRY_H =	0.05f;
 
 #endif /* DEF_HUD_H */

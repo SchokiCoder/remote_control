@@ -19,27 +19,28 @@
 #ifndef DEF_GAMEPLAY_H
 #define DEF_GAMEPLAY_H
 
-//town generation
-#define TOWN_WIDTH					15
-#define TOWN_HEIGHT					15
-#define TOWN_EXPOSURE_AREA_BEGIN_X	4
-#define TOWN_EXPOSURE_AREA_BEGIN_Y	4
-#define TOWN_EXPOSURE_AREA_END_X	11
-#define TOWN_EXPOSURE_AREA_END_Y	11
-#define TOWN_TREEFREE_AREA_BEGIN_X	5
-#define TOWN_TREEFREE_AREA_BEGIN_Y	5
-#define TOWN_TREEFREE_AREA_END_X	10
-#define TOWN_TREEFREE_AREA_END_Y	10
-#define TOWN_GEN_TREE_THRESHOLD		40	/* from 0 to 100 */
-#define TOWN_HQ_SPAWN_X				7
-#define TOWN_HQ_SPAWN_Y				7
-#define TOWN_TIME_BEGIN				6	/* round 0 plays at 06:00 am */
-#define TOWN_START_MONEY			2000
+/* town generation */
+#define TOWN_WIDTH	15
+#define TOWN_HEIGHT	15
 
-//building system
+static const uint32_t TOWN_EXPOSURE_AREA_BEGIN_X =	4;
+static const uint32_t TOWN_EXPOSURE_AREA_BEGIN_Y =	4;
+static const uint32_t TOWN_EXPOSURE_AREA_END_X =	11;
+static const uint32_t TOWN_EXPOSURE_AREA_END_Y =	11;
+static const uint32_t TOWN_TREEFREE_AREA_BEGIN_X =	5;
+static const uint32_t TOWN_TREEFREE_AREA_BEGIN_Y =	5;
+static const uint32_t TOWN_TREEFREE_AREA_END_X =	10;
+static const uint32_t TOWN_TREEFREE_AREA_END_Y =	10;
+static const uint32_t TOWN_GEN_TREE_THRESHOLD =		40;	/* from 0 to 100 */
+static const uint32_t TOWN_HQ_SPAWN_X =				7;
+static const uint32_t TOWN_HQ_SPAWN_Y =				7;
+static const uint32_t TOWN_TIME_BEGIN =				6;	/* round 0 plays at 06:00 am */
+static const uint32_t TOWN_START_MONEY =			2000;
+
+/* building system */
 #define TOWN_MAX_CONSTRUCTIONS		(TOWN_WIDTH * TOWN_HEIGHT)
 
-//fields
+/* fields */
 enum Field
 {
 	FIELD_EMPTY,
@@ -53,7 +54,7 @@ enum Field
 	FIELD_QUARRY
 };
 
-//construction costs
+/* construction costs */
 static const uint32_t FIELD_CONSTRUCTION_COST[] =
 {
 	0,	/* empty */
@@ -67,7 +68,7 @@ static const uint32_t FIELD_CONSTRUCTION_COST[] =
 	20	/* quarry */
 };
 
-//construction time
+/* construction time */
 static const uint32_t FIELD_CONSTRUCTION_TIME[] =
 {
 	0,	/* empty */
@@ -81,7 +82,7 @@ static const uint32_t FIELD_CONSTRUCTION_TIME[] =
 	2	/* quarry */
 };
 
-//running costs
+/* running costs */
 static const uint32_t FIELD_RUNNING_COST[] =
 {
 	0,	/* empty */

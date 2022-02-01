@@ -39,41 +39,41 @@ int32_t Config_load(struct Config *self)
 	char cfg_settings[CONFIG_MAX_LINES][CONFIG_MAX_SETTING_LEN];
 	char cfg_values[CONFIG_MAX_LINES][CONFIG_MAX_VALUE_LEN];
 
-	//get path
+	/* get path */
 	if (get_config_path(filepath) != 0)
 		return 1;
 
-	//open file
+	/* open file */
 	f = fopen(filepath, "r");
 
 	if (f == NULL)
 	{
-		printf(MSG_WARN_CONFIG_LOAD);
+		printf(MSG_WARN_CONFIG_LOAD, MSG_WARN);
 		return 2;
 	}
 
-	//read
+	/* read */
 	while ((buf = fgetc(f)) != EOF)
 	{
 		switch (buf)
 		{
 		case ' ':
-			//ignore spaces
+			/* ignore spaces */
 			break;
 
 		case '=':
-			//start reading value, add '\0' to setting
+			/* start reading value, add '\0' to setting */
 			read_setting = false;
 			cfg_settings[line][setting_len] = '\0';
 			setting_len++;
 			break;
 
 		case '\n':
-			//add '\0' to value
+			/* add '\0' to value */
 			cfg_values[line][value_len] = '\0';
 			value_len++;
 
-			//jump to next line, reset values
+			/* jump to next line, reset values */
 			line++;
 			read_setting = true;
 			setting_len = 0;
@@ -81,16 +81,16 @@ int32_t Config_load(struct Config *self)
 			break;
 
 		default:
-			//if comma did not yet occur
+			/* if comma did not yet occur */
 			if (read_setting == true)
 			{
-				//read setting-name
+				/* read setting-name */
 				cfg_settings[line][setting_len] = (unsigned char) buf;
 				setting_len++;
 			}
 			else
 			{
-				//else read value
+				/* else read value */
 				cfg_values[line][value_len] = (unsigned char) buf;
 				value_len++;
 			}
@@ -98,16 +98,16 @@ int32_t Config_load(struct Config *self)
 		}
 	}
 
-	//if last line is empty, decrement line counter
+	/* if last line is empty, decrement line counter */
 	if (strcmp(cfg_settings[line], "") == 0)
 	{
 		line--;
 	}
 
-	//convert strings into values
+	/* convert strings into values */
 	for (uint32_t i = 0; i < (line + 1); i++)
 	{
-		//etc
+		/* etc */
 		if (strcmp(cfg_settings[i], CFG_SETTING_PATH_FONT) == 0)
 		{
 			strcpy(self->path_font, cfg_values[i]);
@@ -117,7 +117,7 @@ int32_t Config_load(struct Config *self)
 			self->gfx_framerate = strtof(cfg_values[i], NULL);
 		}
 
-		//window pos, size
+		/* window pos, size */
 		else if (strcmp(cfg_settings[i], CFG_SETTING_GFX_WINDOW_X) == 0)
 		{
 			self->gfx_window_x = strtol(cfg_values[i], NULL, 10);
@@ -135,7 +135,7 @@ int32_t Config_load(struct Config *self)
 			self->gfx_window_h = strtol(cfg_values[i], NULL, 10);
 		}
 
-		//bg color
+		/* bg color */
 		else if (strcmp(cfg_settings[i], CFG_SETTING_BG_RED) == 0)
 		{
 			self->bg_red = strtoul(cfg_values[i], NULL, 10);
@@ -149,7 +149,7 @@ int32_t Config_load(struct Config *self)
 			self->bg_blue = strtoul(cfg_values[i], NULL, 10);
 		}
 
-		//font color
+		/* font color */
 		else if (strcmp(cfg_settings[i], CFG_SETTING_FONT_RED) == 0)
 		{
 			self->font_red = strtoul(cfg_values[i], NULL, 10);
@@ -167,7 +167,7 @@ int32_t Config_load(struct Config *self)
 			self->font_alpha = strtoul(cfg_values[i], NULL, 10);
 		}
 
-		//field border color
+		/* field border color */
 		else if (strcmp(cfg_settings[i], CFG_SETTING_FIELD_BORDER_RED) == 0)
 		{
 			self->field_border_red = strtoul(cfg_values[i], NULL, 10);
@@ -185,10 +185,10 @@ int32_t Config_load(struct Config *self)
 			self->field_border_alpha = strtoul(cfg_values[i], NULL, 10);
 		}
 
-		//unknown option
+		/* unknown option */
 		else
 		{
-			printf(MSG_WARN_CONFIG_UNKNOWN_SETTING, cfg_settings[i]);
+			printf(MSG_WARN_CONFIG_UNKNOWN_SETTING, MSG_WARN, cfg_settings[i]);
 		}
 	}
 
@@ -203,20 +203,20 @@ int32_t Config_save(struct Config *self)
 	char filepath[FILEPATH_MAX_LEN] = "";
 	const char *delim = " = ";
 
-	//get path
+	/* get path */
 	if (get_config_path(filepath) != 0)
 		return 1;
 
-	//open
+	/* open */
 	f = fopen(filepath, "w");
 
 	if (f == NULL)
 	{
-		printf(MSG_WARN_CONFIG_SAVE);
+		printf(MSG_WARN_CONFIG_SAVE, MSG_WARN);
 		return 2;
 	}
 
-	//write - etc
+	/* write - etc */
 	fputs(CFG_SETTING_PATH_FONT, f);
 	fputs(delim, f);
 	fprintf(f, "%s", self->path_font);
@@ -227,7 +227,7 @@ int32_t Config_save(struct Config *self)
 	fprintf(f, "%f", self->gfx_framerate);
 	fputc('\n', f);
 
-	//window pos, size
+	/* window pos, size */
 	fputs(CFG_SETTING_GFX_WINDOW_X, f);
 	fputs(delim, f);
 	fprintf(f, "%i", self->gfx_window_x);
@@ -248,7 +248,7 @@ int32_t Config_save(struct Config *self)
 	fprintf(f, "%i", self->gfx_window_h);
 	fputc('\n', f);
 
-	//bg color
+	/* bg color */
 	fputs(CFG_SETTING_BG_RED, f);
 	fputs(delim, f);
 	fprintf(f, "%u", self->bg_red);
@@ -264,7 +264,7 @@ int32_t Config_save(struct Config *self)
 	fprintf(f, "%u", self->bg_blue);
 	fputc('\n', f);
 
-	//font color
+	/* font color */
 	fputs(CFG_SETTING_FONT_RED, f);
 	fputs(delim, f);
 	fprintf(f, "%u", self->font_red);
@@ -285,7 +285,7 @@ int32_t Config_save(struct Config *self)
 	fprintf(f, "%u", self->font_alpha);
 	fputc('\n', f);
 
-	//field border color
+	/* field border color */
 	fputs(CFG_SETTING_FIELD_BORDER_RED, f);
 	fputs(delim, f);
 	fprintf(f, "%u", self->field_border_red);

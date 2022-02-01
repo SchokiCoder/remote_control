@@ -28,10 +28,10 @@
 
 void Town_print(struct Town *self, char *p_town_name)
 {
-	//name
+	/* name */
 	printf("%s\n\n", p_town_name);
 
-	//exposure
+	/* exposure */
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
 		for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
@@ -44,7 +44,7 @@ void Town_print(struct Town *self, char *p_town_name)
 
 	printf("\n");
 
-	//content
+	/* content */
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
 		for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
@@ -72,11 +72,11 @@ int32_t Town_save(struct Town *self, char *p_town_name)
 	uint32_t town_width = TOWN_WIDTH;
 	uint32_t town_height = TOWN_HEIGHT;
 
-	//get path
+	/* get path */
 	if (get_town_path(filepath_save) != 0)
 		return 1;
 
-	//glue file part to path
+	/* glue file part to path */
 	strcat(filepath_save, p_town_name);
 	strcat(filepath_save, ".");
 
@@ -85,29 +85,29 @@ int32_t Town_save(struct Town *self, char *p_town_name)
 	strcat(filepath_save, FILETYPE_TOWN);
 	strcat(filepath_bkp, FILETYPE_BACKUP);
 
-	//if save already exists, move to backup
+	/* if save already exists, move to backup */
 	f = fopen(filepath_save, "r");
 
 	if (f != NULL)
 	{
 		if (rename(filepath_save, filepath_bkp) != 0)
 		{
-			printf(MSG_WARN_FILE_TOWN_BACKUP);
+			printf(MSG_WARN_FILE_TOWN_BACKUP, MSG_WARN);
 		}
 
 		fclose(f);
 	}
 
-	//open file
+	/* open file */
 	f = fopen(filepath_save, "w");
 
 	if (f == NULL)
 	{
-		printf(MSG_ERR_FILE_SAVE);
+		printf(MSG_ERR_FILE_SAVE, MSG_ERR);
 		return 2;
 	}
 
-	//write header
+	/* write header */
 	fwrite(&self->admin_id, sizeof(self->admin_id), 1, f);
 	fwrite(&self->round, sizeof(self->round), 1, f);
 	fwrite(&self->money, sizeof(self->money), 1, f);
@@ -115,13 +115,13 @@ int32_t Town_save(struct Town *self, char *p_town_name)
 	fwrite(&town_height, sizeof(uint32_t), 1, f);
 	fputc('\n', f);
 
-	//write exposure data
+	/* write exposure data */
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
 		fwrite(self->hidden[x], sizeof(self->hidden[x][0]), TOWN_HEIGHT, f);
 	}
 
-	//write content data
+	/* write content data */
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
 		fwrite(self->field[x], sizeof(self->field[x][0]), TOWN_HEIGHT, f);
@@ -129,11 +129,11 @@ int32_t Town_save(struct Town *self, char *p_town_name)
 
 	fputc('\n', f);
 
-	//write construction list data
+	/* write construction list data */
 	fwrite(&self->construction_count, sizeof(self->construction_count), 1, f);
 	fputc('\n', f);
 
-	//write construction list
+	/* write construction list */
 	for (uint32_t i = 0; i < self->construction_count; i++)
 	{
 		fwrite(&self->constructions[i].field, sizeof(self->constructions[i].field), 1, f);
@@ -142,10 +142,10 @@ int32_t Town_save(struct Town *self, char *p_town_name)
 		fwrite(&self->constructions[i].progress, sizeof(self->constructions[i].progress), 1, f);
 	}
 
-	//check and done
+	/* check and done */
 	if (ferror(f))
 	{
-		printf(MSG_ERR_FILE_TOWN_SAVE);
+		printf(MSG_ERR_FILE_TOWN_SAVE, MSG_ERR);
 		fclose(f);
 		return 3;
 	}
@@ -160,25 +160,25 @@ int32_t Town_load(struct Town *self, char *p_town_name)
 	char filepath[FILEPATH_MAX_LEN] = "";
 	uint32_t town_width, town_height;
 
-	//get path
+	/* get path */
 	if (get_town_path(filepath) != 0)
 		return 1;
 
-	//glue file part to path
+	/* glue file part to path */
 	strcat(filepath, p_town_name);
 	strcat(filepath, ".");
 	strcat(filepath, FILETYPE_TOWN);
 
-	//open
+	/* open */
 	f = fopen(filepath, "r");
 
 	if (f == NULL)
 	{
-		printf(MSG_ERR_FILE_LOAD);
+		printf(MSG_ERR_FILE_LOAD, MSG_ERR);
 		return 2;
 	}
 
-	//read header
+	/* read header */
 	fread(&self->admin_id, sizeof(self->admin_id), 1, f);
 	fread(&self->round, sizeof(self->round), 1, f);
 	fread(&self->money, sizeof(self->money), 1, f);
@@ -186,34 +186,34 @@ int32_t Town_load(struct Town *self, char *p_town_name)
 	fread(&town_height, sizeof(town_height), 1, f);
 	fgetc(f);
 
-	//check header info
+	/* check header info */
 	if (
 		!((town_width == TOWN_WIDTH) &
 		(town_height == TOWN_HEIGHT))
 	   )
 	{
-		printf(MSG_ERR_FILE_TOWN_CORRUPT);
+		printf(MSG_ERR_FILE_TOWN_CORRUPT, MSG_ERR);
 		return 3;
 	}
 
-	//read exposure data
+	/* read exposure data */
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
 		fread(self->hidden[x], sizeof(self->hidden[x][0]), TOWN_HEIGHT, f);
 	}
 
-	//read content data
+	/* read content data */
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
 		fread(self->field[x], sizeof(self->field[x][0]), TOWN_HEIGHT, f);
 	}
 	fgetc(f);
 
-	//read construction list data
+	/* read construction list data */
 	fread(&self->construction_count, sizeof(self->construction_count), 1, f);
 	fgetc(f);
 
-	//read construction list
+	/* read construction list */
 	for (uint32_t i = 0; i < self->construction_count; i++)
 	{
 		fread(&self->constructions[i].field, sizeof(self->constructions[i].field), 1, f);
@@ -222,10 +222,10 @@ int32_t Town_load(struct Town *self, char *p_town_name)
 		fread(&self->constructions[i].progress, sizeof(self->constructions[i].progress), 1, f);
 	}
 
-	//check and done
+	/* check and done */
 	if (ferror(f))
 	{
-		printf(MSG_ERR_FILE_TOWN_LOAD);
+		printf(MSG_ERR_FILE_TOWN_LOAD, MSG_ERR);
 		fclose(f);
 		return 4;
 	}
@@ -237,12 +237,12 @@ int32_t Town_load(struct Town *self, char *p_town_name)
 
 void Town_construction_list_remove(struct Town *self, uint32_t p_index)
 {
-	//beginning at index, for each entry overwrite with next entry
+	/* beginning at index, for each entry overwrite with next entry */
 	for (uint32_t i = p_index; i < self->construction_count; i++)
 	{
 		self->constructions[i] = self->constructions[i + 1];
 	}
 
-	//decrement count
+	/* decrement count */
 	self->construction_count--;
 }
