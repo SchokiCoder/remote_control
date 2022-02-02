@@ -30,12 +30,15 @@
 
 struct Game;
 
+/* describes how the hud should react to the mouse hovering on the area */
 enum HudHoverMode
 {
 	HHM_NONE,
-	HHM_CONSTRUCT
+	HHM_CONSTRUCT,
+	HHM_DECONSTRUCT
 };
 
+/* describes which menu is shown */
 enum HudState
 {
 	HS_NORMAL,
@@ -54,9 +57,12 @@ struct Hud
 	enum HudState state;
 	enum HudHoverMode hover_mode;
 	SDL_Point hover_field;
+
 	enum Field hover_construct;
 	SDL_Texture *texture_hover_construct;
 	SDL_Rect rect_hover_construct;
+
+	SDL_Rect rect_hover_deconstruct;
 
 	/* widgets */
 	struct Widget lbl_time_day;
@@ -66,6 +72,7 @@ struct Hud
 	struct Widget lbl_money;
 	struct Widget lbl_money_val;
 	struct Widget btn_construct;
+	struct Widget btn_deconstruct;
 	struct Widget btn_pass;
 
 	/* construct menu widgets */
@@ -83,6 +90,9 @@ struct Hud
 	SDL_RendererFlip flips_field[TOWN_WIDTH][TOWN_HEIGHT];
 
 	/* shared sprites */
+	struct Sprite spr_hud_construct;
+	struct Sprite spr_hud_deconstruct;
+
 	struct Sprite spr_ground;
 	struct Sprite spr_hidden;
 	struct Sprite spr_trees[TOWN_TREE_VARIETY_COUNT];

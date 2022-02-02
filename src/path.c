@@ -31,11 +31,8 @@ int32_t get_base_path(char *p_out)
 	int32_t rc;
 
 	/* get path */
-	strcat(p_out, getenv("HOME"));
-	strcat(p_out, SLASH);
-	strcat(p_out, ".");
-	strcat(p_out, APP_NAME);
-	strcat(p_out, SLASH);
+	sprintf(p_out, PATH_BASE, getenv("HOME"), SLASH, APP_NAME);
+	strncat(p_out, SLASH, (FILEPATH_MAX_LEN - strlen(p_out)));
 
 	/* in case, create dir */
 	errno = 0;
@@ -69,8 +66,8 @@ int32_t get_town_path(char *p_out)
 		return rc;
 
 	/* get path */
-	strcat(p_out, PATH_TOWNS);
-	strcat(p_out, SLASH);
+	strncat(p_out, PATH_TOWNS, (FILEPATH_MAX_LEN - strlen(p_out)));
+	strncat(p_out, SLASH, (FILEPATH_MAX_LEN - strlen(p_out)));
 
 	/* in case, create dir */
 	errno = 0;
@@ -104,7 +101,7 @@ int32_t get_config_path(char *p_out)
 		return rc;
 
 	/* get path */
-	strcat(p_out, PATH_CONFIG);
+	strncat(p_out, PATH_CONFIG, (FILEPATH_MAX_LEN - strlen(p_out)));
 
 	return 0;
 }

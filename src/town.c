@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "definitions/def_app.h"
 #include "definitions/def_gameplay.h"
 #include "definitions/def_files.h"
 #include "definitions/def_messages.h"
@@ -77,13 +78,13 @@ int32_t Town_save(struct Town *self, char *p_town_name)
 		return 1;
 
 	/* glue file part to path */
-	strcat(filepath_save, p_town_name);
-	strcat(filepath_save, ".");
+	strncat(filepath_save, p_town_name, (FILEPATH_MAX_LEN - strlen(filepath_save)));
+	strncat(filepath_save, ".", (FILEPATH_MAX_LEN - strlen(filepath_save)));
 
-	strcpy(filepath_bkp, filepath_save);
+	strncpy(filepath_bkp, filepath_save, FILEPATH_MAX_LEN);
 
-	strcat(filepath_save, FILETYPE_TOWN);
-	strcat(filepath_bkp, FILETYPE_BACKUP);
+	strncat(filepath_save, FILETYPE_TOWN, (FILEPATH_MAX_LEN - strlen(filepath_save)));
+	strncat(filepath_bkp, FILETYPE_BACKUP, (FILEPATH_MAX_LEN - strlen(filepath_save)));
 
 	/* if save already exists, move to backup */
 	f = fopen(filepath_save, "r");
@@ -108,6 +109,9 @@ int32_t Town_save(struct Town *self, char *p_town_name)
 	}
 
 	/* write header */
+	fwrite(&APP_MAJOR, sizeof(APP_MAJOR), 1, f);
+	fwrite(&APP_MINOR, sizeof(APP_MINOR), 1, f);
+	fwrite(&APP_PATCH, sizeof(APP_PATCH), 1, f);
 	fwrite(&self->admin_id, sizeof(self->admin_id), 1, f);
 	fwrite(&self->round, sizeof(self->round), 1, f);
 	fwrite(&self->money, sizeof(self->money), 1, f);
@@ -159,15 +163,16 @@ int32_t Town_load(struct Town *self, char *p_town_name)
 	FILE *f;
 	char filepath[FILEPATH_MAX_LEN] = "";
 	uint32_t town_width, town_height;
+	uint32_t file_major, file_minor, file_patch;
 
 	/* get path */
 	if (get_town_path(filepath) != 0)
 		return 1;
 
 	/* glue file part to path */
-	strcat(filepath, p_town_name);
-	strcat(filepath, ".");
-	strcat(filepath, FILETYPE_TOWN);
+	strncat(filepath, p_town_name, (FILEPATH_MAX_LEN - strlen(filepath)));
+	strncat(filepath, ".", (FILEPATH_MAX_LEN - strlen(filepath)));
+	strncat(filepath, FILETYPE_TOWN, (FILEPATH_MAX_LEN - strlen(filepath)));
 
 	/* open */
 	f = fopen(filepath, "r");
@@ -179,6 +184,9 @@ int32_t Town_load(struct Town *self, char *p_town_name)
 	}
 
 	/* read header */
+	fread(&file_major, sizeof(file_major), 1, f);
+	fread(&file_minor, sizeof(file_minor), 1, f);
+	fread(&file_patch, sizeof(file_patch), 1, f);
 	fread(&self->admin_id, sizeof(self->admin_id), 1, f);
 	fread(&self->round, sizeof(self->round), 1, f);
 	fread(&self->money, sizeof(self->money), 1, f);

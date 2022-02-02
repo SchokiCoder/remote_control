@@ -28,7 +28,7 @@ static const char APP_LICENSE_NOTICE[] = "You should have received a copy of the
 static const char APP_SOURCE[] = "https://github.com/SchokiCoder/remote_control";
 
 static const uint32_t APP_MAJOR = 0;
-static const uint32_t APP_MINOR = 2;
+static const uint32_t APP_MINOR = 3;
 static const uint32_t APP_PATCH = 0;
 
 #endif /* DEF_APP_H */

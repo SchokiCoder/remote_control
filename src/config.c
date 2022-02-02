@@ -110,7 +110,7 @@ int32_t Config_load(struct Config *self)
 		/* etc */
 		if (strcmp(cfg_settings[i], CFG_SETTING_PATH_FONT) == 0)
 		{
-			strcpy(self->path_font, cfg_values[i]);
+			strncpy(self->path_font, cfg_values[i], CFG_SETTING_PATH_FONT_MAX_LEN);
 		}
 		else if (strcmp(cfg_settings[i], CFG_SETTING_GFX_FRAMERATE) == 0)
 		{

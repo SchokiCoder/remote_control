@@ -120,7 +120,7 @@ void Game_end_round(struct Game *self, struct Hud *p_hud)
 	Hud_update_money(p_hud, self->town->money);
 }
 
-void Game_build(
+void Game_construct(
 	struct Game *self,
 	SDL_Point p_coords,
 	enum Field p_field,
@@ -308,6 +308,8 @@ int32_t Game_main(struct Game *self)
 				break;
 
 			case SDL_QUIT:
+				/* save and close */
+				Town_save(self->town, self->town_name);
 				self->game_state = GS_CLOSE;
 				break;
 			}

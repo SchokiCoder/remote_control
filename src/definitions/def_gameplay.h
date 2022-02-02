@@ -71,7 +71,7 @@ static const uint32_t FIELD_CONSTRUCTION_COST[] =
 /* construction time */
 static const uint32_t FIELD_CONSTRUCTION_TIME[] =
 {
-	0,	/* empty */
+	1,	/* empty */
 	0,	/* trees */
 	0,
 	0,

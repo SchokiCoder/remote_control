@@ -49,12 +49,17 @@ int32_t Hud_new(struct Hud *self, SDL_Renderer *p_renderer, char *p_path_font)
 	Widget_new(&self->lbl_time_hour_val);
 	Widget_new(&self->lbl_money);
 	Widget_new(&self->lbl_money_val);
-	Widget_new(&self->btn_construct);
+
 	Widget_new(&self->btn_pass);
+	Widget_new(&self->btn_construct);
+	Widget_new(&self->btn_deconstruct);
 
 	Widget_new(&self->btn_construct_quarry);
 
 	/* init sprites */
+	Sprite_new(&self->spr_hud_construct);
+	Sprite_new(&self->spr_hud_deconstruct);
+
 	Sprite_new(&self->spr_ground);
 	Sprite_new(&self->spr_hidden);
 
@@ -66,11 +71,11 @@ int32_t Hud_new(struct Hud *self, SDL_Renderer *p_renderer, char *p_path_font)
 	Sprite_new(&self->spr_quarry);
 
 	/* set widget texts */
-	strcpy(self->lbl_time_day.text, HUD_LBL_TIME_DAY_TEXT);
-	strcpy(self->lbl_time_hour.text, HUD_LBL_TIME_HOUR_TEXT);
-	strcpy(self->lbl_money.text, HUD_LBL_MONEY_TEXT);
-	strcpy(self->lbl_money_val.text, "0");
-	strcpy(self->btn_pass.text, HUD_BTN_PASS_TEXT);
+	strncpy(self->lbl_time_day.text, HUD_LBL_TIME_DAY_TEXT, HUD_WIDGET_TEXT_MAX_LEN);
+	strncpy(self->lbl_time_hour.text, HUD_LBL_TIME_HOUR_TEXT, HUD_WIDGET_TEXT_MAX_LEN);
+	strncpy(self->lbl_money.text, HUD_LBL_MONEY_TEXT, HUD_WIDGET_TEXT_MAX_LEN);
+	strncpy(self->lbl_money_val.text, "0", HUD_WIDGET_TEXT_MAX_LEN);
+	strncpy(self->btn_pass.text, HUD_BTN_PASS_TEXT, HUD_WIDGET_TEXT_MAX_LEN);
 
 	return 0;
 }
@@ -98,7 +103,16 @@ void Hud_update_money(struct Hud *self, uint32_t p_money)
 int32_t Hud_load_sprites(struct Hud *self)
 {
 	/* load sprites */
-	if ((Sprite_from_image(&self->spr_ground, self->renderer, PATH_TEXTURE_GROUND) != 0) ||
+	if ((Sprite_from_image(
+			&self->spr_hud_construct,
+			self->renderer,
+			PATH_TEXTURE_HUD_CONSTRUCT) != 0) ||
+		(Sprite_from_image(
+			&self->spr_hud_deconstruct,
+			self->renderer,
+			PATH_TEXTURE_HUD_DECONSTRUCT) != 0) ||
+
+		(Sprite_from_image(&self->spr_ground, self->renderer, PATH_TEXTURE_GROUND) != 0) ||
 		(Sprite_from_image(&self->spr_hidden, self->renderer, PATH_TEXTURE_HIDDEN) != 0) ||
 		(Sprite_from_image(&self->spr_trees[0], self->renderer, PATH_TEXTURE_TREE_0) != 0) ||
 		(Sprite_from_image(&self->spr_trees[1], self->renderer, PATH_TEXTURE_TREE_1) != 0) ||
@@ -127,7 +141,9 @@ int32_t Hud_init_widgets(struct Hud *self)
 	}
 
 	/* set sprite widgets texture */
-	self->btn_construct.sprite.texture = self->spr_construction.texture;
+	self->btn_construct.sprite.texture = self->spr_hud_construct.texture;
+	self->btn_deconstruct.sprite.texture = self->spr_hud_deconstruct.texture;
+
 	self->btn_construct_quarry.sprite.texture = self->spr_quarry.texture;
 
 	return 0;
@@ -158,17 +174,23 @@ void Hud_calc(struct Hud *self,	int32_t p_window_w,	int32_t p_window_h)
 		(p_window_w * HUD_LBL_MONEY_VAL_X_DIST);
 	self->lbl_money_val.rect.y = p_window_h * HUD_LBL_MONEY_VAL_Y;
 
+	/* pass button */
+	self->btn_pass.rect.x = p_window_w * HUD_BTN_PASS_X;
+	self->btn_pass.rect.y = p_window_h * HUD_BTN_PASS_Y;
+	self->btn_pass.rect.w = p_window_w * HUD_BTN_PASS_W;
+	self->btn_pass.rect.h = p_window_h * HUD_BTN_PASS_H;
+
 	/* construct btn */
 	self->btn_construct.rect.x = p_window_w * HUD_BTN_CONSTRUCT_X;
 	self->btn_construct.rect.y = p_window_h * HUD_BTN_CONSTRUCT_Y;
 	self->btn_construct.rect.w = p_window_w * HUD_BTN_CONSTRUCT_W;
 	self->btn_construct.rect.h = p_window_h * HUD_BTN_CONSTRUCT_H;
 
-	/* pass button */
-	self->btn_pass.rect.x = p_window_w * HUD_BTN_PASS_X;
-	self->btn_pass.rect.y = p_window_h * HUD_BTN_PASS_Y;
-	self->btn_pass.rect.w = p_window_w * HUD_BTN_PASS_W;
-	self->btn_pass.rect.h = p_window_h * HUD_BTN_PASS_H;
+	/* deconstruct button */
+	self->btn_deconstruct.rect.x = p_window_w * HUD_BTN_DECONSTRUCT_X;
+	self->btn_deconstruct.rect.y = p_window_h * HUD_BTN_DECONSTRUCT_Y;
+	self->btn_deconstruct.rect.w = p_window_w * HUD_BTN_DECONSTRUCT_W;
+	self->btn_deconstruct.rect.h = p_window_h * HUD_BTN_DECONSTRUCT_H;
 
 	/* construct widgets */
 	self->btn_construct_quarry.rect.x = p_window_w * HUD_BTN_CONSTRUCT_QUARRY_X;
@@ -356,11 +378,14 @@ void Hud_draw(struct Hud *self)
 	Widget_draw(&self->lbl_money, self->renderer);
 	Widget_draw(&self->lbl_money_val, self->renderer);
 
+	/* draw pass button */
+	Widget_draw(&self->btn_pass, self->renderer);
+
 	/* construct btn */
 	Widget_draw(&self->btn_construct, self->renderer);
 
-	/* draw pass button */
-	Widget_draw(&self->btn_pass, self->renderer);
+	/* deconstruct btn */
+	Widget_draw(&self->btn_deconstruct, self->renderer);
 
 	/* draw optional menus */
 	switch (self->state)
@@ -382,6 +407,17 @@ void Hud_draw(struct Hud *self)
 	case HHM_CONSTRUCT:
         /* draw to be constructed building on hover field */
         SDL_RenderCopy(self->renderer, self->texture_hover_construct, NULL, &self->rect_hover_construct);
+		break;
+
+	case HHM_DECONSTRUCT:
+		/* draw red rect on hovered field */
+		SDL_SetRenderDrawColor(
+			self->renderer,
+			HUD_DECONSTRUCT_HOVER_R,
+			HUD_DECONSTRUCT_HOVER_G,
+			HUD_DECONSTRUCT_HOVER_B,
+			HUD_DECONSTRUCT_HOVER_A);
+		SDL_RenderFillRect(self->renderer, &self->rect_hover_deconstruct);
 	}
 }
 
@@ -414,6 +450,12 @@ void Hud_handle_click(struct Hud *self, SDL_Point p_mouse, struct Game *p_game)
 			self->state = HS_CONSTRUCT;
 		}
 
+		/* if deconstruct button pressed */
+		else if (SDL_PointInRect(&p_mouse, &self->btn_deconstruct.rect) == true)
+		{
+			self->hover_mode = HHM_DECONSTRUCT;
+		}
+
 		/* if hud has construct state, check construct widgets */
 		else if (self->state == HS_CONSTRUCT)
 		{
@@ -433,12 +475,38 @@ void Hud_handle_click(struct Hud *self, SDL_Point p_mouse, struct Game *p_game)
 			/* get field coord */
 			temp = Hud_mouse_to_field(self, p_mouse);
 
-			/* update game and hud */
-			Game_build(p_game, temp, self->hover_construct, self, self->texture_hover_construct);
-			Hud_set_field(self, temp, self->spr_construction.texture);
+			/* if field is exposed and empty */
+			if ((p_game->town->hidden[temp.x][temp.y] == false) &&
+				(p_game->town->field[temp.x][temp.y] == FIELD_EMPTY))
+			{
+				/* update game and hud */
+				Game_construct(p_game, temp, self->hover_construct, self, self->texture_hover_construct);
+				Hud_set_field(self, temp, self->spr_construction.texture);
+			}
 		}
 
 		/* stop construct mode */
+		self->hover_mode = HHM_NONE;
+		break;
+
+	case HHM_DECONSTRUCT:
+        /* if field clicked */
+		if (SDL_PointInRect(&p_mouse, &self->rect_area))
+		{
+			/* get field coord */
+			temp = Hud_mouse_to_field(self, p_mouse);
+
+			/* if field is exposed and not empty */
+			if ((p_game->town->hidden[temp.x][temp.y] == false) &&
+				(p_game->town->field[temp.x][temp.y] != FIELD_EMPTY))
+			{
+				/* update game and hud */
+				Game_construct(p_game, temp, FIELD_EMPTY, self, NULL);
+				Hud_set_field(self, temp, self->spr_construction.texture);
+			}
+		}
+
+		/* stop deconstruct mode */
 		self->hover_mode = HHM_NONE;
 		break;
 	}
@@ -446,6 +514,15 @@ void Hud_handle_click(struct Hud *self, SDL_Point p_mouse, struct Game *p_game)
 
 void Hud_handle_hover(struct Hud *self, SDL_Point p_mouse)
 {
+	/* if mouse not in area, stop */
+	if (SDL_PointInRect(&p_mouse, &self->rect_area) == false)
+	{
+		return;
+	}
+
+	/* update hover value */
+	self->hover_field = Hud_mouse_to_field(self, p_mouse);
+
 	/* react to hover modes */
 	switch (self->hover_mode)
 	{
@@ -453,21 +530,26 @@ void Hud_handle_hover(struct Hud *self, SDL_Point p_mouse)
 		break;
 
 	case HHM_CONSTRUCT:
-		/* if mouse in area */
-		if (SDL_PointInRect(&p_mouse, &self->rect_area) == true)
-		{
-			/* update hover value */
-			self->hover_field = Hud_mouse_to_field(self, p_mouse);
+		self->rect_hover_construct.x =
+			self->rects_field_content[self->hover_field.x][self->hover_field.y].x;
+		self->rect_hover_construct.y =
+			self->rects_field_content[self->hover_field.x][self->hover_field.y].y;
+		self->rect_hover_construct.w =
+			self->rects_field_content[self->hover_field.x][self->hover_field.y].w;
+		self->rect_hover_construct.h =
+			self->rects_field_content[self->hover_field.x][self->hover_field.y].h;
+		break;
 
-			self->rect_hover_construct.x =
-				self->rects_field_content[self->hover_field.x][self->hover_field.y].x;
-			self->rect_hover_construct.y =
-				self->rects_field_content[self->hover_field.x][self->hover_field.y].y;
-			self->rect_hover_construct.w =
-				self->rects_field_content[self->hover_field.x][self->hover_field.y].w;
-			self->rect_hover_construct.h =
-				self->rects_field_content[self->hover_field.x][self->hover_field.y].h;
-		}
+	case HHM_DECONSTRUCT:
+		self->rect_hover_deconstruct.x =
+			self->rects_field_content[self->hover_field.x][self->hover_field.y].x;
+		self->rect_hover_deconstruct.y =
+			self->rects_field_content[self->hover_field.x][self->hover_field.y].y;
+		self->rect_hover_deconstruct.w =
+			self->rects_field_content[self->hover_field.x][self->hover_field.y].w;
+		self->rect_hover_deconstruct.h =
+			self->rects_field_content[self->hover_field.x][self->hover_field.y].h;
+		break;
 	}
 }
 
@@ -529,10 +611,13 @@ void Hud_clear(struct Hud *self)
 	Widget_clear(&self->lbl_time_hour_val);
 	Widget_clear(&self->lbl_money);
 	Widget_clear(&self->lbl_money_val);
-	Widget_clear(&self->btn_construct);
 	Widget_clear(&self->btn_pass);
+	Widget_clear(&self->btn_construct);
+	Widget_clear(&self->btn_deconstruct);
 
 	Widget_clear(&self->btn_construct_quarry);
+
+	Sprite_clear(&self->spr_hud_deconstruct);
 
 	Sprite_clear(&self->spr_ground);
 	Sprite_clear(&self->spr_hidden);

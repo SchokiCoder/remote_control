@@ -21,7 +21,7 @@
 
 void Widget_new(struct Widget *self)
 {
-	strcpy(self->text, "");
+	strncpy(self->text, "\0", 1);
 	Sprite_new(&self->sprite);
 }
 

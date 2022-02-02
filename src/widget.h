@@ -20,11 +20,12 @@
 #define WIDGET_H
 
 #include <SDL.h>
+#include "definitions/def_hud.h"
 #include "sprite.h"
 
 struct Widget
 {
-	char text[64];
+	char text[HUD_WIDGET_TEXT_MAX_LEN];
 	SDL_Rect rect;
 	struct Sprite sprite;
 };

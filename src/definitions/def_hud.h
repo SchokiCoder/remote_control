@@ -19,6 +19,8 @@
 #ifndef DEF_HUD_H
 #define DEF_HUD_H
 
+#define HUD_WIDGET_TEXT_MAX_LEN	64
+
 static const float HUD_AREA_X2 =	0.9f;
 static const float HUD_AREA_Y =		0.1f;
 static const float HUD_AREA_H =		0.8f;
@@ -46,19 +48,29 @@ static const float HUD_LBL_MONEY_Y =			HUD_LBL_TIME_DAY_Y;
 static const float HUD_LBL_MONEY_VAL_X_DIST =	HUD_LBL_TIME_DAY_VAL_X_DIST;
 static const float HUD_LBL_MONEY_VAL_Y =		HUD_LBL_MONEY_Y;
 
+static const float HUD_BTN_PASS_X =	0.05f;
+static const float HUD_BTN_PASS_Y =	0.20f;
+static const float HUD_BTN_PASS_W =	0.05f;
+static const float HUD_BTN_PASS_H =	0.05f;
+
 static const float HUD_BTN_CONSTRUCT_X =	0.05f;
 static const float HUD_BTN_CONSTRUCT_Y =	0.30f;
 static const float HUD_BTN_CONSTRUCT_W =	0.05f;
 static const float HUD_BTN_CONSTRUCT_H =	0.05f;
 
-static const float HUD_BTN_PASS_X =	0.05f;
-static const float HUD_BTN_PASS_Y =	0.4f;
-static const float HUD_BTN_PASS_W =	0.05f;
-static const float HUD_BTN_PASS_H =	0.05f;
+static const float HUD_BTN_DECONSTRUCT_X =	0.05f;
+static const float HUD_BTN_DECONSTRUCT_Y =	0.40f;
+static const float HUD_BTN_DECONSTRUCT_W =	0.05f;
+static const float HUD_BTN_DECONSTRUCT_H =	0.05f;
 
 static const float HUD_BTN_CONSTRUCT_QUARRY_X =	0.05f;
 static const float HUD_BTN_CONSTRUCT_QUARRY_Y =	0.90f;
 static const float HUD_BTN_CONSTRUCT_QUARRY_W =	0.05f;
 static const float HUD_BTN_CONSTRUCT_QUARRY_H =	0.05f;
+
+static const uint8_t HUD_DECONSTRUCT_HOVER_R = 255;
+static const uint8_t HUD_DECONSTRUCT_HOVER_G = 100;
+static const uint8_t HUD_DECONSTRUCT_HOVER_B = 100;
+static const uint8_t HUD_DECONSTRUCT_HOVER_A = 150;
 
 #endif /* DEF_HUD_H */

@@ -93,9 +93,9 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 	if (get_town_path(filepath) != 0)
 		return;
 
-	strcat(filepath, p_town_name);
-	strcat(filepath, ".");
-	strcat(filepath, FILETYPE_TOWN);
+	strncat(filepath, p_town_name, (FILEPATH_MAX_LEN - strlen(filepath)));
+	strncat(filepath, ".", (FILEPATH_MAX_LEN - strlen(filepath)));
+	strncat(filepath, FILETYPE_TOWN, (FILEPATH_MAX_LEN - strlen(filepath)));
 
 	f = fopen(filepath, "r");
 
@@ -219,7 +219,7 @@ void cmd_connect(char *p_town_name)
 		return;
 
 	/* set cfg to std values (set values will overwrite std) */
-	strcpy(cfg.path_font, CFG_STD_PATH_FONT);
+	strncpy(cfg.path_font, CFG_STD_PATH_FONT, CFG_SETTING_PATH_FONT_MAX_LEN);
 	cfg.gfx_framerate = CFG_STD_GFX_FRAMERATE;
 	cfg.gfx_window_x = CFG_STD_GFX_WINDOW_X;
 	cfg.gfx_window_y = CFG_STD_GFX_WINDOW_Y;
@@ -252,11 +252,13 @@ void cmd_connect(char *p_town_name)
 	/* if gameover print reason */
 	switch (game.game_state)
 	{
-	case GS_FAILURE_COST:
-		printf(MSG_FAILURE_COST);
+	case GS_ACTIVE:
+		break;
+	case GS_CLOSE:
 		break;
 
-	default:
+	case GS_FAILURE_COST:
+		printf(MSG_FAILURE_COST);
 		break;
 	}
 
@@ -273,9 +275,9 @@ void cmd_delete(char *p_town_name)
 		return;
 
 	/* glue file part to path */
-	strcat(filepath, p_town_name);
-	strcat(filepath, ".");
-	strcat(filepath, FILETYPE_TOWN);
+	strncat(filepath, p_town_name, (FILEPATH_MAX_LEN - strlen(filepath)));
+	strncat(filepath, ".", (FILEPATH_MAX_LEN - strlen(filepath)));
+	strncat(filepath, FILETYPE_TOWN, (FILEPATH_MAX_LEN - strlen(filepath)));
 
 	if (remove(filepath) != 0)
 		printf(MSG_ERR_FILE_TOWN_DELETE, MSG_ERR);

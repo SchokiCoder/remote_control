@@ -45,7 +45,7 @@ struct Game
 
 void Game_end_round(struct Game *self, struct Hud *p_hud);
 
-void Game_build(
+void Game_construct(
 	struct Game *self,
 	SDL_Point p_field,
 	enum Field p_building,
