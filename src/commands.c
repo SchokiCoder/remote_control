@@ -41,6 +41,7 @@ void cmd_help_menu()
 void cmd_help_full()
 {
 	cmd_help_menu();
+
 	printf(
 		HELP_COMMANDS,
 		APP_NAME,
@@ -50,6 +51,16 @@ void cmd_help_full()
 		CMD_LIST_TOWNS_LONG, CMD_LIST_TOWNS,
 		CMD_CONNECT_LONG, CMD_CONNECT,
 		CMD_DELETE_TOWN_LONG);
+
+	printf(
+		HELP_LICENSE,
+		APP_NAME,
+		APP_MAJOR,
+		APP_MINOR,
+		APP_PATCH,
+		APP_LICENSE,
+		APP_LICENSE_NOTICE,
+		APP_SOURCE);
 }
 
 void cmd_list_admins()

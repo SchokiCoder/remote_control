@@ -64,6 +64,10 @@ struct Hud
 
 	SDL_Rect rect_hover_deconstruct;
 
+	/* bars */
+	SDL_Rect rect_bar_top;
+	SDL_Rect rect_bar_side;
+
 	/* widgets */
 	struct Widget lbl_time_day;
 	struct Widget lbl_time_day_val;

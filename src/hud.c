@@ -151,6 +151,19 @@ int32_t Hud_init_widgets(struct Hud *self)
 
 void Hud_calc(struct Hud *self,	int32_t p_window_w,	int32_t p_window_h)
 {
+	/* calc bars */
+	self->rect_bar_top.x = p_window_w * HUD_BAR_TOP_X;
+	self->rect_bar_top.y = p_window_h * HUD_BAR_TOP_Y;
+	self->rect_bar_top.w = p_window_w * HUD_BAR_TOP_W;
+	self->rect_bar_top.h =
+		((float) p_window_h * HUD_BAR_TOP_H_MARGIN * 2.0f) +
+		self->lbl_time_day.sprite.surface->h;
+
+	self->rect_bar_side.x = p_window_w * HUD_BAR_SIDE_X;
+	self->rect_bar_side.y = p_window_h * HUD_BAR_SIDE_Y;
+	self->rect_bar_side.w = p_window_w * HUD_BAR_SIDE_W;
+	self->rect_bar_side.h = p_window_h * HUD_BAR_SIDE_H;
+
 	/* calc time widgets position */
 	self->lbl_time_day.rect.x = p_window_w * HUD_LBL_TIME_DAY_X;
 	self->lbl_time_day.rect.y = p_window_h * HUD_LBL_TIME_DAY_Y;
@@ -159,7 +172,8 @@ void Hud_calc(struct Hud *self,	int32_t p_window_w,	int32_t p_window_h)
 		(p_window_w * HUD_LBL_TIME_DAY_VAL_X_DIST);
 	self->lbl_time_day_val.rect.y = p_window_h * HUD_LBL_TIME_DAY_VAL_Y;
 
-	self->lbl_time_hour.rect.x = p_window_w * HUD_LBL_TIME_HOUR_X;
+	self->lbl_time_hour.rect.x = (self->lbl_time_day_val.rect.x + self->lbl_time_day_val.rect.w) +
+		(p_window_w * HUD_LBL_TIME_HOUR_X_DIST);
 	self->lbl_time_hour.rect.y = p_window_h * HUD_LBL_TIME_HOUR_Y;
 
 	self->lbl_time_hour_val.rect.x = (self->lbl_time_hour.rect.x + self->lbl_time_hour.rect.w) +
@@ -167,7 +181,8 @@ void Hud_calc(struct Hud *self,	int32_t p_window_w,	int32_t p_window_h)
 	self->lbl_time_hour_val.rect.y = p_window_h * HUD_LBL_TIME_HOUR_VAL_Y;
 
 	/* money widgets */
-	self->lbl_money.rect.x = p_window_w * HUD_LBL_MONEY_X;
+	self->lbl_money.rect.x = (self->lbl_time_hour_val.rect.x + self->lbl_time_hour_val.rect.w) +
+		(p_window_w * HUD_LBL_MONEY_X_DIST);
 	self->lbl_money.rect.y = p_window_h * HUD_LBL_MONEY_Y;
 
 	self->lbl_money_val.rect.x = (self->lbl_money.rect.x + self->lbl_money.rect.w) +
@@ -367,6 +382,17 @@ void Hud_draw(struct Hud *self)
 			SDL_RenderDrawRect(self->renderer, &self->rects_field[x][y]);
 		}
 	} /* draw fields */
+
+	/* draw bars */
+	SDL_SetRenderDrawColor(
+		self->renderer,
+		HUD_BAR_COLOR_R,
+		HUD_BAR_COLOR_G,
+		HUD_BAR_COLOR_B,
+		HUD_BAR_COLOR_A);
+	SDL_RenderFillRect(self->renderer, &self->rect_bar_top);
+
+	SDL_RenderFillRect(self->renderer, &self->rect_bar_side);
 
 	/* draw time widgets */
 	Widget_draw(&self->lbl_time_day, self->renderer);

@@ -23,8 +23,10 @@
 
 static const char APP_NAME[] = "remote_control";
 static const char APP_LICENSE[] = "GPLv3";
-static const char APP_LICENSE_NOTICE[] = "You should have received a copy of the GNU General Public License\n" \
-"along with this program.  If not, see <https://www.gnu.org/licenses/>.\n";
+static const char APP_LICENSE_NOTICE[] =
+	"You should have received a copy of the GNU General Public License\n" \
+	"along with this program.  If not, see <https://www.gnu.org/licenses/>.\n";
+
 static const char APP_SOURCE[] = "https://github.com/SchokiCoder/remote_control";
 
 static const uint32_t APP_MAJOR = 0;

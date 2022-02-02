@@ -32,7 +32,7 @@ static const char HELP_1ST_STEPS[] = "\n" \
 "\n";
 
 static const char HELP_COMMANDS[] = "\n" \
-"Usage %s COMMAND [ARGS]\n" \
+"Usage %s [COMMAND] [ARGS]\n" \
 "\n" \
 "Commands to prepare your work:\n" \
 "  show this message:\n" \
@@ -55,7 +55,8 @@ static const char HELP_COMMANDS[] = "\n" \
 "\n";
 
 static const char HELP_LICENSE[] = "%s %u.%u.%u is licensed under the %s.\n" \
-"%sThe source code of this program is available at\n%s\n";
+"%s" \
+"The source code of this program is available at\n%s\n";
 
 /* messages */
 static const char MSG_ERR[] =		"ERROR: ";
