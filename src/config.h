@@ -19,6 +19,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <SDL.h>
 #include "definitions/def_config.h"
 
 struct Config
@@ -40,9 +41,15 @@ struct Config
 	uint8_t field_border_green;
 	uint8_t field_border_blue;
 	uint8_t field_border_alpha;
+	SDL_Keycode kb_pass;
+	SDL_Keycode kb_build_quarry;
+	SDL_Keycode kb_deconstruct;
 };
 
+void Config_new(struct Config *self);
+
 int32_t Config_load(struct Config *self);
+
 int32_t Config_save(struct Config *self);
 
 #endif /* CONFIG_H */

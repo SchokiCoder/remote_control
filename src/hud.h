@@ -132,6 +132,10 @@ void Hud_handle_click(struct Hud *self, SDL_Point p_mouse, struct Game *p_game);
 
 void Hud_handle_hover(struct Hud *self, SDL_Point p_mouse);
 
+void Hud_construct_mode(struct Hud *self, enum Field p_field, SDL_Texture *p_texture);
+
+void Hud_deconstruct_mode(struct Hud *self);
+
 void Hud_set_field(struct Hud *self, SDL_Point p_field, SDL_Texture *p_texture);
 
 SDL_Texture* Hud_get_field_texture(struct Hud *self, enum Field p_field);

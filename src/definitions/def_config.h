@@ -47,6 +47,9 @@ static const char CFG_SETTING_FIELD_BORDER_RED[] =		"field_border_red";
 static const char CFG_SETTING_FIELD_BORDER_GREEN[] =	"field_border_green";
 static const char CFG_SETTING_FIELD_BORDER_BLUE[] =		"field_border_blue";
 static const char CFG_SETTING_FIELD_BORDER_ALPHA[] =	"field_border_alpha";
+static const char CFG_SETTING_KB_PASS[] =				"kb_pass";
+static const char CFG_SETTING_KB_BUILD_QUARRY[] =		"kb_build_quarry";
+static const char CFG_SETTING_KB_DECONSTRUCT[] =		"kb_deconstruct";
 
 /* default config values */
 #ifdef _WIN32
@@ -71,5 +74,8 @@ static const uint8_t CFG_STD_FIELD_BORDER_RED =		100;
 static const uint8_t CFG_STD_FIELD_BORDER_GREEN =	100;
 static const uint8_t CFG_STD_FIELD_BORDER_BLUE	=	255;
 static const uint8_t CFG_STD_FIELD_BORDER_ALPHA =	50;
+static const SDL_Keycode CFG_STD_KB_PASS =			SDLK_RETURN;
+static const SDL_Keycode CFG_STD_KB_BUILD_QUARRY =	SDLK_q;
+static const SDL_Keycode CFG_STD_KB_DECONSTRUCT =	SDLK_d;
 
 #endif /* DEF_CONFIG_H */

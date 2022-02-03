@@ -271,6 +271,7 @@ int32_t Game_main(struct Game *self)
 		/* handle sdl-events */
 		while (SDL_PollEvent(&event))
 		{
+			/* mouse */
 			switch (event.type)
 			{
 			case SDL_MOUSEBUTTONUP:
@@ -281,6 +282,25 @@ int32_t Game_main(struct Game *self)
 				Hud_handle_hover(&hud, mouse);
 				break;
 
+			/* keyboard */
+			case SDL_KEYUP:
+				if (event.key.keysym.sym == self->cfg->kb_pass)
+				{
+					Game_end_round(self, &hud);
+				}
+				else if (event.key.keysym.sym == self->cfg->kb_build_quarry)
+				{
+					Hud_construct_mode(&hud, FIELD_QUARRY, hud.spr_quarry.texture);
+					Hud_handle_hover(&hud, mouse);
+				}
+				else if (event.key.keysym.sym == self->cfg->kb_deconstruct)
+				{
+					Hud_deconstruct_mode(&hud);
+					Hud_handle_hover(&hud, mouse);
+				}
+				break;
+
+			/* window */
 			case SDL_WINDOWEVENT:
 				if (event.window.event == SDL_WINDOWEVENT_RESIZED)
 				{
@@ -291,10 +311,7 @@ int32_t Game_main(struct Game *self)
 					self->cfg->gfx_window_h = window_h;
 
 					/* recalc ui sizes and pos */
-					Hud_calc(
-						&hud,
-						self->cfg->gfx_window_w,
-						self->cfg->gfx_window_h);
+					Hud_calc(&hud, self->cfg->gfx_window_w, self->cfg->gfx_window_h);
 				}
 				else if (event.window.event == SDL_WINDOWEVENT_MOVED)
 				{

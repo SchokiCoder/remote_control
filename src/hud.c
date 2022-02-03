@@ -479,7 +479,7 @@ void Hud_handle_click(struct Hud *self, SDL_Point p_mouse, struct Game *p_game)
 		/* if deconstruct button pressed */
 		else if (SDL_PointInRect(&p_mouse, &self->btn_deconstruct.rect) == true)
 		{
-			self->hover_mode = HHM_DECONSTRUCT;
+			Hud_deconstruct_mode(self);
 		}
 
 		/* if hud has construct state, check construct widgets */
@@ -487,9 +487,7 @@ void Hud_handle_click(struct Hud *self, SDL_Point p_mouse, struct Game *p_game)
 		{
 			if (SDL_PointInRect(&p_mouse, &self->btn_construct_quarry.rect) == true)
 			{
-				self->hover_mode = HHM_CONSTRUCT;
-				self->hover_construct = FIELD_QUARRY;
-				self->texture_hover_construct = self->spr_quarry.texture;
+				Hud_construct_mode(self, FIELD_QUARRY, self->spr_quarry.texture);
 			}
 		}
 		break;
@@ -577,6 +575,18 @@ void Hud_handle_hover(struct Hud *self, SDL_Point p_mouse)
 			self->rects_field_content[self->hover_field.x][self->hover_field.y].h;
 		break;
 	}
+}
+
+void Hud_construct_mode(struct Hud *self, enum Field p_field, SDL_Texture *p_texture)
+{
+	self->hover_mode = HHM_CONSTRUCT;
+	self->hover_construct = p_field;
+	self->texture_hover_construct = p_texture;
+}
+
+void Hud_deconstruct_mode(struct Hud *self)
+{
+	self->hover_mode = HHM_DECONSTRUCT;
 }
 
 void Hud_set_field(struct Hud *self, SDL_Point p_field, SDL_Texture *p_texture)

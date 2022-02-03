@@ -27,6 +27,30 @@
 #include "path.h"
 #include "config.h"
 
+void Config_new(struct Config *self)
+{
+	strncpy(self->path_font, CFG_STD_PATH_FONT, CFG_SETTING_PATH_FONT_MAX_LEN);
+	self->gfx_framerate = CFG_STD_GFX_FRAMERATE;
+	self->gfx_window_x = CFG_STD_GFX_WINDOW_X;
+	self->gfx_window_y = CFG_STD_GFX_WINDOW_Y;
+	self->gfx_window_w = CFG_STD_GFX_WINDOW_W;
+	self->gfx_window_h = CFG_STD_GFX_WINDOW_H;
+	self->bg_red = CFG_STD_BG_RED;
+	self->bg_green = CFG_STD_BG_GREEN;
+	self->bg_blue = CFG_STD_BG_BLUE;
+	self->font_red = CFG_STD_FONT_RED;
+	self->font_green = CFG_STD_FONT_GREEN;
+	self->font_blue = CFG_STD_FONT_BLUE;
+	self->font_alpha = CFG_STD_FONT_ALPHA;
+	self->field_border_red = CFG_STD_FIELD_BORDER_RED;
+	self->field_border_green = CFG_STD_FIELD_BORDER_GREEN;
+	self->field_border_blue = CFG_STD_FIELD_BORDER_BLUE;
+	self->field_border_alpha = CFG_STD_FIELD_BORDER_ALPHA;
+	self->kb_pass = CFG_STD_KB_PASS;
+	self->kb_build_quarry = CFG_STD_KB_BUILD_QUARRY;
+	self->kb_deconstruct = CFG_STD_KB_DECONSTRUCT;
+}
+
 int32_t Config_load(struct Config *self)
 {
 	FILE *f;
@@ -185,6 +209,22 @@ int32_t Config_load(struct Config *self)
 			self->field_border_alpha = strtoul(cfg_values[i], NULL, 10);
 		}
 
+		/* key bindings */
+		else if (strcmp(cfg_settings[i], CFG_SETTING_KB_PASS) == 0)
+		{
+			self->kb_pass = strtol(cfg_values[i], NULL, 10);
+		}
+
+		else if (strcmp(cfg_settings[i], CFG_SETTING_KB_BUILD_QUARRY) == 0)
+		{
+			self->kb_build_quarry = strtol(cfg_values[i], NULL, 10);
+		}
+
+		else if (strcmp(cfg_settings[i], CFG_SETTING_KB_DECONSTRUCT) == 0)
+		{
+			self->kb_deconstruct = strtol(cfg_values[i], NULL, 10);
+		}
+
 		/* unknown option */
 		else
 		{
@@ -304,6 +344,22 @@ int32_t Config_save(struct Config *self)
 	fputs(CFG_SETTING_FIELD_BORDER_ALPHA, f);
 	fputs(delim, f);
 	fprintf(f, "%u", self->field_border_alpha);
+	fputc('\n', f);
+
+	/* key bindings */
+	fputs(CFG_SETTING_KB_PASS, f);
+	fputs(delim, f);
+	fprintf(f, "%i", self->kb_pass);
+	fputc('\n', f);
+
+	fputs(CFG_SETTING_KB_BUILD_QUARRY, f);
+	fputs(delim, f);
+	fprintf(f, "%i", self->kb_build_quarry);
+	fputc('\n', f);
+
+	fputs(CFG_SETTING_KB_DECONSTRUCT, f);
+	fputs(delim, f);
+	fprintf(f, "%i", self->kb_deconstruct);
 	fputc('\n', f);
 
 	fclose(f);
