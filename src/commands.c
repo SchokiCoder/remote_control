@@ -83,13 +83,12 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 	struct Town new_town;
 	uint32_t tree_chance;
 	uint32_t tree_variance;
-	time_t rng_seed;
 	char filepath[FILEPATH_MAX_LEN] = "";
 	FILE *f;
 	char confirmation;
 
-	time(&rng_seed);
-	srand(rng_seed);
+	// init random gen
+	srand(time(NULL));
 
 	/* check given admin id */
 	if ((p_admin_id != ADMIN_ID[0]) &

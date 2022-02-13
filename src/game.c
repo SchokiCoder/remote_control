@@ -20,6 +20,11 @@
 #include <SDL_ttf.h>
 #include <stdint.h>
 #include <stdbool.h>
+
+#ifdef _DEBUG
+#include <time.h>
+#endif
+
 #include "definitions/def_commands.h"
 #include "definitions/def_messages.h"
 #include "definitions/def_files.h"
@@ -143,6 +148,28 @@ void Game_construct(
 	Hud_update_money(p_hud, self->town->money);
 }
 
+void Game_spawn_merc(struct Game *self, struct Hud *hud, struct Mercenary p_merc)
+{
+	//if merc already exists, stop
+	for (uint32_t i = 0; i < self->town->merc_count; i++)
+	{
+		if (p_merc.id == self->town->mercs[i].id)
+		{
+			return;
+		}
+	}
+
+	//add to merc list
+	self->town->merc_count++;
+	self->town->mercs[self->town->merc_count - 1] = p_merc;
+
+    //update town
+    self->town->field[p_merc.coords.x][p_merc.coords.y] = FIELD_MERC;
+
+    //update hud
+    Hud_set_field(hud, p_merc.coords, Hud_get_field_texture(hud, FIELD_MERC));
+}
+
 int32_t Game_main(struct Game *self)
 {
 	SDL_Window *window;
@@ -160,6 +187,11 @@ int32_t Game_main(struct Game *self)
 	struct Hud hud;
 
 	struct Sprite spr_icon;
+
+#ifdef _DEBUG
+	// init random gen
+	srand(time(NULL));
+#endif /* _DEBUG */
 
 	/* init SDL */
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
@@ -255,7 +287,7 @@ int32_t Game_main(struct Game *self)
 			SDL_RenderClear(renderer);
 
 			/* draw hud */
-			Hud_draw(&hud);
+			Hud_draw(&hud, self->town);
 
 			/* show image, save time */
 			SDL_RenderPresent(renderer);
@@ -288,6 +320,23 @@ int32_t Game_main(struct Game *self)
 				{
 					Game_end_round(self, &hud);
 				}
+
+#ifdef _DEBUG
+				//in case of debug mode, add debug keybinds
+				else if (event.key.keysym.sym == SDLK_o)
+				{
+					// spawn random friendly merc
+					struct Mercenary merc = {
+						.id = rand() % TOWN_MAX_MERCS,
+						.hp = MERCS_HP[merc.id],
+						.coords = {.x = 8, .y = 7},
+						.fraction = MF_PURPLE
+					};
+
+					Game_spawn_merc(self, &hud, merc);
+				}
+#endif /* _DEBUG */
+
 				else if (event.key.keysym.sym == self->cfg->kb_build_quarry)
 				{
 					Hud_construct_mode(&hud, FIELD_QUARRY, hud.spr_quarry.texture);

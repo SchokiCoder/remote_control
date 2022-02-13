@@ -62,6 +62,12 @@ int32_t Hud_new(struct Hud *self, SDL_Renderer *p_renderer, char *p_path_font)
 
 	Sprite_new(&self->spr_ground);
 	Sprite_new(&self->spr_hidden);
+	Sprite_new(&self->spr_merc_base);
+	Sprite_new(&self->spr_merc_tint_green);
+	Sprite_new(&self->spr_merc_tint_purple);
+
+	for (uint32_t i = 0; i < TOWN_MAX_MERCS; i++)
+		Sprite_new(&self->spr_mercs[i]);
 
 	for (uint32_t i = 0; i < TOWN_TREE_VARIETY_COUNT; i++)
 		Sprite_new(&self->spr_trees[i]);
@@ -114,11 +120,21 @@ int32_t Hud_load_sprites(struct Hud *self)
 
 		(Sprite_from_image(&self->spr_ground, self->renderer, PATH_TEXTURE_GROUND) != 0) ||
 		(Sprite_from_image(&self->spr_hidden, self->renderer, PATH_TEXTURE_HIDDEN) != 0) ||
+
+		(Sprite_from_image(&self->spr_merc_base, self->renderer, PATH_TEXTURE_MERC_BASE) != 0) ||
+		(Sprite_from_image(&self->spr_merc_tint_green, self->renderer, PATH_TEXTURE_MERC_GREEN) != 0) ||
+		(Sprite_from_image(&self->spr_merc_tint_purple, self->renderer, PATH_TEXTURE_MERC_PURPLE) != 0) ||
+		(Sprite_from_image(&self->spr_mercs[0], self->renderer, PATH_TEXTURE_MERC_SOLDIER) != 0) ||
+		(Sprite_from_image(&self->spr_mercs[1], self->renderer, PATH_TEXTURE_MERC_PYRO) != 0) ||
+		(Sprite_from_image(&self->spr_mercs[2], self->renderer, PATH_TEXTURE_MERC_ANCHOR) != 0) ||
+		(Sprite_from_image(&self->spr_mercs[3], self->renderer, PATH_TEXTURE_MERC_MEDIC) != 0) ||
+
 		(Sprite_from_image(&self->spr_trees[0], self->renderer, PATH_TEXTURE_TREE_0) != 0) ||
 		(Sprite_from_image(&self->spr_trees[1], self->renderer, PATH_TEXTURE_TREE_1) != 0) ||
 		(Sprite_from_image(&self->spr_trees[2], self->renderer, PATH_TEXTURE_TREE_2) != 0) ||
 		(Sprite_from_image(&self->spr_trees[3], self->renderer, PATH_TEXTURE_TREE_3) != 0) ||
 		(Sprite_from_image(&self->spr_trees[4], self->renderer, PATH_TEXTURE_TREE_4) != 0) ||
+
 		(Sprite_from_image(&self->spr_hq, self->renderer, PATH_TEXTURE_HQ) != 0) ||
 		(Sprite_from_image(&self->spr_construction, self->renderer, PATH_TEXTURE_CONSTRUCTION) != 0) ||
 		(Sprite_from_image(&self->spr_quarry, self->renderer, PATH_TEXTURE_QUARRY) != 0))
@@ -309,50 +325,13 @@ void Hud_map_textures(
 				self->textures_field_ground[x][y] = self->spr_ground.texture;
 
 				/* map textures to area content */
-				switch (p_fields_content[x][y])
-				{
-					case FIELD_TREE_0:
-						self->textures_field_content[x][y] = self->spr_trees[0].texture;
-						break;
-
-					case FIELD_TREE_1:
-						self->textures_field_content[x][y] = self->spr_trees[1].texture;
-						break;
-
-					case FIELD_TREE_2:
-						self->textures_field_content[x][y] = self->spr_trees[2].texture;
-						break;
-
-					case FIELD_TREE_3:
-						self->textures_field_content[x][y] = self->spr_trees[3].texture;
-						break;
-
-					case FIELD_TREE_4:
-						self->textures_field_content[x][y] = self->spr_trees[4].texture;
-						break;
-
-					case FIELD_ADMINISTRATION:
-						self->textures_field_content[x][y] = self->spr_hq.texture;
-						break;
-
-					case FIELD_CONSTRUCTION:
-						self->textures_field_content[x][y] = self->spr_construction.texture;
-						break;
-
-					case FIELD_QUARRY:
-						self->textures_field_content[x][y] = self->spr_quarry.texture;
-						break;
-
-					case FIELD_EMPTY:
-						self->textures_field_content[x][y] = NULL;
-						break;
-				}
+				self->textures_field_content[x][y] = Hud_get_field_texture(self, p_fields_content[x][y]);
 			}
 		}
 	}
 }
 
-void Hud_draw(struct Hud *self)
+void Hud_draw(struct Hud *self, struct Town *p_town)
 {
 	/* draw fields */
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
@@ -383,7 +362,42 @@ void Hud_draw(struct Hud *self)
 		}
 	} /* draw fields */
 
-	/* draw bars */
+	for (uint32_t i = 0; i < p_town->merc_count; i++)
+	{
+		// draw mercenary fields
+		SDL_RenderCopy(
+			self->renderer,
+        	self->spr_merc_base.texture,
+        	NULL,
+        	&self->rects_field_content[p_town->mercs[i].coords.x][p_town->mercs[i].coords.y]);
+
+		// draw fraction color tint
+        if (p_town->mercs[i].fraction == MF_GREEN)
+        {
+			SDL_RenderCopy(
+				self->renderer,
+	        	self->spr_merc_tint_green.texture,
+        		NULL,
+        		&self->rects_field_content[p_town->mercs[i].coords.x][p_town->mercs[i].coords.y]);
+        }
+        else
+        {
+        	SDL_RenderCopy(
+				self->renderer,
+        		self->spr_merc_tint_purple.texture,
+	        	NULL,
+    	    	&self->rects_field_content[p_town->mercs[i].coords.x][p_town->mercs[i].coords.y]);
+        }
+
+		// draw mercenary class icon
+		SDL_RenderCopy(
+			self->renderer,
+			self->spr_mercs[p_town->mercs[i].id].texture,
+			NULL,
+			&self->rects_field_content[p_town->mercs[i].coords.x][p_town->mercs[i].coords.y]);
+	}
+
+	/* draw hud bars */
 	SDL_SetRenderDrawColor(
 		self->renderer,
 		HUD_BAR_COLOR_R,
@@ -601,6 +615,11 @@ SDL_Texture* Hud_get_field_texture(struct Hud *self, enum Field p_field)
 	case FIELD_EMPTY:
 		break;
 
+	case FIELD_MERC:
+		/* the mercenary sprites are handled differently,
+		so that they can't be simply drawn by the town_field drawing part */
+		break;
+
 	case FIELD_TREE_0:
 		return self->spr_trees[0].texture;
 		break;
@@ -657,6 +676,13 @@ void Hud_clear(struct Hud *self)
 
 	Sprite_clear(&self->spr_ground);
 	Sprite_clear(&self->spr_hidden);
+
+	Sprite_clear(&self->spr_merc_base);
+	Sprite_clear(&self->spr_merc_tint_green);
+	Sprite_clear(&self->spr_merc_tint_purple);
+
+	for (uint32_t i = 0; i < TOWN_MAX_MERCS; i++)
+		Sprite_clear(&self->spr_mercs[i]);
 
 	for (uint32_t i = 0; i < TOWN_TREE_VARIETY_COUNT; i++)
 		Sprite_clear(&self->spr_trees[i]);

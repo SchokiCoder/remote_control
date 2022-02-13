@@ -23,12 +23,21 @@
 #include <stdbool.h>
 #include <SDL.h>
 #include "definitions/def_gameplay.h"
+#include "definitions/def_mercs.h"
 
 struct Construction
 {
 	enum Field field;
 	SDL_Point coords;
 	uint32_t progress;
+};
+
+struct Mercenary
+{
+	uint32_t id;
+	SDL_Point coords;
+	uint32_t hp;
+	enum MercFraction fraction;
 };
 
 struct Town
@@ -41,6 +50,9 @@ struct Town
 
 	uint32_t construction_count;
 	struct Construction constructions[TOWN_MAX_CONSTRUCTIONS];
+
+	uint32_t merc_count;
+	struct Mercenary mercs[TOWN_MAX_MERCS];
 };
 
 void Town_print(struct Town *self, char *p_town_name);

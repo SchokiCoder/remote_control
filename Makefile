@@ -16,7 +16,7 @@
 
 CC = cc
 APP_NAME = remote_control
-CFLAGS = -std=c99 -Wall -pedantic -O3
+CFLAGS = -std=c99 -Wall -Wextra -pedantic -O3
 INCLUDE = -I /usr/include/SDL2
 LIBS = -l SDL2 -l SDL2_image -l SDL2_ttf
 

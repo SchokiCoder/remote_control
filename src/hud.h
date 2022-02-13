@@ -99,6 +99,12 @@ struct Hud
 
 	struct Sprite spr_ground;
 	struct Sprite spr_hidden;
+
+	struct Sprite spr_merc_base;
+	struct Sprite spr_merc_tint_green;
+	struct Sprite spr_merc_tint_purple;
+	struct Sprite spr_mercs[TOWN_MAX_MERCS];
+
 	struct Sprite spr_trees[TOWN_TREE_VARIETY_COUNT];
 	struct Sprite spr_hq;
 	struct Sprite spr_construction;
@@ -124,7 +130,7 @@ void Hud_map_textures(
 	bool p_fields_hidden[TOWN_WIDTH][TOWN_HEIGHT],
 	enum Field p_fields_content[TOWN_WIDTH][TOWN_HEIGHT]);
 
-void Hud_draw(struct Hud *self);
+void Hud_draw(struct Hud *self, struct Town *p_town);
 
 SDL_Point Hud_mouse_to_field(struct Hud *self, SDL_Point p_mouse);
 

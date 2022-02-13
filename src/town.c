@@ -61,8 +61,9 @@ void Town_new(struct Town *self)
 {
 	self->admin_id = 0;
 	self->construction_count = 0;
+	self->merc_count = 0;
 	self->money = TOWN_START_MONEY;
-	self->round = TOWN_TIME_BEGIN;
+	self->round = TOWN_START_TIME;
 }
 
 int32_t Town_save(struct Town *self, char *p_town_name)
@@ -144,6 +145,20 @@ int32_t Town_save(struct Town *self, char *p_town_name)
 		fwrite(&self->constructions[i].coords.x, sizeof(self->constructions[i].coords.x), 1, f);
 		fwrite(&self->constructions[i].coords.y, sizeof(self->constructions[i].coords.y), 1, f);
 		fwrite(&self->constructions[i].progress, sizeof(self->constructions[i].progress), 1, f);
+	}
+
+	// write merc list data
+	fwrite(&self->merc_count, sizeof(self->merc_count), 1, f);
+	fputc('\n', f);
+
+	// write merc list
+	for (uint32_t i = 0; i < self->merc_count; i++)
+	{
+		fwrite(&self->mercs[i].id, sizeof(self->mercs[i].id), 1, f);
+		fwrite(&self->mercs[i].coords.x, sizeof(self->mercs[i].coords.x), 1, f);
+		fwrite(&self->mercs[i].coords.y, sizeof(self->mercs[i].coords.y), 1, f);
+		fwrite(&self->mercs[i].hp, sizeof(self->mercs[i].hp), 1, f);
+		fwrite(&self->mercs[i].fraction, sizeof(self->mercs[i].fraction), 1, f);
 	}
 
 	/* check and done */
@@ -228,6 +243,20 @@ int32_t Town_load(struct Town *self, char *p_town_name)
 		fread(&self->constructions[i].coords.x, sizeof(self->constructions[i].coords.x), 1, f);
 		fread(&self->constructions[i].coords.y, sizeof(self->constructions[i].coords.y), 1, f);
 		fread(&self->constructions[i].progress, sizeof(self->constructions[i].progress), 1, f);
+	}
+
+	// read merc list data
+	fread(&self->merc_count, sizeof(self->merc_count), 1, f);
+	fgetc(f);
+
+	// read merc list
+	for (uint32_t i = 0; i < self->merc_count; i++)
+	{
+		fread(&self->mercs[i].id, sizeof(self->mercs[i].id), 1, f);
+		fread(&self->mercs[i].coords.x, sizeof(self->mercs[i].coords.x), 1, f);
+		fread(&self->mercs[i].coords.y, sizeof(self->mercs[i].coords.y), 1, f);
+		fread(&self->mercs[i].hp, sizeof(self->mercs[i].hp), 1, f);
+		fread(&self->mercs[i].fraction, sizeof(self->mercs[i].fraction), 1, f);
 	}
 
 	/* check and done */

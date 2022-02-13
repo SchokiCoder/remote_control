@@ -44,6 +44,13 @@ static const char PATH_TEXTURE_HUD_DECONSTRUCT[] =	PATH_TEXTURES "hud_deconstruc
 
 static const char PATH_TEXTURE_GROUND[] =		PATH_TEXTURES "ground.png";
 static const char PATH_TEXTURE_HIDDEN[] =		PATH_TEXTURES "hidden.png";
+static const char PATH_TEXTURE_MERC_BASE[] =	PATH_TEXTURES "mercenary_base.png";
+static const char PATH_TEXTURE_MERC_GREEN[] =	PATH_TEXTURES "mercenary_green_tint.png";
+static const char PATH_TEXTURE_MERC_PURPLE[] =	PATH_TEXTURES "mercenary_purple_tint.png";
+static const char PATH_TEXTURE_MERC_SOLDIER[] =	PATH_TEXTURES "mercenary_soldier.png";
+static const char PATH_TEXTURE_MERC_PYRO[] =	PATH_TEXTURES "mercenary_pyro.png";
+static const char PATH_TEXTURE_MERC_ANCHOR[] =	PATH_TEXTURES "mercenary_anchor.png";
+static const char PATH_TEXTURE_MERC_MEDIC[] =	PATH_TEXTURES "mercenary_medic.png";
 static const char PATH_TEXTURE_HQ[] =			PATH_TEXTURES "headquarter.png";
 static const char PATH_TEXTURE_CONSTRUCTION[] =	PATH_TEXTURES "construction.png";
 static const char PATH_TEXTURE_QUARRY[] =		PATH_TEXTURES "quarry.png";

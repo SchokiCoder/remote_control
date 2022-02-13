@@ -52,6 +52,8 @@ void Game_construct(
 	struct Hud *p_hud,
 	SDL_Texture *p_texture);
 
+void Game_spawn_merc(struct Game *self, struct Hud *hud, struct Mercenary p_merc);
+
 int32_t Game_main(struct Game *self);
 
 #endif /* GAME_H */

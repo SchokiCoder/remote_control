@@ -31,19 +31,21 @@ static const uint32_t TOWN_TREEFREE_AREA_BEGIN_X =	5;
 static const uint32_t TOWN_TREEFREE_AREA_BEGIN_Y =	5;
 static const uint32_t TOWN_TREEFREE_AREA_END_X =	10;
 static const uint32_t TOWN_TREEFREE_AREA_END_Y =	10;
-static const uint32_t TOWN_GEN_TREE_THRESHOLD =		40;	/* from 0 to 100 */
+static const uint32_t TOWN_GEN_TREE_THRESHOLD =		40;		/* from 0 to 100 */
 static const uint32_t TOWN_HQ_SPAWN_X =				7;
 static const uint32_t TOWN_HQ_SPAWN_Y =				7;
-static const uint32_t TOWN_TIME_BEGIN =				6;	/* round 0 plays at 06:00 am */
+static const uint32_t TOWN_START_TIME =				6;		/* round 0 plays at 06:00 am */
 static const uint32_t TOWN_START_MONEY =			2000;
 
 /* building system */
 #define TOWN_MAX_CONSTRUCTIONS		(TOWN_WIDTH * TOWN_HEIGHT)
+#define TOWN_MAX_MERCS				4
 
 /* fields */
 enum Field
 {
 	FIELD_EMPTY,
+	FIELD_MERC,
 	FIELD_TREE_0,
 	FIELD_TREE_1,
 	FIELD_TREE_2,
@@ -58,6 +60,7 @@ enum Field
 static const uint32_t FIELD_CONSTRUCTION_COST[] =
 {
 	0,	/* empty */
+	0,	/* merc */
 	0,	/* trees */
 	0,
 	0,
@@ -72,6 +75,7 @@ static const uint32_t FIELD_CONSTRUCTION_COST[] =
 static const uint32_t FIELD_CONSTRUCTION_TIME[] =
 {
 	1,	/* empty */
+	0,	/* merc */
 	0,	/* trees */
 	0,
 	0,
@@ -86,6 +90,7 @@ static const uint32_t FIELD_CONSTRUCTION_TIME[] =
 static const uint32_t FIELD_RUNNING_COST[] =
 {
 	0,	/* empty */
+	10,	/* merc */
 	0,	/* trees */
 	0,
 	0,
