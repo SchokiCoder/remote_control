@@ -150,7 +150,7 @@ void Game_construct(
 
 void Game_spawn_merc(struct Game *self, struct Hud *hud, struct Mercenary p_merc)
 {
-	//if merc already exists, stop
+	// if merc already exists, stop
 	for (uint32_t i = 0; i < self->town->merc_count; i++)
 	{
 		if (p_merc.id == self->town->mercs[i].id)
@@ -159,14 +159,14 @@ void Game_spawn_merc(struct Game *self, struct Hud *hud, struct Mercenary p_merc
 		}
 	}
 
-	//add to merc list
+	// add to merc list
 	self->town->merc_count++;
 	self->town->mercs[self->town->merc_count - 1] = p_merc;
 
-    //update town
+    // update town
     self->town->field[p_merc.coords.x][p_merc.coords.y] = FIELD_MERC;
 
-    //update hud
+    // update hud
     Hud_set_field(hud, p_merc.coords, Hud_get_field_texture(hud, FIELD_MERC));
 }
 

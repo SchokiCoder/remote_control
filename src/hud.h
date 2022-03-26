@@ -23,64 +23,35 @@
 #include <stdbool.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <SGUI_menu.h>
+#include <SGUI_entry.h>
+#include <SGUI_label.h>
 #include "definitions/def_gameplay.h"
-#include "widget.h"
 #include "sprite.h"
 #include "town.h"
 
-struct Game;
+typedef struct Game Game;
 
-/* describes how the hud should react to the mouse hovering on the area */
-enum HudHoverMode
-{
-	HHM_NONE,
-	HHM_CONSTRUCT,
-	HHM_DECONSTRUCT
-};
-
-/* describes which menu is shown */
-enum HudState
-{
-	HS_NORMAL,
-	HS_CONSTRUCT
-};
-
-struct Hud
+typedef struct Hud
 {
 	SDL_Renderer *renderer;
 
-	/* font */
-	TTF_Font *font;
-	SDL_Color font_color;
-
 	/* data */
-	enum HudState state;
-	enum HudHoverMode hover_mode;
+	bool invalid;
 	SDL_Point hover_field;
-
-	enum Field hover_construct;
-	SDL_Texture *texture_hover_construct;
-	SDL_Rect rect_hover_construct;
-
-	SDL_Rect rect_hover_deconstruct;
 
 	/* bars */
 	SDL_Rect rect_bar_top;
 	SDL_Rect rect_bar_side;
 
-	/* widgets */
-	struct Widget lbl_time_day;
-	struct Widget lbl_time_day_val;
-	struct Widget lbl_time_hour;
-	struct Widget lbl_time_hour_val;
-	struct Widget lbl_money;
-	struct Widget lbl_money_val;
-	struct Widget btn_construct;
-	struct Widget btn_deconstruct;
-	struct Widget btn_pass;
-
-	/* construct menu widgets */
-	struct Widget btn_construct_quarry;
+	/* hud widgets */
+	SGUI_Menu mnu_hud;
+	SGUI_Label lbl_time_day;
+	SGUI_Label lbl_time_day_val;
+	SGUI_Label lbl_time_hour;
+	SGUI_Label lbl_time_hour_val;
+	SGUI_Label lbl_money;
+	SGUI_Label lbl_money_val;
 
 	/* graphical data for area and fields */
 	SDL_Color field_border_color;
@@ -94,9 +65,6 @@ struct Hud
 	SDL_RendererFlip flips_field[TOWN_WIDTH][TOWN_HEIGHT];
 
 	/* shared sprites */
-	struct Sprite spr_hud_construct;
-	struct Sprite spr_hud_deconstruct;
-
 	struct Sprite spr_ground;
 	struct Sprite spr_hidden;
 
@@ -109,17 +77,13 @@ struct Hud
 	struct Sprite spr_hq;
 	struct Sprite spr_construction;
 	struct Sprite spr_quarry;
-};
+} Hud ;
 
-int32_t Hud_new(struct Hud *self, SDL_Renderer *p_renderer, char *p_path_font);
+Hud Hud_new(SDL_Renderer *p_renderer, char *p_path_font);
 
 void Hud_update_time(struct Hud *self, uint32_t p_round);
 
 void Hud_update_money(struct Hud *self, uint32_t p_money);
-
-int32_t Hud_load_sprites(struct Hud *self);
-
-int32_t Hud_init_widgets(struct Hud *self);
 
 void Hud_calc(struct Hud *self,	int32_t p_window_w,	int32_t p_window_h);
 
@@ -134,7 +98,7 @@ void Hud_draw(struct Hud *self, struct Town *p_town);
 
 SDL_Point Hud_mouse_to_field(struct Hud *self, SDL_Point p_mouse);
 
-void Hud_handle_click(struct Hud *self, SDL_Point p_mouse, struct Game *p_game);
+void Hud_handle_click(struct Hud *self, SDL_Point p_mouse, Game *p_game);
 
 void Hud_handle_hover(struct Hud *self, SDL_Point p_mouse);
 

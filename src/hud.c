@@ -23,93 +23,35 @@
 #include "game.h"
 #include "hud.h"
 
-int32_t Hud_new(struct Hud *self, SDL_Renderer *p_renderer, char *p_path_font)
+static const SGUI_Theme THEME_RC = {
+	.menu_bg_color = {.r = 30, .g = 30, .b = 30, .a = 255},
+
+	.label_font_color = {.r = 200, .g = 200, .b = 200, .a = 255},
+    .label_bg_color = {.r = 0, .g = 0, .b = 0, .a = 0},
+    .label_border_color = {.r = 0, .g = 0, .b = 0, .a = 0},
+
+    .button_font_color = {.r = 200, .g = 200, .b = 200, .a = 255},
+    .button_bg_color = {.r = 50, .g = 50, .b = 50, .a = 255},
+    .button_border_color = {.r = 70, .g = 70, .b = 70, .a = 255},
+    .button_disabled_color = {.r = 0, .g = 0, .b = 0, .a = 75},
+
+    .entry_font_color = {.r = 200, .g = 200, .b = 200, .a = 255},
+    .entry_bg_color = {.r = 65, .g = 65, .b = 65, .a = 255},
+    .entry_border_color = {.r = 70, .g = 70, .b = 70, .a = 255},
+    .entry_disabled_color = {.r = 0, .g = 0, .b = 0, .a = 75}
+};
+
+Hud Hud_new(SDL_Renderer *p_renderer, char *p_path_font)
 {
-	/* set data */
-	self->state = HS_NORMAL;
-	self->hover_mode = HHM_NONE;
-	self->texture_hover_construct = NULL;
+	SMString temp;
+	Hud result = {
+		.invalid = false,
+		.state = HS_NORMAL,
+		.renderer = p_renderer
+	};
 
-	/* set renderer */
-	self->renderer = p_renderer;
-
-	/* load font */
-	self->font = TTF_OpenFont(p_path_font, HUD_FONT_SIZE);
-
-	if (self->font == NULL)
-	{
-		printf(MSG_ERR_FONT_LOAD, MSG_ERR, p_path_font);
-		return 1;
-	}
-
-	/* init widgets */
-	Widget_new(&self->lbl_time_day);
-	Widget_new(&self->lbl_time_day_val);
-	Widget_new(&self->lbl_time_hour);
-	Widget_new(&self->lbl_time_hour_val);
-	Widget_new(&self->lbl_money);
-	Widget_new(&self->lbl_money_val);
-
-	Widget_new(&self->btn_pass);
-	Widget_new(&self->btn_construct);
-	Widget_new(&self->btn_deconstruct);
-
-	Widget_new(&self->btn_construct_quarry);
-
-	/* init sprites */
-	Sprite_new(&self->spr_hud_construct);
-	Sprite_new(&self->spr_hud_deconstruct);
-
-	Sprite_new(&self->spr_ground);
-	Sprite_new(&self->spr_hidden);
-	Sprite_new(&self->spr_merc_base);
-	Sprite_new(&self->spr_merc_tint_green);
-	Sprite_new(&self->spr_merc_tint_purple);
-
-	for (uint32_t i = 0; i < TOWN_MAX_MERCS; i++)
-		Sprite_new(&self->spr_mercs[i]);
-
-	for (uint32_t i = 0; i < TOWN_TREE_VARIETY_COUNT; i++)
-		Sprite_new(&self->spr_trees[i]);
-
-	Sprite_new(&self->spr_hq);
-	Sprite_new(&self->spr_construction);
-	Sprite_new(&self->spr_quarry);
-
-	/* set widget texts */
-	strncpy(self->lbl_time_day.text, HUD_LBL_TIME_DAY_TEXT, HUD_WIDGET_TEXT_MAX_LEN);
-	strncpy(self->lbl_time_hour.text, HUD_LBL_TIME_HOUR_TEXT, HUD_WIDGET_TEXT_MAX_LEN);
-	strncpy(self->lbl_money.text, HUD_LBL_MONEY_TEXT, HUD_WIDGET_TEXT_MAX_LEN);
-	strncpy(self->lbl_money_val.text, "0", HUD_WIDGET_TEXT_MAX_LEN);
-	strncpy(self->btn_pass.text, HUD_BTN_PASS_TEXT, HUD_WIDGET_TEXT_MAX_LEN);
-
-	return 0;
-}
-
-void Hud_update_time(struct Hud *self, uint32_t p_round)
-{
-	/* create widget strings */
-	sprintf(self->lbl_time_day_val.text, "%u", (p_round / 24));
-	sprintf(self->lbl_time_hour_val.text, "%02u:00", (p_round % 24));
-
-	/* gen widgets */
-	Widget_generate_sprite(&self->lbl_time_day_val, self->renderer, self->font, self->font_color);
-	Widget_generate_sprite(&self->lbl_time_hour_val, self->renderer, self->font, self->font_color);
-}
-
-void Hud_update_money(struct Hud *self, uint32_t p_money)
-{
-	/* create widget strings */
-	sprintf(self->lbl_money_val.text, "%u", p_money);
-
-	/* gen widget */
-	Widget_generate_sprite(&self->lbl_money_val, self->renderer, self->font, self->font_color);
-}
-
-int32_t Hud_load_sprites(struct Hud *self)
-{
-	/* load sprites */
-	if ((Sprite_from_image(
+	// load sprites
+	((Sprite_from_image(
 			&self->spr_hud_construct,
 			self->renderer,
 			PATH_TEXTURE_HUD_CONSTRUCT) != 0) ||
@@ -138,31 +80,58 @@ int32_t Hud_load_sprites(struct Hud *self)
 		(Sprite_from_image(&self->spr_hq, self->renderer, PATH_TEXTURE_HQ) != 0) ||
 		(Sprite_from_image(&self->spr_construction, self->renderer, PATH_TEXTURE_CONSTRUCTION) != 0) ||
 		(Sprite_from_image(&self->spr_quarry, self->renderer, PATH_TEXTURE_QUARRY) != 0))
+
+	// make menu
+	TTF_Font *font = TTF_OpenFont(p_path_font, HUD_FONT_SIZE);
+
+	result.mnu_hud = SGUI_Menu(p_renderer, font, &THEME_RC);
+	SGUI_Label_new(&result.lbl_time_day, &result.mnu_hud, &THEME_RC);
+	SGUI_Label_new(&result.lbl_time_day_val, &result.mnu_hud, &THEME_RC);
+	SGUI_Label_new(&result.lbl_time_hour, &result.mnu_hud, &THEME_RC);
+	SGUI_Label_new(&result.lbl_time_hour_val, &result.mnu_hud, &THEME_RC);
+	SGUI_Label_new(&result.lbl_money, &result.mnu_hud, &THEME_RC);
+	SGUI_Label_new(&result.lbl_money_val, &result.mnu_hud, &THEME_RC);
+
+	// define menu
+
+
+
+
+	strncpy(self->lbl_time_day.text, HUD_LBL_TIME_DAY_TEXT, HUD_WIDGET_TEXT_MAX_LEN);
+	strncpy(self->lbl_time_hour.text, HUD_LBL_TIME_HOUR_TEXT, HUD_WIDGET_TEXT_MAX_LEN);
+	strncpy(self->lbl_money.text, HUD_LBL_MONEY_TEXT, HUD_WIDGET_TEXT_MAX_LEN);
+	strncpy(self->lbl_money_val.text, "0", HUD_WIDGET_TEXT_MAX_LEN);
+	strncpy(self->btn_pass.text, HUD_BTN_PASS_TEXT, HUD_WIDGET_TEXT_MAX_LEN);
+
+	// check
+	if (font == NULL)
 	{
-		return 1;
+		result.invalid = true;
 	}
 
-	return 0;
+	dont forget other checks!;
+
+	return result;
 }
 
-int32_t Hud_init_widgets(struct Hud *self)
+void Hud_update_time(struct Hud *self, uint32_t p_round)
 {
-	/* create text sprites of widgets, that wont change their sprite */
-	if ((Widget_generate_sprite(&self->lbl_time_day, self->renderer, self->font, self->font_color) != 0) ||
-		(Widget_generate_sprite(&self->lbl_time_hour, self->renderer, self->font, self->font_color) != 0) ||
-		(Widget_generate_sprite(&self->lbl_money, self->renderer, self->font, self->font_color) != 0) ||
-		(Widget_generate_sprite(&self->btn_pass, self->renderer, self->font, self->font_color) != 0))
-	{
-		return 1;
-	}
+	/* create widget strings */
+	sprintf(self->lbl_time_day_val.text, "%u", (p_round / 24));
+	sprintf(self->lbl_time_hour_val.text, "%02u:00", (p_round % 24));
 
-	/* set sprite widgets texture */
-	self->btn_construct.sprite.texture = self->spr_hud_construct.texture;
-	self->btn_deconstruct.sprite.texture = self->spr_hud_deconstruct.texture;
+	/* gen widgets */
+	Widget_generate_sprite(&self->lbl_time_day_val, self->renderer, self->font, self->font_color);
+	Widget_generate_sprite(&self->lbl_time_hour_val, self->renderer, self->font, self->font_color);
+}
 
-	self->btn_construct_quarry.sprite.texture = self->spr_quarry.texture;
+void Hud_update_money(struct Hud *self, uint32_t p_money)
+{
+	/* create widget strings */
+	sprintf(self->lbl_money_val.text, "%u", p_money);
 
-	return 0;
+	/* gen widget */
+	Widget_generate_sprite(&self->lbl_money_val, self->renderer, self->font, self->font_color);
 }
 
 void Hud_calc(struct Hud *self,	int32_t p_window_w,	int32_t p_window_h)

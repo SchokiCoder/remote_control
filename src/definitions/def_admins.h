@@ -22,7 +22,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-static const uint32_t ADMIN_ID[] =
+static const int32_t ADMIN_ID[] =
 {
 	0,
 	1,
@@ -43,7 +43,7 @@ static const char ADMIN_LASTNAME[][10] =
 	"McLain"
 };
 
-static const uint32_t ADMIN_AGE[] =
+static const int32_t ADMIN_AGE[] =
 {
 	25,
 	33,
@@ -72,7 +72,7 @@ static const char ADMIN_BIO[][256] =
 	"For the right payment, she can effectively turn tides in dire situations, with her methods of motivation."
 };
 
-static const uint32_t ADMIN_SALARY[] =
+static const int32_t ADMIN_SALARY[] =
 {
 	10,
 	11,
