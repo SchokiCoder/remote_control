@@ -22,7 +22,7 @@
 #include <SDL.h>
 #include "definitions/def_config.h"
 
-struct Config
+typedef struct Config
 {
 	char path_font[CFG_SETTING_PATH_FONT_MAX_LEN];
 	float gfx_framerate;
@@ -44,12 +44,12 @@ struct Config
 	SDL_Keycode kb_pass;
 	SDL_Keycode kb_build_quarry;
 	SDL_Keycode kb_deconstruct;
-};
+} Config ;
 
-void Config_new(struct Config *self);
+Config Config_new( void );
 
-int32_t Config_load(struct Config *self);
+int32_t Config_load( Config *cfg );
 
-int32_t Config_save(struct Config *self);
+int32_t Config_save( Config *cfg );
 
 #endif /* CONFIG_H */

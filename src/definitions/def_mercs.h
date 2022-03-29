@@ -21,13 +21,13 @@
 
 #include <stdint.h>
 
-enum MercClass {
-	MC_OFFENSE,
-	MC_DEFENSE,
-	MC_SUPPORT
-};
+typedef enum MercRole {
+	MR_OFFENSE,
+	MR_DEFENSE,
+	MR_SUPPORT
+} MercRole ;
 
-enum MercWeapon {
+typedef enum MercWeapon {
 	MW_NONE,
 	MW_SHOTGUN,
 	MW_GRENADE,
@@ -37,72 +37,28 @@ enum MercWeapon {
 	MW_SYRINGE_GUN,
 	MW_PISTOL,
 	MW_SWORD
-};
+} MercWeapon ;
 
-enum MercFraction {
+typedef enum MercFraction {
 	MF_GREEN,
 	MF_PURPLE
+} MercFraction ;
+
+typedef struct MercenaryData
+{
+	char name[10];
+	MercRole role;
+	uint32_t max_hp;
+	uint32_t speed;
+	MercWeapon loadout[3];
+} MercenaryData ;
+
+static const MercenaryData DATA_MERCENARIES[] = {
+    {"Soldier",	MR_OFFENSE,	125, 	2,	{MW_SHOTGUN, MW_GRENADE, MW_KNIFE}},
+    {"Pyro",	MR_OFFENSE,	75,		3,	{MW_FLAMETHROWER, MW_NONE, MW_NONE}},
+    {"Anchor",	MR_DEFENSE, 300,	1,	{MW_MINIGUN, MW_NONE, MW_NONE}},
+    {"Medic",	MR_SUPPORT, 75,		2,	{MW_SYRINGE_GUN, MW_PISTOL, MW_SWORD}}
 };
-
-static const uint32_t MERCS_ID[] = {
-	0,
-	1,
-	2,
-	3
-};
-
-static const char MERCS_NAME[][10] = {
-	"Soldier",
-	"Pyro",
-	"Anchor",
-	"Medic"
-};
-
-static const enum MercClass MERCS_CLASS[] = {
-	MC_OFFENSE,
-	MC_OFFENSE,
-	MC_DEFENSE,
-	MC_SUPPORT
-};
-
-static const uint32_t MERCS_HP[] = {
-	125,
-	75,
-	300,
-	75
-};
-
-static const uint32_t MERCS_SPEED[] = {
-	2,
-	3,
-	1,
-	2
-};
-
-static const enum MercWeapon MERCS_LOADOUT[][3] = {
-	{
-		MW_SHOTGUN,
-		MW_GRENADE,
-		MW_KNIFE
-	},
-
-	{
-		MW_FLAMETHROWER,
-		MW_NONE,
-		MW_NONE
-	},
-
-	{
-		MW_MINIGUN,
-		MW_NONE,
-		MW_NONE
-	},
-
-	{
-		MW_SYRINGE_GUN,
-		MW_PISTOL,
-		MW_SWORD
-	}
-};
+#define MERCENARY_COUNT sizeof(DATA_MERCENARIES) / sizeof(DATA_MERCENARIES[0])
 
 #endif /* DEF_MERCS_H */

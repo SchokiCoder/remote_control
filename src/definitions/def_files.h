@@ -39,29 +39,6 @@ static const char PATH_CONFIG[] = "config.cfg";
 /* asset paths (and some data) */
 static const char PATH_TEXTURE_ICON[] =	PATH_TEXTURES "icon.png";
 
-static const char PATH_TEXTURE_HUD_CONSTRUCT[] =	PATH_TEXTURES "hud_construct.png";
-static const char PATH_TEXTURE_HUD_DECONSTRUCT[] =	PATH_TEXTURES "hud_deconstruct.png";
-
-static const char PATH_TEXTURE_GROUND[] =		PATH_TEXTURES "ground.png";
-static const char PATH_TEXTURE_HIDDEN[] =		PATH_TEXTURES "hidden.png";
-static const char PATH_TEXTURE_MERC_BASE[] =	PATH_TEXTURES "mercenary_base.png";
-static const char PATH_TEXTURE_MERC_GREEN[] =	PATH_TEXTURES "mercenary_green_tint.png";
-static const char PATH_TEXTURE_MERC_PURPLE[] =	PATH_TEXTURES "mercenary_purple_tint.png";
-static const char PATH_TEXTURE_MERC_SOLDIER[] =	PATH_TEXTURES "mercenary_soldier.png";
-static const char PATH_TEXTURE_MERC_PYRO[] =	PATH_TEXTURES "mercenary_pyro.png";
-static const char PATH_TEXTURE_MERC_ANCHOR[] =	PATH_TEXTURES "mercenary_anchor.png";
-static const char PATH_TEXTURE_MERC_MEDIC[] =	PATH_TEXTURES "mercenary_medic.png";
-static const char PATH_TEXTURE_HQ[] =			PATH_TEXTURES "headquarter.png";
-static const char PATH_TEXTURE_CONSTRUCTION[] =	PATH_TEXTURES "construction.png";
-static const char PATH_TEXTURE_QUARRY[] =		PATH_TEXTURES "quarry.png";
-
-#define TOWN_TREE_VARIETY_COUNT					5
-static const char PATH_TEXTURE_TREE_0[] =		PATH_TEXTURES "tree_0.png";
-static const char PATH_TEXTURE_TREE_1[] =		PATH_TEXTURES "tree_1.png";
-static const char PATH_TEXTURE_TREE_2[] =		PATH_TEXTURES "tree_2.png";
-static const char PATH_TEXTURE_TREE_3[] =		PATH_TEXTURES "tree_3.png";
-static const char PATH_TEXTURE_TREE_4[] =		PATH_TEXTURES "tree_4.png";
-
 /* filetypes */
 static const char FILETYPE_TOWN[] = "twn";
 static const char FILETYPE_BACKUP[] = "bkp";

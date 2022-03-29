@@ -19,7 +19,6 @@
 #ifndef DEF_GAMEPLAY_H
 #define DEF_GAMEPLAY_H
 
-/* town generation */
 #define TOWN_WIDTH	15
 #define TOWN_HEIGHT	15
 
@@ -37,12 +36,7 @@ static const uint32_t TOWN_HQ_SPAWN_Y =				7;
 static const uint32_t TOWN_START_TIME =				6;		/* round 0 plays at 06:00 am */
 static const uint32_t TOWN_START_MONEY =			2000;
 
-/* building system */
-#define TOWN_MAX_CONSTRUCTIONS		(TOWN_WIDTH * TOWN_HEIGHT)
-#define TOWN_MAX_MERCS				4
-
-/* fields */
-enum Field
+typedef enum Field
 {
 	FIELD_EMPTY,
 	FIELD_MERC,
@@ -54,51 +48,27 @@ enum Field
 	FIELD_ADMINISTRATION,
 	FIELD_CONSTRUCTION,
 	FIELD_QUARRY
-};
+} Field ;
+static const uint_fast32_t FIELD_TREE_COUNT = 5;
 
-/* construction costs */
-static const uint32_t FIELD_CONSTRUCTION_COST[] =
+typedef struct FieldData
 {
-	0,	/* empty */
-	0,	/* merc */
-	0,	/* trees */
-	0,
-	0,
-	0,
-	0,	/* trees */
-	0,	/* headquarter */
-	0,	/* construction */
-	20	/* quarry */
-};
+	uint32_t construction_cost;
+	uint32_t construction_time;
+	uint32_t running_cost;
+} FieldData ;
 
-/* construction time */
-static const uint32_t FIELD_CONSTRUCTION_TIME[] =
-{
-	1,	/* empty */
-	0,	/* merc */
-	0,	/* trees */
-	0,
-	0,
-	0,
-	0,	/* trees */
-	0,	/* headquarter */
-	0,	/* construction */
-	2	/* quarry */
-};
-
-/* running costs */
-static const uint32_t FIELD_RUNNING_COST[] =
-{
-	0,	/* empty */
-	10,	/* merc */
-	0,	/* trees */
-	0,
-	0,
-	0,
-	0,	/* trees */
-	20,	/* headquarter */
-	0,	/* construction */
-	10	/* quarry */
+static const FieldData DATA_FIELDS[] = {
+	{0, 1, 0},		// empty
+	{0, 0, 10},		// merc
+	{0, 0, 0},		// trees
+	{0, 0, 0},
+	{0, 0, 0},
+	{0, 0, 0},
+	{0, 0, 0},		// trees
+	{0, 0, 20},		// administration
+	{0, 0, 0},		// construction
+	{20, 2, 10},	//quarry
 };
 
 #endif /* DEF_GAMEPLAY_H */

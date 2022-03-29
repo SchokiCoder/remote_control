@@ -26,21 +26,21 @@
 #include "definitions/def_app.h"
 #include "path.h"
 
-int32_t get_base_path(char *p_out)
+int32_t get_base_path( char *out )
 {
 	int32_t rc;
 
 	/* get path */
-	sprintf(p_out, PATH_BASE, getenv("HOME"), SLASH, APP_NAME);
-	strncat(p_out, SLASH, (FILEPATH_MAX_LEN - strlen(p_out)));
+	sprintf(out, PATH_BASE, getenv("HOME"), SLASH, APP_NAME);
+	strncat(out, SLASH, (FILEPATH_MAX_LEN - strlen(out)));
 
 	/* in case, create dir */
 	errno = 0;
 
 	#ifdef _WIN32
-		rc = mkdir(p_out);
+		rc = mkdir(out);
 	#else
-		rc = mkdir(p_out, S_IRWXU);
+		rc = mkdir(out, S_IRWXU);
 	#endif
 
 	if (rc == -1)
@@ -55,27 +55,27 @@ int32_t get_base_path(char *p_out)
 	return 0;
 }
 
-int32_t get_town_path(char *p_out)
+int32_t get_town_path( char *out )
 {
 	int32_t rc;
 
 	/* get base path */
-	rc = get_base_path(p_out);
+	rc = get_base_path(out);
 
 	if (rc != 0)
 		return rc;
 
 	/* get path */
-	strncat(p_out, PATH_TOWNS, (FILEPATH_MAX_LEN - strlen(p_out)));
-	strncat(p_out, SLASH, (FILEPATH_MAX_LEN - strlen(p_out)));
+	strncat(out, PATH_TOWNS, (FILEPATH_MAX_LEN - strlen(out)));
+	strncat(out, SLASH, (FILEPATH_MAX_LEN - strlen(out)));
 
 	/* in case, create dir */
 	errno = 0;
 
 	#ifdef _WIN32
-		rc = mkdir(p_out);
+		rc = mkdir(out);
 	#else
-		rc = mkdir(p_out, S_IRWXU);
+		rc = mkdir(out, S_IRWXU);
 	#endif
 
 	if (rc == -1)
@@ -90,18 +90,18 @@ int32_t get_town_path(char *p_out)
 	return 0;
 }
 
-int32_t get_config_path(char *p_out)
+int32_t get_config_path( char *out )
 {
 	int32_t rc;
 
 	/* get base path */
-	rc = get_base_path(p_out);
+	rc = get_base_path(out);
 
 	if (rc != 0)
 		return rc;
 
 	/* get path */
-	strncat(p_out, PATH_CONFIG, (FILEPATH_MAX_LEN - strlen(p_out)));
+	strncat(out, PATH_CONFIG, (FILEPATH_MAX_LEN - strlen(out)));
 
 	return 0;
 }

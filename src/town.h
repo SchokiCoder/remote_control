@@ -25,44 +25,44 @@
 #include "definitions/def_gameplay.h"
 #include "definitions/def_mercs.h"
 
-struct Construction
+typedef struct Construction
 {
-	enum Field field;
+	Field field;
 	SDL_Point coords;
 	uint32_t progress;
-};
+} Construction ;
 
-struct Mercenary
+typedef struct Mercenary
 {
 	uint32_t id;
 	SDL_Point coords;
 	uint32_t hp;
 	enum MercFraction fraction;
-};
+} Mercenary ;
 
-struct Town
+typedef struct Town
 {
 	uint8_t admin_id;
 	uint32_t round;
 	uint32_t money;
-	enum Field field[TOWN_WIDTH][TOWN_HEIGHT];
+	Field field[TOWN_WIDTH][TOWN_HEIGHT];
 	bool hidden[TOWN_WIDTH][TOWN_HEIGHT];
 
 	uint32_t construction_count;
-	struct Construction constructions[TOWN_MAX_CONSTRUCTIONS];
+	Construction constructions[TOWN_WIDTH * TOWN_HEIGHT];
 
 	uint32_t merc_count;
-	struct Mercenary mercs[TOWN_MAX_MERCS];
-};
+	Mercenary mercs[MERCENARY_COUNT];
+} Town ;
 
-void Town_print(struct Town *self, char *p_town_name);
+Town Town_new( void );
 
-void Town_new(struct Town *self);
+void Town_print( Town *town, char *town_name );
 
-int32_t Town_save(struct Town *self, char *p_town_name);
+int32_t Town_save( Town *town, char *town_name );
 
-int32_t Town_load(struct Town *self, char *p_town_name);
+int32_t Town_load( Town *town, char *town_name );
 
-void Town_construction_list_remove(struct Town *self, uint32_t p_index);
+void Town_construction_list_remove( Town *town, uint32_t index );
 
 #endif /* TOWN_H */

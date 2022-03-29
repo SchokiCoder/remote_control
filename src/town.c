@@ -27,17 +27,30 @@
 #include "path.h"
 #include "town.h"
 
-void Town_print(struct Town *self, char *p_town_name)
+Town Town_new( void )
+{
+	Town result = {
+		.admin_id = 0,
+		.construction_count = 0,
+		.merc_count = 0,
+		.money = TOWN_START_MONEY,
+		.round = TOWN_START_TIME,
+	};
+
+	return result;
+}
+
+void Town_print( Town *town, char *town_name )
 {
 	/* name */
-	printf("%s\n\n", p_town_name);
+	printf("%s\n\n", town_name);
 
 	/* exposure */
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
 		for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
 		{
-			printf("%i", self->hidden[x][y]);
+			printf("%i", town->hidden[x][y]);
 		}
 
 		printf("\n");
@@ -50,23 +63,14 @@ void Town_print(struct Town *self, char *p_town_name)
 	{
 		for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
 		{
-			printf("%i", self->field[x][y]);
+			printf("%i", town->field[x][y]);
 		}
 
 		printf("\n");
 	}
 }
 
-void Town_new(struct Town *self)
-{
-	self->admin_id = 0;
-	self->construction_count = 0;
-	self->merc_count = 0;
-	self->money = TOWN_START_MONEY;
-	self->round = TOWN_START_TIME;
-}
-
-int32_t Town_save(struct Town *self, char *p_town_name)
+int32_t Town_save( Town *town, char *town_name )
 {
 	char filepath_save[FILEPATH_MAX_LEN] = "";
 	char filepath_bkp[FILEPATH_MAX_LEN] = "";
@@ -79,7 +83,7 @@ int32_t Town_save(struct Town *self, char *p_town_name)
 		return 1;
 
 	/* glue file part to path */
-	strncat(filepath_save, p_town_name, (FILEPATH_MAX_LEN - strlen(filepath_save)));
+	strncat(filepath_save, town_name, (FILEPATH_MAX_LEN - strlen(filepath_save)));
 	strncat(filepath_save, ".", (FILEPATH_MAX_LEN - strlen(filepath_save)));
 
 	strncpy(filepath_bkp, filepath_save, FILEPATH_MAX_LEN);
@@ -113,9 +117,9 @@ int32_t Town_save(struct Town *self, char *p_town_name)
 	fwrite(&APP_MAJOR, sizeof(APP_MAJOR), 1, f);
 	fwrite(&APP_MINOR, sizeof(APP_MINOR), 1, f);
 	fwrite(&APP_PATCH, sizeof(APP_PATCH), 1, f);
-	fwrite(&self->admin_id, sizeof(self->admin_id), 1, f);
-	fwrite(&self->round, sizeof(self->round), 1, f);
-	fwrite(&self->money, sizeof(self->money), 1, f);
+	fwrite(&town->admin_id, sizeof(town->admin_id), 1, f);
+	fwrite(&town->round, sizeof(town->round), 1, f);
+	fwrite(&town->money, sizeof(town->money), 1, f);
 	fwrite(&town_width, sizeof(uint32_t), 1, f);
 	fwrite(&town_height, sizeof(uint32_t), 1, f);
 	fputc('\n', f);
@@ -123,42 +127,42 @@ int32_t Town_save(struct Town *self, char *p_town_name)
 	/* write exposure data */
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
-		fwrite(self->hidden[x], sizeof(self->hidden[x][0]), TOWN_HEIGHT, f);
+		fwrite(town->hidden[x], sizeof(town->hidden[x][0]), TOWN_HEIGHT, f);
 	}
 
 	/* write content data */
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
-		fwrite(self->field[x], sizeof(self->field[x][0]), TOWN_HEIGHT, f);
+		fwrite(town->field[x], sizeof(town->field[x][0]), TOWN_HEIGHT, f);
 	}
 
 	fputc('\n', f);
 
 	/* write construction list data */
-	fwrite(&self->construction_count, sizeof(self->construction_count), 1, f);
+	fwrite(&town->construction_count, sizeof(town->construction_count), 1, f);
 	fputc('\n', f);
 
 	/* write construction list */
-	for (uint32_t i = 0; i < self->construction_count; i++)
+	for (uint32_t i = 0; i < town->construction_count; i++)
 	{
-		fwrite(&self->constructions[i].field, sizeof(self->constructions[i].field), 1, f);
-		fwrite(&self->constructions[i].coords.x, sizeof(self->constructions[i].coords.x), 1, f);
-		fwrite(&self->constructions[i].coords.y, sizeof(self->constructions[i].coords.y), 1, f);
-		fwrite(&self->constructions[i].progress, sizeof(self->constructions[i].progress), 1, f);
+		fwrite(&town->constructions[i].field, sizeof(town->constructions[i].field), 1, f);
+		fwrite(&town->constructions[i].coords.x, sizeof(town->constructions[i].coords.x), 1, f);
+		fwrite(&town->constructions[i].coords.y, sizeof(town->constructions[i].coords.y), 1, f);
+		fwrite(&town->constructions[i].progress, sizeof(town->constructions[i].progress), 1, f);
 	}
 
 	// write merc list data
-	fwrite(&self->merc_count, sizeof(self->merc_count), 1, f);
+	fwrite(&town->merc_count, sizeof(town->merc_count), 1, f);
 	fputc('\n', f);
 
 	// write merc list
-	for (uint32_t i = 0; i < self->merc_count; i++)
+	for (uint32_t i = 0; i < town->merc_count; i++)
 	{
-		fwrite(&self->mercs[i].id, sizeof(self->mercs[i].id), 1, f);
-		fwrite(&self->mercs[i].coords.x, sizeof(self->mercs[i].coords.x), 1, f);
-		fwrite(&self->mercs[i].coords.y, sizeof(self->mercs[i].coords.y), 1, f);
-		fwrite(&self->mercs[i].hp, sizeof(self->mercs[i].hp), 1, f);
-		fwrite(&self->mercs[i].fraction, sizeof(self->mercs[i].fraction), 1, f);
+		fwrite(&town->mercs[i].id, sizeof(town->mercs[i].id), 1, f);
+		fwrite(&town->mercs[i].coords.x, sizeof(town->mercs[i].coords.x), 1, f);
+		fwrite(&town->mercs[i].coords.y, sizeof(town->mercs[i].coords.y), 1, f);
+		fwrite(&town->mercs[i].hp, sizeof(town->mercs[i].hp), 1, f);
+		fwrite(&town->mercs[i].fraction, sizeof(town->mercs[i].fraction), 1, f);
 	}
 
 	/* check and done */
@@ -173,7 +177,7 @@ int32_t Town_save(struct Town *self, char *p_town_name)
 	return 0;
 }
 
-int32_t Town_load(struct Town *self, char *p_town_name)
+int32_t Town_load( Town *town, char *town_name )
 {
 	FILE *f;
 	char filepath[FILEPATH_MAX_LEN] = "";
@@ -185,7 +189,7 @@ int32_t Town_load(struct Town *self, char *p_town_name)
 		return 1;
 
 	/* glue file part to path */
-	strncat(filepath, p_town_name, (FILEPATH_MAX_LEN - strlen(filepath)));
+	strncat(filepath, town_name, (FILEPATH_MAX_LEN - strlen(filepath)));
 	strncat(filepath, ".", (FILEPATH_MAX_LEN - strlen(filepath)));
 	strncat(filepath, FILETYPE_TOWN, (FILEPATH_MAX_LEN - strlen(filepath)));
 
@@ -202,9 +206,9 @@ int32_t Town_load(struct Town *self, char *p_town_name)
 	fread(&file_major, sizeof(file_major), 1, f);
 	fread(&file_minor, sizeof(file_minor), 1, f);
 	fread(&file_patch, sizeof(file_patch), 1, f);
-	fread(&self->admin_id, sizeof(self->admin_id), 1, f);
-	fread(&self->round, sizeof(self->round), 1, f);
-	fread(&self->money, sizeof(self->money), 1, f);
+	fread(&town->admin_id, sizeof(town->admin_id), 1, f);
+	fread(&town->round, sizeof(town->round), 1, f);
+	fread(&town->money, sizeof(town->money), 1, f);
 	fread(&town_width, sizeof(town_width), 1, f);
 	fread(&town_height, sizeof(town_height), 1, f);
 	fgetc(f);
@@ -222,41 +226,41 @@ int32_t Town_load(struct Town *self, char *p_town_name)
 	/* read exposure data */
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
-		fread(self->hidden[x], sizeof(self->hidden[x][0]), TOWN_HEIGHT, f);
+		fread(town->hidden[x], sizeof(town->hidden[x][0]), TOWN_HEIGHT, f);
 	}
 
 	/* read content data */
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
-		fread(self->field[x], sizeof(self->field[x][0]), TOWN_HEIGHT, f);
+		fread(town->field[x], sizeof(town->field[x][0]), TOWN_HEIGHT, f);
 	}
 	fgetc(f);
 
 	/* read construction list data */
-	fread(&self->construction_count, sizeof(self->construction_count), 1, f);
+	fread(&town->construction_count, sizeof(town->construction_count), 1, f);
 	fgetc(f);
 
 	/* read construction list */
-	for (uint32_t i = 0; i < self->construction_count; i++)
+	for (uint32_t i = 0; i < town->construction_count; i++)
 	{
-		fread(&self->constructions[i].field, sizeof(self->constructions[i].field), 1, f);
-		fread(&self->constructions[i].coords.x, sizeof(self->constructions[i].coords.x), 1, f);
-		fread(&self->constructions[i].coords.y, sizeof(self->constructions[i].coords.y), 1, f);
-		fread(&self->constructions[i].progress, sizeof(self->constructions[i].progress), 1, f);
+		fread(&town->constructions[i].field, sizeof(town->constructions[i].field), 1, f);
+		fread(&town->constructions[i].coords.x, sizeof(town->constructions[i].coords.x), 1, f);
+		fread(&town->constructions[i].coords.y, sizeof(town->constructions[i].coords.y), 1, f);
+		fread(&town->constructions[i].progress, sizeof(town->constructions[i].progress), 1, f);
 	}
 
 	// read merc list data
-	fread(&self->merc_count, sizeof(self->merc_count), 1, f);
+	fread(&town->merc_count, sizeof(town->merc_count), 1, f);
 	fgetc(f);
 
 	// read merc list
-	for (uint32_t i = 0; i < self->merc_count; i++)
+	for (uint32_t i = 0; i < town->merc_count; i++)
 	{
-		fread(&self->mercs[i].id, sizeof(self->mercs[i].id), 1, f);
-		fread(&self->mercs[i].coords.x, sizeof(self->mercs[i].coords.x), 1, f);
-		fread(&self->mercs[i].coords.y, sizeof(self->mercs[i].coords.y), 1, f);
-		fread(&self->mercs[i].hp, sizeof(self->mercs[i].hp), 1, f);
-		fread(&self->mercs[i].fraction, sizeof(self->mercs[i].fraction), 1, f);
+		fread(&town->mercs[i].id, sizeof(town->mercs[i].id), 1, f);
+		fread(&town->mercs[i].coords.x, sizeof(town->mercs[i].coords.x), 1, f);
+		fread(&town->mercs[i].coords.y, sizeof(town->mercs[i].coords.y), 1, f);
+		fread(&town->mercs[i].hp, sizeof(town->mercs[i].hp), 1, f);
+		fread(&town->mercs[i].fraction, sizeof(town->mercs[i].fraction), 1, f);
 	}
 
 	/* check and done */
@@ -272,14 +276,14 @@ int32_t Town_load(struct Town *self, char *p_town_name)
 	return 0;
 }
 
-void Town_construction_list_remove(struct Town *self, uint32_t p_index)
+void Town_construction_list_remove( Town *town, uint32_t index )
 {
 	/* beginning at index, for each entry overwrite with next entry */
-	for (uint32_t i = p_index; i < self->construction_count; i++)
+	for (uint32_t i = index; i < town->construction_count; i++)
 	{
-		self->constructions[i] = self->constructions[i + 1];
+		town->constructions[i] = town->constructions[i + 1];
 	}
 
 	/* decrement count */
-	self->construction_count--;
+	town->construction_count--;
 }

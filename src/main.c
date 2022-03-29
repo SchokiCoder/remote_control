@@ -25,7 +25,7 @@
 #include "definitions/def_messages.h"
 #include "commands.h"
 
-int main(int argc, char **argv)
+int main( int argc, char **argv )
 {
 	/* if no args given */
 	if (argc < 2)

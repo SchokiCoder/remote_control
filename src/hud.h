@@ -27,10 +27,37 @@
 #include <SGUI_entry.h>
 #include <SGUI_label.h>
 #include "definitions/def_gameplay.h"
-#include "sprite.h"
 #include "town.h"
 
 typedef struct Game Game;
+
+static const char PATH_TEXTURE_GROUND[] =		PATH_TEXTURES "ground.png";
+static const char PATH_TEXTURE_HIDDEN[] =		PATH_TEXTURES "hidden.png";
+static const char PATH_TEXTURE_MERC_BASE[] =	PATH_TEXTURES "mercenary_base.png";
+static const char PATH_TEXTURE_MERC_GREEN[] =	PATH_TEXTURES "mercenary_green_tint.png";
+static const char PATH_TEXTURE_MERC_PURPLE[] =	PATH_TEXTURES "mercenary_purple_tint.png";
+
+static const char *PATH_TEXTURE_MERCENARIES[] = {
+	PATH_TEXTURES "mercenary_soldier.png",
+	PATH_TEXTURES "mercenary_pyro.png",
+	PATH_TEXTURES "mercenary_anchor.png",
+	PATH_TEXTURES "mercenary_medic.png"
+};
+#define MERCENARY_SPRITE_COUNT sizeof(PATH_TEXTURE_MERCENARIES) / sizeof(PATH_TEXTURE_MERCENARIES[0])
+
+static const char *PATH_TEXTURE_FIELDS[] = {
+	PATH_TEXTURES "tree_0.png",
+	PATH_TEXTURES "tree_1.png",
+	PATH_TEXTURES "tree_2.png",
+	PATH_TEXTURES "tree_3.png",
+	PATH_TEXTURES "tree_4.png",
+	PATH_TEXTURES "headquarter.png",
+	PATH_TEXTURES "construction.png",
+	PATH_TEXTURES "quarry.png"
+};
+#define FIELD_SPRITE_OFFSET 2
+#define FIELD_SPRITE_COUNT \
+	(sizeof(PATH_TEXTURE_FIELDS) / sizeof(PATH_TEXTURE_FIELDS[0])) - FIELD_SPRITE_OFFSET
 
 typedef struct Hud
 {
@@ -65,51 +92,40 @@ typedef struct Hud
 	SDL_RendererFlip flips_field[TOWN_WIDTH][TOWN_HEIGHT];
 
 	/* shared sprites */
-	struct Sprite spr_ground;
-	struct Sprite spr_hidden;
+	SGUI_Sprite spr_ground;
+	SGUI_Sprite spr_hidden;
 
-	struct Sprite spr_merc_base;
-	struct Sprite spr_merc_tint_green;
-	struct Sprite spr_merc_tint_purple;
-	struct Sprite spr_mercs[TOWN_MAX_MERCS];
+	SGUI_Sprite spr_merc_base;
+	SGUI_Sprite spr_merc_tint_green;
+	SGUI_Sprite spr_merc_tint_purple;
+	SGUI_Sprite spr_mercs[MERCENARY_SPRITE_COUNT];
 
-	struct Sprite spr_trees[TOWN_TREE_VARIETY_COUNT];
-	struct Sprite spr_hq;
-	struct Sprite spr_construction;
-	struct Sprite spr_quarry;
+	SGUI_Sprite spr_fields[FIELD_SPRITE_COUNT];
 } Hud ;
 
-Hud Hud_new(SDL_Renderer *p_renderer, char *p_path_font);
+Hud Hud_new( SDL_Renderer *renderer, char *path_font );
 
-void Hud_update_time(struct Hud *self, uint32_t p_round);
+void Hud_update_time( Hud *hud, uint32_t round );
 
-void Hud_update_money(struct Hud *self, uint32_t p_money);
+void Hud_update_money( Hud *hud, uint32_t money );
 
-void Hud_calc(struct Hud *self,	int32_t p_window_w,	int32_t p_window_h);
+void Hud_calc( Hud *hud,	int32_t window_w, int32_t window_h );
 
-void Hud_generate_flips(struct Hud *self);
+void Hud_generate_flips( Hud *hud );
 
 void Hud_map_textures(
-	struct Hud *self,
-	bool p_fields_hidden[TOWN_WIDTH][TOWN_HEIGHT],
-	enum Field p_fields_content[TOWN_WIDTH][TOWN_HEIGHT]);
+	Hud *hud,
+	bool fields_hidden[TOWN_WIDTH][TOWN_HEIGHT],
+	Field fields_content[TOWN_WIDTH][TOWN_HEIGHT] );
 
-void Hud_draw(struct Hud *self, struct Town *p_town);
+void Hud_draw( Hud *hud, Town *town );
 
-SDL_Point Hud_mouse_to_field(struct Hud *self, SDL_Point p_mouse);
+SDL_Point Hud_mouse_to_field( Hud *hud, SDL_Point mouse );
 
-void Hud_handle_click(struct Hud *self, SDL_Point p_mouse, Game *p_game);
+void Hud_handle_hover( Hud *hud, SDL_Point mouse );
 
-void Hud_handle_hover(struct Hud *self, SDL_Point p_mouse);
+void Hud_set_field( Hud *hud, SDL_Point field, SDL_Texture *texture );
 
-void Hud_construct_mode(struct Hud *self, enum Field p_field, SDL_Texture *p_texture);
-
-void Hud_deconstruct_mode(struct Hud *self);
-
-void Hud_set_field(struct Hud *self, SDL_Point p_field, SDL_Texture *p_texture);
-
-SDL_Texture* Hud_get_field_texture(struct Hud *self, enum Field p_field);
-
-void Hud_clear(struct Hud *self);
+void Hud_clear( Hud *hud );
 
 #endif /* HUD_H */

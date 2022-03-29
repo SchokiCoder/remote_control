@@ -27,31 +27,36 @@
 #include "path.h"
 #include "config.h"
 
-void Config_new(struct Config *self)
+Config Config_new( void )
 {
-	strncpy(self->path_font, CFG_STD_PATH_FONT, CFG_SETTING_PATH_FONT_MAX_LEN);
-	self->gfx_framerate = CFG_STD_GFX_FRAMERATE;
-	self->gfx_window_x = CFG_STD_GFX_WINDOW_X;
-	self->gfx_window_y = CFG_STD_GFX_WINDOW_Y;
-	self->gfx_window_w = CFG_STD_GFX_WINDOW_W;
-	self->gfx_window_h = CFG_STD_GFX_WINDOW_H;
-	self->bg_red = CFG_STD_BG_RED;
-	self->bg_green = CFG_STD_BG_GREEN;
-	self->bg_blue = CFG_STD_BG_BLUE;
-	self->font_red = CFG_STD_FONT_RED;
-	self->font_green = CFG_STD_FONT_GREEN;
-	self->font_blue = CFG_STD_FONT_BLUE;
-	self->font_alpha = CFG_STD_FONT_ALPHA;
-	self->field_border_red = CFG_STD_FIELD_BORDER_RED;
-	self->field_border_green = CFG_STD_FIELD_BORDER_GREEN;
-	self->field_border_blue = CFG_STD_FIELD_BORDER_BLUE;
-	self->field_border_alpha = CFG_STD_FIELD_BORDER_ALPHA;
-	self->kb_pass = CFG_STD_KB_PASS;
-	self->kb_build_quarry = CFG_STD_KB_BUILD_QUARRY;
-	self->kb_deconstruct = CFG_STD_KB_DECONSTRUCT;
+	Config result = {
+		.gfx_framerate = CFG_STD_GFX_FRAMERATE,
+		.gfx_window_x = CFG_STD_GFX_WINDOW_X,
+		.gfx_window_y = CFG_STD_GFX_WINDOW_Y,
+		.gfx_window_w = CFG_STD_GFX_WINDOW_W,
+		.gfx_window_h = CFG_STD_GFX_WINDOW_H,
+		.bg_red = CFG_STD_BG_RED,
+		.bg_green = CFG_STD_BG_GREEN,
+		.bg_blue = CFG_STD_BG_BLUE,
+		.font_red = CFG_STD_FONT_RED,
+		.font_green = CFG_STD_FONT_GREEN,
+		.font_blue = CFG_STD_FONT_BLUE,
+		.font_alpha = CFG_STD_FONT_ALPHA,
+		.field_border_red = CFG_STD_FIELD_BORDER_RED,
+		.field_border_green = CFG_STD_FIELD_BORDER_GREEN,
+		.field_border_blue = CFG_STD_FIELD_BORDER_BLUE,
+		.field_border_alpha = CFG_STD_FIELD_BORDER_ALPHA,
+		.kb_pass = CFG_STD_KB_PASS,
+		.kb_build_quarry = CFG_STD_KB_BUILD_QUARRY,
+		.kb_deconstruct = CFG_STD_KB_DECONSTRUCT,
+	};
+
+	strncpy(result.path_font, CFG_STD_PATH_FONT, CFG_SETTING_PATH_FONT_MAX_LEN);
+
+	return result;
 }
 
-int32_t Config_load(struct Config *self)
+int32_t Config_load( Config *cfg )
 {
 	FILE *f;
 	char filepath[FILEPATH_MAX_LEN] = "";
@@ -134,95 +139,95 @@ int32_t Config_load(struct Config *self)
 		/* etc */
 		if (strcmp(cfg_settings[i], CFG_SETTING_PATH_FONT) == 0)
 		{
-			strncpy(self->path_font, cfg_values[i], CFG_SETTING_PATH_FONT_MAX_LEN);
+			strncpy(cfg->path_font, cfg_values[i], CFG_SETTING_PATH_FONT_MAX_LEN);
 		}
 		else if (strcmp(cfg_settings[i], CFG_SETTING_GFX_FRAMERATE) == 0)
 		{
-			self->gfx_framerate = strtof(cfg_values[i], NULL);
+			cfg->gfx_framerate = strtof(cfg_values[i], NULL);
 		}
 
 		/* window pos, size */
 		else if (strcmp(cfg_settings[i], CFG_SETTING_GFX_WINDOW_X) == 0)
 		{
-			self->gfx_window_x = strtol(cfg_values[i], NULL, 10);
+			cfg->gfx_window_x = strtol(cfg_values[i], NULL, 10);
 		}
 		else if(strcmp(cfg_settings[i], CFG_SETTING_GFX_WINDOW_Y) == 0)
 		{
-			self->gfx_window_y = strtol(cfg_values[i], NULL, 10);
+			cfg->gfx_window_y = strtol(cfg_values[i], NULL, 10);
 		}
 		else if(strcmp(cfg_settings[i], CFG_SETTING_GFX_WINDOW_W) == 0)
 		{
-			self->gfx_window_w = strtol(cfg_values[i], NULL, 10);
+			cfg->gfx_window_w = strtol(cfg_values[i], NULL, 10);
 		}
 		else if(strcmp(cfg_settings[i], CFG_SETTING_GFX_WINDOW_H) == 0)
 		{
-			self->gfx_window_h = strtol(cfg_values[i], NULL, 10);
+			cfg->gfx_window_h = strtol(cfg_values[i], NULL, 10);
 		}
 
 		/* bg color */
 		else if (strcmp(cfg_settings[i], CFG_SETTING_BG_RED) == 0)
 		{
-			self->bg_red = strtoul(cfg_values[i], NULL, 10);
+			cfg->bg_red = strtoul(cfg_values[i], NULL, 10);
 		}
 		else if (strcmp(cfg_settings[i], CFG_SETTING_BG_GREEN) == 0)
 		{
-			self->bg_green = strtoul(cfg_values[i], NULL, 10);
+			cfg->bg_green = strtoul(cfg_values[i], NULL, 10);
 		}
 		else if (strcmp(cfg_settings[i], CFG_SETTING_BG_BLUE) == 0)
 		{
-			self->bg_blue = strtoul(cfg_values[i], NULL, 10);
+			cfg->bg_blue = strtoul(cfg_values[i], NULL, 10);
 		}
 
 		/* font color */
 		else if (strcmp(cfg_settings[i], CFG_SETTING_FONT_RED) == 0)
 		{
-			self->font_red = strtoul(cfg_values[i], NULL, 10);
+			cfg->font_red = strtoul(cfg_values[i], NULL, 10);
 		}
 		else if (strcmp(cfg_settings[i], CFG_SETTING_FONT_GREEN) == 0)
 		{
-			self->font_green = strtoul(cfg_values[i], NULL, 10);
+			cfg->font_green = strtoul(cfg_values[i], NULL, 10);
 		}
 		else if (strcmp(cfg_settings[i], CFG_SETTING_FONT_BLUE) == 0)
 		{
-			self->font_blue = strtoul(cfg_values[i], NULL, 10);
+			cfg->font_blue = strtoul(cfg_values[i], NULL, 10);
 		}
 		else if (strcmp(cfg_settings[i], CFG_SETTING_FONT_ALPHA) == 0)
 		{
-			self->font_alpha = strtoul(cfg_values[i], NULL, 10);
+			cfg->font_alpha = strtoul(cfg_values[i], NULL, 10);
 		}
 
 		/* field border color */
 		else if (strcmp(cfg_settings[i], CFG_SETTING_FIELD_BORDER_RED) == 0)
 		{
-			self->field_border_red = strtoul(cfg_values[i], NULL, 10);
+			cfg->field_border_red = strtoul(cfg_values[i], NULL, 10);
 		}
 		else if (strcmp(cfg_settings[i], CFG_SETTING_FIELD_BORDER_GREEN) == 0)
 		{
-			self->field_border_green = strtoul(cfg_values[i], NULL, 10);
+			cfg->field_border_green = strtoul(cfg_values[i], NULL, 10);
 		}
 		else if (strcmp(cfg_settings[i], CFG_SETTING_FIELD_BORDER_BLUE) == 0)
 		{
-			self->field_border_blue = strtoul(cfg_values[i], NULL, 10);
+			cfg->field_border_blue = strtoul(cfg_values[i], NULL, 10);
 		}
 		else if (strcmp(cfg_settings[i], CFG_SETTING_FIELD_BORDER_ALPHA) == 0)
 		{
-			self->field_border_alpha = strtoul(cfg_values[i], NULL, 10);
+			cfg->field_border_alpha = strtoul(cfg_values[i], NULL, 10);
 		}
 
 		/* key bindings */
 		else if (strcmp(cfg_settings[i], CFG_SETTING_KB_PASS) == 0)
 		{
-			self->kb_pass = strtol(cfg_values[i], NULL, 10);
+			cfg->kb_pass = strtol(cfg_values[i], NULL, 10);
 		}
 
 		else if (strcmp(cfg_settings[i], CFG_SETTING_KB_BUILD_QUARRY) == 0)
 		{
-			self->kb_build_quarry = strtol(cfg_values[i], NULL, 10);
+			cfg->kb_build_quarry = strtol(cfg_values[i], NULL, 10);
 		}
 
 		else if (strcmp(cfg_settings[i], CFG_SETTING_KB_DECONSTRUCT) == 0)
 		{
-			self->kb_deconstruct = strtol(cfg_values[i], NULL, 10);
+			cfg->kb_deconstruct = strtol(cfg_values[i], NULL, 10);
 		}
 
 		/* unknown option */
@@ -237,7 +242,7 @@ int32_t Config_load(struct Config *self)
 	return 0;
 }
 
-int32_t Config_save(struct Config *self)
+int32_t Config_save( Config *cfg )
 {
 	FILE *f;
 	char filepath[FILEPATH_MAX_LEN] = "";
@@ -259,107 +264,107 @@ int32_t Config_save(struct Config *self)
 	/* write - etc */
 	fputs(CFG_SETTING_PATH_FONT, f);
 	fputs(delim, f);
-	fprintf(f, "%s", self->path_font);
+	fprintf(f, "%s", cfg->path_font);
 	fputc('\n', f);
 
 	fputs(CFG_SETTING_GFX_FRAMERATE, f);
 	fputs(delim, f);
-	fprintf(f, "%f", self->gfx_framerate);
+	fprintf(f, "%f", cfg->gfx_framerate);
 	fputc('\n', f);
 
 	/* window pos, size */
 	fputs(CFG_SETTING_GFX_WINDOW_X, f);
 	fputs(delim, f);
-	fprintf(f, "%i", self->gfx_window_x);
+	fprintf(f, "%i", cfg->gfx_window_x);
 	fputc('\n', f);
 
 	fputs(CFG_SETTING_GFX_WINDOW_Y, f);
 	fputs(delim, f);
-	fprintf(f, "%i", self->gfx_window_y);
+	fprintf(f, "%i", cfg->gfx_window_y);
 	fputc('\n', f);
 
 	fputs(CFG_SETTING_GFX_WINDOW_W, f);
 	fputs(delim, f);
-	fprintf(f, "%i", self->gfx_window_w);
+	fprintf(f, "%i", cfg->gfx_window_w);
 	fputc('\n', f);
 
 	fputs(CFG_SETTING_GFX_WINDOW_H, f);
 	fputs(delim, f);
-	fprintf(f, "%i", self->gfx_window_h);
+	fprintf(f, "%i", cfg->gfx_window_h);
 	fputc('\n', f);
 
 	/* bg color */
 	fputs(CFG_SETTING_BG_RED, f);
 	fputs(delim, f);
-	fprintf(f, "%u", self->bg_red);
+	fprintf(f, "%u", cfg->bg_red);
 	fputc('\n', f);
 
 	fputs(CFG_SETTING_BG_GREEN, f);
 	fputs(delim, f);
-	fprintf(f, "%u", self->bg_green);
+	fprintf(f, "%u", cfg->bg_green);
 	fputc('\n', f);
 
 	fputs(CFG_SETTING_BG_BLUE, f);
 	fputs(delim, f);
-	fprintf(f, "%u", self->bg_blue);
+	fprintf(f, "%u", cfg->bg_blue);
 	fputc('\n', f);
 
 	/* font color */
 	fputs(CFG_SETTING_FONT_RED, f);
 	fputs(delim, f);
-	fprintf(f, "%u", self->font_red);
+	fprintf(f, "%u", cfg->font_red);
 	fputc('\n', f);
 
 	fputs(CFG_SETTING_FONT_GREEN, f);
 	fputs(delim, f);
-	fprintf(f, "%u", self->font_green);
+	fprintf(f, "%u", cfg->font_green);
 	fputc('\n', f);
 
 	fputs(CFG_SETTING_FONT_BLUE, f);
 	fputs(delim, f);
-	fprintf(f, "%u", self->font_blue);
+	fprintf(f, "%u", cfg->font_blue);
 	fputc('\n', f);
 
 	fputs(CFG_SETTING_FONT_ALPHA, f);
 	fputs(delim, f);
-	fprintf(f, "%u", self->font_alpha);
+	fprintf(f, "%u", cfg->font_alpha);
 	fputc('\n', f);
 
 	/* field border color */
 	fputs(CFG_SETTING_FIELD_BORDER_RED, f);
 	fputs(delim, f);
-	fprintf(f, "%u", self->field_border_red);
+	fprintf(f, "%u", cfg->field_border_red);
 	fputc('\n', f);
 
 	fputs(CFG_SETTING_FIELD_BORDER_GREEN, f);
 	fputs(delim, f);
-	fprintf(f, "%u", self->field_border_green);
+	fprintf(f, "%u", cfg->field_border_green);
 	fputc('\n', f);
 
 	fputs(CFG_SETTING_FIELD_BORDER_BLUE, f);
 	fputs(delim, f);
-	fprintf(f, "%u", self->field_border_blue);
+	fprintf(f, "%u", cfg->field_border_blue);
 	fputc('\n', f);
 
 	fputs(CFG_SETTING_FIELD_BORDER_ALPHA, f);
 	fputs(delim, f);
-	fprintf(f, "%u", self->field_border_alpha);
+	fprintf(f, "%u", cfg->field_border_alpha);
 	fputc('\n', f);
 
 	/* key bindings */
 	fputs(CFG_SETTING_KB_PASS, f);
 	fputs(delim, f);
-	fprintf(f, "%i", self->kb_pass);
+	fprintf(f, "%i", cfg->kb_pass);
 	fputc('\n', f);
 
 	fputs(CFG_SETTING_KB_BUILD_QUARRY, f);
 	fputs(delim, f);
-	fprintf(f, "%i", self->kb_build_quarry);
+	fprintf(f, "%i", cfg->kb_build_quarry);
 	fputc('\n', f);
 
 	fputs(CFG_SETTING_KB_DECONSTRUCT, f);
 	fputs(delim, f);
-	fprintf(f, "%i", self->kb_deconstruct);
+	fprintf(f, "%i", cfg->kb_deconstruct);
 	fputc('\n', f);
 
 	fclose(f);

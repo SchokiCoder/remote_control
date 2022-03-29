@@ -33,12 +33,12 @@
 #include "game.h"
 #include "commands.h"
 
-void cmd_help_menu()
+void cmd_help_menu( void )
 {
 	printf(HELP_1ST_STEPS);
 }
 
-void cmd_help_full()
+void cmd_help_full( void )
 {
 	cmd_help_menu();
 
@@ -63,7 +63,7 @@ void cmd_help_full()
 		APP_SOURCE);
 }
 
-void cmd_list_admins()
+void cmd_list_admins( void )
 {
 	for (uint32_t i = 0; i < (sizeof(ADMIN_ID) / sizeof(ADMIN_ID[0])); i++)
 	{
@@ -78,9 +78,9 @@ void cmd_list_admins()
 	}
 }
 
-void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
+void cmd_hire_admin( int32_t admin_id, char *town_name )
 {
-	struct Town new_town;
+	Town new_town = Town_new();
 	uint32_t tree_chance;
 	uint32_t tree_variance;
 	char filepath[FILEPATH_MAX_LEN] = "";
@@ -91,9 +91,9 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 	srand(time(NULL));
 
 	/* check given admin id */
-	if ((p_admin_id != ADMIN_ID[0]) &
-		(p_admin_id != ADMIN_ID[1]) &
-		(p_admin_id != ADMIN_ID[2]))
+	if ((admin_id != ADMIN_ID[0]) &
+		(admin_id != ADMIN_ID[1]) &
+		(admin_id != ADMIN_ID[2]))
 	{
 		printf(MSG_ERR_ADMIN_ID, MSG_ERR, CMD_LIST_ADMINS_LONG);
 		return;
@@ -103,7 +103,7 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 	if (get_town_path(filepath) != 0)
 		return;
 
-	strncat(filepath, p_town_name, (FILEPATH_MAX_LEN - strlen(filepath)));
+	strncat(filepath, town_name, (FILEPATH_MAX_LEN - strlen(filepath)));
 	strncat(filepath, ".", (FILEPATH_MAX_LEN - strlen(filepath)));
 	strncat(filepath, FILETYPE_TOWN, (FILEPATH_MAX_LEN - strlen(filepath)));
 
@@ -126,8 +126,7 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 	}
 
 	/* set values */
-	Town_new(&new_town);
-	new_town.admin_id = p_admin_id;
+	new_town.admin_id = admin_id;
 
 	/* hide fields, generate trees */
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
@@ -140,7 +139,7 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 			if (tree_chance > TOWN_GEN_TREE_THRESHOLD)
 			{
 				/* chance for species */
-				tree_variance = rand() % TOWN_TREE_VARIETY_COUNT;
+				tree_variance = rand() % FIELD_TREE_COUNT;
 				new_town.field[x][y] = (FIELD_TREE_0 + tree_variance);
 			}
 			else
@@ -175,11 +174,11 @@ void cmd_hire_admin(int32_t p_admin_id, char *p_town_name)
 	new_town.field[TOWN_HQ_SPAWN_X][TOWN_HQ_SPAWN_Y] = FIELD_ADMINISTRATION;
 
 	/* save town to file */
-	if(Town_save(&new_town, p_town_name) == 0)
+	if(Town_save(&new_town, town_name) == 0)
 		printf(MSG_FILE_TOWN_CREATE);
 }
 
-void cmd_list_towns()
+void cmd_list_towns( void )
 {
 	char path[FILEPATH_MAX_LEN] = "";
 	DIR *dir;
@@ -216,26 +215,21 @@ void cmd_list_towns()
 	printf("\n");
 }
 
-void cmd_connect(char *p_town_name)
+void cmd_connect( char *town_name )
 {
 	struct Game game;
-	struct Town town;
-	struct Config cfg;
+	Town town = Town_new();
+	Config cfg = Config_new();
 
-	/* load game */
-	Town_new(&town);
-
-	if (Town_load(&town, p_town_name) != 0)
+	// load game
+	if (Town_load(&town, town_name) != 0)
 		return;
 
-	/* set cfg to std values (set values will overwrite std) */
-	Config_new(&cfg);
-
-	/* read config */
+	// read config
 	Config_load(&cfg);
 
 	/* prepare gameplay data */
-	game.town_name = p_town_name;
+	game.town_name = town_name;
 	game.town = &town;
 	game.cfg = &cfg;
 	game.game_state = GS_ACTIVE;
@@ -260,7 +254,7 @@ void cmd_connect(char *p_town_name)
 	printf(MSG_CONNECTION_CLOSED);
 }
 
-void cmd_delete(char *p_town_name)
+void cmd_delete( char *town_name )
 {
 	char filepath[FILEPATH_MAX_LEN] = "";
 
@@ -269,7 +263,7 @@ void cmd_delete(char *p_town_name)
 		return;
 
 	/* glue file part to path */
-	strncat(filepath, p_town_name, (FILEPATH_MAX_LEN - strlen(filepath)));
+	strncat(filepath, town_name, (FILEPATH_MAX_LEN - strlen(filepath)));
 	strncat(filepath, ".", (FILEPATH_MAX_LEN - strlen(filepath)));
 	strncat(filepath, FILETYPE_TOWN, (FILEPATH_MAX_LEN - strlen(filepath)));
 

@@ -24,8 +24,8 @@
 #include <SDL.h>
 #include "town.h"
 
-struct Config;
-struct Hud;
+typedef struct Config Config;
+typedef struct Hud Hud;
 
 enum GameState
 {
@@ -34,26 +34,21 @@ enum GameState
 	GS_FAILURE_COST
 };
 
-struct Game
+typedef struct Game
 {
 	char *town_name;
-	struct Town *town;
-	struct Config *cfg;
+	Town *town;
+	Config *cfg;
 
 	enum GameState game_state;
-};
+} Game ;
 
-void Game_end_round(struct Game *self, struct Hud *p_hud);
+void Game_end_round( Game *game, Hud *hud );
 
-void Game_construct(
-	struct Game *self,
-	SDL_Point p_field,
-	enum Field p_building,
-	struct Hud *p_hud,
-	SDL_Texture *p_texture);
+void Game_construct( Game *game, SDL_Point field, Field building, Hud *hud );
 
-void Game_spawn_merc(struct Game *self, struct Hud *hud, struct Mercenary p_merc);
+void Game_spawn_merc( Game *game, Hud *hud, Mercenary merc );
 
-int32_t Game_main(struct Game *self);
+int32_t Game_main( Game *game );
 
 #endif /* GAME_H */
