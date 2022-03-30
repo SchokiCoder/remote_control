@@ -21,9 +21,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
-#include "definitions/def_commands.h"
-#include "definitions/def_messages.h"
 #include "commands.h"
+#include "messages.h"
 
 int main( int argc, char **argv )
 {

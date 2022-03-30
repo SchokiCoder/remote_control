@@ -22,8 +22,59 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <SDL.h>
-#include "definitions/def_gameplay.h"
-#include "definitions/def_mercs.h"
+#include "mercs.h"
+
+#define TOWN_WIDTH	15
+#define TOWN_HEIGHT	15
+
+static const uint32_t TOWN_EXPOSURE_AREA_BEGIN_X =	4;
+static const uint32_t TOWN_EXPOSURE_AREA_BEGIN_Y =	4;
+static const uint32_t TOWN_EXPOSURE_AREA_END_X =	11;
+static const uint32_t TOWN_EXPOSURE_AREA_END_Y =	11;
+static const uint32_t TOWN_TREEFREE_AREA_BEGIN_X =	5;
+static const uint32_t TOWN_TREEFREE_AREA_BEGIN_Y =	5;
+static const uint32_t TOWN_TREEFREE_AREA_END_X =	10;
+static const uint32_t TOWN_TREEFREE_AREA_END_Y =	10;
+static const uint32_t TOWN_GEN_TREE_THRESHOLD =		40;		/* from 0 to 100 */
+static const uint32_t TOWN_HQ_SPAWN_X =				7;
+static const uint32_t TOWN_HQ_SPAWN_Y =				7;
+static const uint32_t TOWN_START_TIME =				6;		/* round 0 plays at 06:00 am */
+static const uint32_t TOWN_START_MONEY =			2000;
+
+typedef enum Field
+{
+	FIELD_EMPTY,
+	FIELD_MERC,
+	FIELD_TREE_0,
+	FIELD_TREE_1,
+	FIELD_TREE_2,
+	FIELD_TREE_3,
+	FIELD_TREE_4,
+	FIELD_ADMINISTRATION,
+	FIELD_CONSTRUCTION,
+	FIELD_QUARRY
+} Field ;
+static const uint_fast32_t FIELD_TREE_COUNT = 5;
+
+typedef struct FieldData
+{
+	uint32_t construction_cost;
+	uint32_t construction_time;
+	uint32_t running_cost;
+} FieldData ;
+
+static const FieldData DATA_FIELDS[] = {
+	{0, 1, 0},		// empty
+	{0, 0, 10},		// merc
+	{0, 0, 0},		// trees
+	{0, 0, 0},
+	{0, 0, 0},
+	{0, 0, 0},
+	{0, 0, 0},		// trees
+	{0, 0, 20},		// administration
+	{0, 0, 0},		// construction
+	{20, 2, 10},	//quarry
+};
 
 typedef struct Construction
 {
@@ -42,6 +93,7 @@ typedef struct Mercenary
 
 typedef struct Town
 {
+	bool invalid;
 	uint8_t admin_id;
 	uint32_t round;
 	uint32_t money;
@@ -59,9 +111,9 @@ Town Town_new( void );
 
 void Town_print( Town *town, char *town_name );
 
-int32_t Town_save( Town *town, char *town_name );
+void Town_save( Town *town, char *town_name );
 
-int32_t Town_load( Town *town, char *town_name );
+void Town_load( Town *town, char *town_name );
 
 void Town_construction_list_remove( Town *town, uint32_t index );
 

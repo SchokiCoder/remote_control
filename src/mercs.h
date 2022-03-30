@@ -16,8 +16,8 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef DEF_MERCS_H
-#define DEF_MERCS_H
+#ifndef MERCS_H
+#define MERCS_H
 
 #include <stdint.h>
 
@@ -61,4 +61,4 @@ static const MercenaryData DATA_MERCENARIES[] = {
 };
 #define MERCENARY_COUNT sizeof(DATA_MERCENARIES) / sizeof(DATA_MERCENARIES[0])
 
-#endif /* DEF_MERCS_H */
+#endif /* MERCS_H */

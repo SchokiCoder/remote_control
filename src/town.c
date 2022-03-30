@@ -20,16 +20,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "definitions/def_app.h"
-#include "definitions/def_gameplay.h"
-#include "definitions/def_files.h"
-#include "definitions/def_messages.h"
+#include "messages.h"
+#include "app.h"
 #include "path.h"
 #include "town.h"
 
 Town Town_new( void )
 {
 	Town result = {
+		.invalid = false,
 		.admin_id = 0,
 		.construction_count = 0,
 		.merc_count = 0,
@@ -46,11 +45,11 @@ void Town_print( Town *town, char *town_name )
 	printf("%s\n\n", town_name);
 
 	/* exposure */
-	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
+	for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
 	{
-		for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
+		for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 		{
-			printf("%i", town->hidden[x][y]);
+			printf("%i ", town->hidden[x][y]);
 		}
 
 		printf("\n");
@@ -59,18 +58,18 @@ void Town_print( Town *town, char *town_name )
 	printf("\n");
 
 	/* content */
-	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
+	for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
 	{
-		for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
+		for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 		{
-			printf("%i", town->field[x][y]);
+			printf("%i ", town->field[x][y]);
 		}
 
 		printf("\n");
 	}
 }
 
-int32_t Town_save( Town *town, char *town_name )
+void Town_save( Town *town, char *town_name )
 {
 	char filepath_save[FILEPATH_MAX_LEN] = "";
 	char filepath_bkp[FILEPATH_MAX_LEN] = "";
@@ -80,7 +79,10 @@ int32_t Town_save( Town *town, char *town_name )
 
 	/* get path */
 	if (get_town_path(filepath_save) != 0)
-		return 1;
+	{
+		town->invalid = true;
+		return;
+	}
 
 	/* glue file part to path */
 	strncat(filepath_save, town_name, (FILEPATH_MAX_LEN - strlen(filepath_save)));
@@ -109,8 +111,9 @@ int32_t Town_save( Town *town, char *town_name )
 
 	if (f == NULL)
 	{
+		town->invalid = true;
 		printf(MSG_ERR_FILE_SAVE, MSG_ERR);
-		return 2;
+		return;
 	}
 
 	/* write header */
@@ -168,16 +171,14 @@ int32_t Town_save( Town *town, char *town_name )
 	/* check and done */
 	if (ferror(f))
 	{
+		town->invalid = true;
 		printf(MSG_ERR_FILE_TOWN_SAVE, MSG_ERR);
-		fclose(f);
-		return 3;
 	}
 
 	fclose(f);
-	return 0;
 }
 
-int32_t Town_load( Town *town, char *town_name )
+void Town_load( Town *town, char *town_name )
 {
 	FILE *f;
 	char filepath[FILEPATH_MAX_LEN] = "";
@@ -186,7 +187,10 @@ int32_t Town_load( Town *town, char *town_name )
 
 	/* get path */
 	if (get_town_path(filepath) != 0)
-		return 1;
+	{
+		town->invalid = true;
+		return;
+	}
 
 	/* glue file part to path */
 	strncat(filepath, town_name, (FILEPATH_MAX_LEN - strlen(filepath)));
@@ -198,8 +202,9 @@ int32_t Town_load( Town *town, char *town_name )
 
 	if (f == NULL)
 	{
+		town->invalid = true;
 		printf(MSG_ERR_FILE_LOAD, MSG_ERR);
-		return 2;
+		return;
 	}
 
 	/* read header */
@@ -214,13 +219,11 @@ int32_t Town_load( Town *town, char *town_name )
 	fgetc(f);
 
 	/* check header info */
-	if (
-		!((town_width == TOWN_WIDTH) &
-		(town_height == TOWN_HEIGHT))
-	   )
+	if ((town_width != TOWN_WIDTH) || (town_height != TOWN_HEIGHT))
 	{
+		town->invalid = true;
 		printf(MSG_ERR_FILE_TOWN_CORRUPT, MSG_ERR);
-		return 3;
+		return;
 	}
 
 	/* read exposure data */
@@ -266,14 +269,12 @@ int32_t Town_load( Town *town, char *town_name )
 	/* check and done */
 	if (ferror(f))
 	{
+		town->invalid = true;
 		printf(MSG_ERR_FILE_TOWN_LOAD, MSG_ERR);
 		fclose(f);
-		return 4;
 	}
 
-	printf(MSG_FILE_TOWN_LOAD);
 	fclose(f);
-	return 0;
 }
 
 void Town_construction_list_remove( Town *town, uint32_t index )

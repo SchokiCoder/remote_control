@@ -21,9 +21,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include "definitions/def_messages.h"
-#include "definitions/def_files.h"
-#include "definitions/def_app.h"
+#include "messages.h"
+#include "app.h"
 #include "path.h"
 
 int32_t get_base_path( char *out )

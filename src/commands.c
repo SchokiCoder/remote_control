@@ -23,10 +23,9 @@
 #include <string.h>
 #include <dirent.h>
 #include <SDL.h>
-#include "definitions/def_gameplay.h"
-#include "definitions/def_admins.h"
-#include "definitions/def_messages.h"
-#include "definitions/def_files.h"
+#include "admins.h"
+#include "messages.h"
+#include "app.h"
 #include "town.h"
 #include "config.h"
 #include "path.h"
@@ -65,16 +64,16 @@ void cmd_help_full( void )
 
 void cmd_list_admins( void )
 {
-	for (uint32_t i = 0; i < (sizeof(ADMIN_ID) / sizeof(ADMIN_ID[0])); i++)
+	for (uint32_t i = 0; i < (sizeof(DATA_ADMINS) / sizeof(DATA_ADMINS[0])); i++)
 	{
 		printf(
 			"Admin ID:\t%i\nLastname:\t%s\nFirstname:\t%s\nAge:\t\t%i\nGender:\t\t%s\nBio:\n%s\n\n",
-			ADMIN_ID[i],
-			ADMIN_LASTNAME[i],
-			ADMIN_FIRSTNAME[i],
-			ADMIN_AGE[i],
-			(ADMIN_MALE[i] == true ? "male" : "female"),
-			ADMIN_BIO[i]);
+			i,
+			DATA_ADMINS[i].last_name,
+			DATA_ADMINS[i].first_name,
+			DATA_ADMINS[i].age,
+			(DATA_ADMINS[i].male == true ? "male" : "female"),
+			DATA_ADMINS[i].bio);
 	}
 }
 
@@ -91,9 +90,8 @@ void cmd_hire_admin( int32_t admin_id, char *town_name )
 	srand(time(NULL));
 
 	/* check given admin id */
-	if ((admin_id != ADMIN_ID[0]) &
-		(admin_id != ADMIN_ID[1]) &
-		(admin_id != ADMIN_ID[2]))
+	if (admin_id < 0 ||
+		(uint32_t) admin_id > (sizeof(DATA_ADMINS) / sizeof(DATA_ADMINS[0])))
 	{
 		printf(MSG_ERR_ADMIN_ID, MSG_ERR, CMD_LIST_ADMINS_LONG);
 		return;
@@ -174,7 +172,9 @@ void cmd_hire_admin( int32_t admin_id, char *town_name )
 	new_town.field[TOWN_HQ_SPAWN_X][TOWN_HQ_SPAWN_Y] = FIELD_ADMINISTRATION;
 
 	/* save town to file */
-	if(Town_save(&new_town, town_name) == 0)
+	Town_save(&new_town, town_name);
+
+	if(new_town.invalid == false)
 		printf(MSG_FILE_TOWN_CREATE);
 }
 
@@ -222,7 +222,9 @@ void cmd_connect( char *town_name )
 	Config cfg = Config_new();
 
 	// load game
-	if (Town_load(&town, town_name) != 0)
+	Town_load(&town, town_name);
+
+	if (town.invalid)
 		return;
 
 	// read config

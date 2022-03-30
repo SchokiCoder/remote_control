@@ -21,15 +21,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "definitions/def_messages.h"
-#include "definitions/def_config.h"
-#include "definitions/def_files.h"
+#include "messages.h"
 #include "path.h"
 #include "config.h"
 
 Config Config_new( void )
 {
 	Config result = {
+		.invalid = false,
 		.gfx_framerate = CFG_STD_GFX_FRAMERATE,
 		.gfx_window_x = CFG_STD_GFX_WINDOW_X,
 		.gfx_window_y = CFG_STD_GFX_WINDOW_Y,
@@ -46,9 +45,6 @@ Config Config_new( void )
 		.field_border_green = CFG_STD_FIELD_BORDER_GREEN,
 		.field_border_blue = CFG_STD_FIELD_BORDER_BLUE,
 		.field_border_alpha = CFG_STD_FIELD_BORDER_ALPHA,
-		.kb_pass = CFG_STD_KB_PASS,
-		.kb_build_quarry = CFG_STD_KB_BUILD_QUARRY,
-		.kb_deconstruct = CFG_STD_KB_DECONSTRUCT,
 	};
 
 	strncpy(result.path_font, CFG_STD_PATH_FONT, CFG_SETTING_PATH_FONT_MAX_LEN);
@@ -56,7 +52,7 @@ Config Config_new( void )
 	return result;
 }
 
-int32_t Config_load( Config *cfg )
+void Config_load( Config *cfg )
 {
 	FILE *f;
 	char filepath[FILEPATH_MAX_LEN] = "";
@@ -70,15 +66,19 @@ int32_t Config_load( Config *cfg )
 
 	/* get path */
 	if (get_config_path(filepath) != 0)
-		return 1;
+	{
+		cfg->invalid = true;
+		return;
+	}
 
 	/* open file */
 	f = fopen(filepath, "r");
 
 	if (f == NULL)
 	{
+		cfg->invalid = true;
 		printf(MSG_WARN_CONFIG_LOAD, MSG_WARN);
-		return 2;
+		return;
 	}
 
 	/* read */
@@ -214,22 +214,6 @@ int32_t Config_load( Config *cfg )
 			cfg->field_border_alpha = strtoul(cfg_values[i], NULL, 10);
 		}
 
-		/* key bindings */
-		else if (strcmp(cfg_settings[i], CFG_SETTING_KB_PASS) == 0)
-		{
-			cfg->kb_pass = strtol(cfg_values[i], NULL, 10);
-		}
-
-		else if (strcmp(cfg_settings[i], CFG_SETTING_KB_BUILD_QUARRY) == 0)
-		{
-			cfg->kb_build_quarry = strtol(cfg_values[i], NULL, 10);
-		}
-
-		else if (strcmp(cfg_settings[i], CFG_SETTING_KB_DECONSTRUCT) == 0)
-		{
-			cfg->kb_deconstruct = strtol(cfg_values[i], NULL, 10);
-		}
-
 		/* unknown option */
 		else
 		{
@@ -238,11 +222,9 @@ int32_t Config_load( Config *cfg )
 	}
 
 	fclose(f);
-
-	return 0;
 }
 
-int32_t Config_save( Config *cfg )
+void Config_save( Config *cfg )
 {
 	FILE *f;
 	char filepath[FILEPATH_MAX_LEN] = "";
@@ -250,15 +232,19 @@ int32_t Config_save( Config *cfg )
 
 	/* get path */
 	if (get_config_path(filepath) != 0)
-		return 1;
+	{
+		cfg->invalid = true;
+		return;
+	}
 
 	/* open */
 	f = fopen(filepath, "w");
 
 	if (f == NULL)
 	{
+		cfg->invalid = true;
 		printf(MSG_WARN_CONFIG_SAVE, MSG_WARN);
-		return 2;
+		return;
 	}
 
 	/* write - etc */
@@ -351,23 +337,5 @@ int32_t Config_save( Config *cfg )
 	fprintf(f, "%u", cfg->field_border_alpha);
 	fputc('\n', f);
 
-	/* key bindings */
-	fputs(CFG_SETTING_KB_PASS, f);
-	fputs(delim, f);
-	fprintf(f, "%i", cfg->kb_pass);
-	fputc('\n', f);
-
-	fputs(CFG_SETTING_KB_BUILD_QUARRY, f);
-	fputs(delim, f);
-	fprintf(f, "%i", cfg->kb_build_quarry);
-	fputc('\n', f);
-
-	fputs(CFG_SETTING_KB_DECONSTRUCT, f);
-	fputs(delim, f);
-	fprintf(f, "%i", cfg->kb_deconstruct);
-	fputc('\n', f);
-
 	fclose(f);
-
-	return 0;
 }

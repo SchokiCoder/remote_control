@@ -16,31 +16,21 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef DEF_FILES_H
-#define DEF_FILES_H
+#ifndef APP_H
+#define APP_H
 
-#include "def_app.h"
+#include <stdint.h>
 
-/* generic path definitions */
-#ifdef _WIN32
-	static const char SLASH[] = "\\";
-#else
-	static const char SLASH[] = "/";
-#endif /* _WIN32 */
+static const char APP_NAME[] = "remote_control";
+static const char APP_LICENSE[] = "GPLv3";
+static const char APP_LICENSE_NOTICE[] =
+	"You should have received a copy of the GNU General Public License\n" \
+	"along with this program.  If not, see <https://www.gnu.org/licenses/>.\n";
 
-#define FILEPATH_MAX_LEN 1024
+static const char APP_SOURCE[] = "https://github.com/SchokiCoder/remote_control";
 
-static const char PATH_BASE[] = "%s%s.%s";
+static const uint32_t APP_MAJOR = 0;
+static const uint32_t APP_MINOR = 3;
+static const uint32_t APP_PATCH = 0;
 
-/* userfile paths (appended onto the base path) */
-static const char PATH_TOWNS[] = "towns";
-static const char PATH_CONFIG[] = "config.cfg";
-
-/* asset paths (and some data) */
-static const char PATH_TEXTURE_ICON[] =	PATH_TEXTURES "icon.png";
-
-/* filetypes */
-static const char FILETYPE_TOWN[] = "twn";
-static const char FILETYPE_BACKUP[] = "bkp";
-
-#endif /* DEF_FILES_H */
+#endif /* APP_H */

@@ -18,8 +18,7 @@
 
 #include <string.h>
 #include <SGUI_theme.h>
-#include "definitions/def_files.h"
-#include "definitions/def_messages.h"
+#include "messages.h"
 #include "game.h"
 #include "hud.h"
 
@@ -42,11 +41,6 @@ static const float HUD_BAR_TOP_X = 0.0f;
 static const float HUD_BAR_TOP_Y = 0.0f;
 static const float HUD_BAR_TOP_W = 100.0f;
 static const float HUD_BAR_TOP_H_MARGIN = 0.001f;
-
-static const float HUD_BAR_SIDE_X = 0.0f;
-static const float HUD_BAR_SIDE_Y = 0.35f;
-static const float HUD_BAR_SIDE_W = 0.10f;
-static const float HUD_BAR_SIDE_H = 0.26f;
 
 /* top bar widgets */
 static const char HUD_LBL_TIME_DAY_TEXT[] =		"day:";
@@ -125,14 +119,13 @@ Hud Hud_new( SDL_Renderer *renderer, char *path_font )
 	result.spr_merc_tint_purple = Hud_load_sprite(&result, PATH_TEXTURE_MERC_PURPLE);
 
 	for (uint_fast32_t i = 0; i < MERCENARY_SPRITE_COUNT; i++)
-	{
 		result.spr_mercs[i] = Hud_load_sprite(&result, PATH_TEXTURE_MERCENARIES[i]);
-	}
 
-	for (uint_fast32_t i = FIELD_SPRITE_OFFSET; i < FIELD_SPRITE_COUNT; i++)
-	{
-		result.spr_fields[i] = Hud_load_sprite(&result, PATH_TEXTURE_FIELDS[i]);
-	}
+	for (uint_fast32_t i = 0; i < FIELD_SPRITE_OFFSET; i++)
+		result.spr_fields[i] = SGUI_Sprite_new();
+
+	for (uint_fast32_t i = FIELD_SPRITE_OFFSET; i < (FIELD_SPRITE_COUNT + FIELD_SPRITE_OFFSET); i++)
+		result.spr_fields[i] = Hud_load_sprite(&result, PATH_TEXTURE_FIELDS[i - FIELD_SPRITE_OFFSET]);
 
 	// load font
 	TTF_Font *font = TTF_OpenFont(path_font, HUD_FONT_SIZE);
@@ -145,6 +138,8 @@ Hud Hud_new( SDL_Renderer *renderer, char *path_font )
 
 	// make menu
 	result.mnu_hud = SGUI_Menu_new(renderer, THEME_RC.menu);
+	SGUI_Label_new(&result.lbl_hover_x, &result.mnu_hud, font, THEME_RC.label);
+	SGUI_Label_new(&result.lbl_hover_y, &result.mnu_hud, font, THEME_RC.label);
 	SGUI_Label_new(&result.lbl_time_day, &result.mnu_hud, font, THEME_RC.label);
 	SGUI_Label_new(&result.lbl_time_day_val, &result.mnu_hud, font, THEME_RC.label);
 	SGUI_Label_new(&result.lbl_time_hour, &result.mnu_hud, font, THEME_RC.label);
@@ -172,26 +167,32 @@ Hud Hud_new( SDL_Renderer *renderer, char *path_font )
 	return result;
 }
 
+void Hud_update_hover( Hud *hud, SDL_Point coord )
+{
+    sprintf(hud->lbl_hover_x.text.str, "%i", coord.x);
+    hud->lbl_hover_x.text.len = strlen(hud->lbl_hover_x.text.str);
+    SGUI_Label_update_sprite(&hud->lbl_hover_x);
+
+    sprintf(hud->lbl_hover_y.text.str, "%i", coord.y);
+    hud->lbl_hover_y.text.len = strlen(hud->lbl_hover_y.text.str);
+    SGUI_Label_update_sprite(&hud->lbl_hover_y);
+}
+
 void Hud_update_time( Hud *hud, uint32_t round )
 {
-	// create widget strings
 	sprintf(hud->lbl_time_day_val.text.str, "%u", (round / 24));
 	hud->lbl_time_day_val.text.len = strlen(hud->lbl_time_day_val.text.str);
+	SGUI_Label_update_sprite(&hud->lbl_time_day_val);
+
 	sprintf(hud->lbl_time_hour_val.text.str, "%02u:00", (round % 24));
 	hud->lbl_time_hour_val.text.len = strlen(hud->lbl_time_hour_val.text.str);
-
-	// gen widgets
-	SGUI_Label_update_sprite(&hud->lbl_time_day_val);
 	SGUI_Label_update_sprite(&hud->lbl_time_hour_val);
 }
 
 void Hud_update_money( Hud *hud, uint32_t money )
 {
-	/* create widget strings */
 	sprintf(hud->lbl_money_val.text.str, "%u", money);
 	hud->lbl_money_val.text.len = strlen(hud->lbl_money_val.text.str);
-
-	/* gen widget */
 	SGUI_Label_update_sprite(&hud->lbl_money_val);
 }
 
@@ -204,11 +205,6 @@ void Hud_calc( Hud *hud,	int32_t window_w,	int32_t window_h )
 	hud->rect_bar_top.h =
 		((float) window_h * HUD_BAR_TOP_H_MARGIN * 2.0f) +
 		hud->lbl_time_day.sprite.surface->h;
-
-	hud->rect_bar_side.x = window_w * HUD_BAR_SIDE_X;
-	hud->rect_bar_side.y = window_h * HUD_BAR_SIDE_Y;
-	hud->rect_bar_side.w = window_w * HUD_BAR_SIDE_W;
-	hud->rect_bar_side.h = window_h * HUD_BAR_SIDE_H;
 
 	/* calc time widgets position */
 	hud->lbl_time_day.rect.x = window_w * HUD_LBL_TIME_DAY_X;
@@ -316,21 +312,21 @@ void Hud_map_textures(
 	{
 		for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
 		{
-			/* if field hidden */
+			// if field hidden
 			if (fields_hidden[x][y] == true)
 			{
-				/* assign hidden ground texture */
+				// assign hidden ground texture
 				hud->textures_field_ground[x][y] = hud->spr_hidden.texture;
 
-				/* and null content texture */
+				// and null content texture
 				hud->textures_field_content[x][y] = NULL;
 			}
 			else
 			{
-				/* assign exposed ground texture */
+				// assign exposed ground texture
 				hud->textures_field_ground[x][y] = hud->spr_ground.texture;
 
-				/* map textures to area content */
+				// map textures to area content
 				hud->textures_field_content[x][y] = hud->spr_fields[fields_content[x][y]].texture;
 			}
 		}
@@ -339,25 +335,25 @@ void Hud_map_textures(
 
 void Hud_draw( Hud *hud, Town *town )
 {
-	/* draw fields */
+	// draw fields
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
 	{
 		for (uint32_t y = 0; y < TOWN_HEIGHT; y++)
 		{
-			/* draw stored ground texture */
+			// draw stored ground texture
 			SDL_RenderCopyEx(hud->renderer, hud->textures_field_ground[x][y], NULL, &hud->rects_field[x][y],
 				0.0f,
 				NULL,
 				hud->flips_field[x][y]);
 
-			/* draw given content texture */
+			// draw stored content texture
 			SDL_RenderCopy(
 				hud->renderer,
 				hud->textures_field_content[x][y],
 				NULL,
 				&hud->rects_field_content[x][y]);
 
-			/* draw field border */
+			// draw field border
 			SDL_SetRenderDrawColor(
 				hud->renderer,
 				hud->field_border_color.r,
@@ -366,7 +362,7 @@ void Hud_draw( Hud *hud, Town *town )
 				hud->field_border_color.a);
 			SDL_RenderDrawRect(hud->renderer, &hud->rects_field[x][y]);
 		}
-	} /* draw fields */
+	}
 
 	for (uint32_t i = 0; i < town->merc_count; i++)
 	{
@@ -403,7 +399,7 @@ void Hud_draw( Hud *hud, Town *town )
 			&hud->rects_field_content[town->mercs[i].coords.x][town->mercs[i].coords.y]);
 	}
 
-	/* draw hud bars */
+	// draw hud bars
 	SDL_SetRenderDrawColor(
 		hud->renderer,
 		HUD_BAR_COLOR_R,
@@ -412,25 +408,8 @@ void Hud_draw( Hud *hud, Town *town )
 		HUD_BAR_COLOR_A);
 	SDL_RenderFillRect(hud->renderer, &hud->rect_bar_top);
 
-	SDL_RenderFillRect(hud->renderer, &hud->rect_bar_side);
-
 	// draw hud menu
 	SGUI_Menu_draw(&hud->mnu_hud);
-}
-
-SDL_Point Hud_mouse_to_field( Hud *hud, SDL_Point mouse )
-{
-	SDL_Point result;
-
-	result.x = (mouse.x - hud->rect_area.x) / hud->field_width;
-	result.y = (mouse.y - hud->rect_area.y) / hud->field_height;
-
-	return result;
-}
-
-void Hud_handle_hover( Hud *hud, SDL_Point mouse )
-{
-	return;
 }
 
 void Hud_set_field( Hud *hud, SDL_Point field, SDL_Texture *texture )

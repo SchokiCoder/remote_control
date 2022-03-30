@@ -16,67 +16,37 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef DEF_ADMINS_H
-#define DEF_ADMINS_H
+#ifndef ADMINS_H
+#define ADMINS_H
 
 #include <stdint.h>
 #include <stdbool.h>
 
-static const int32_t ADMIN_ID[] =
+typedef struct AdminData
 {
-	0,
-	1,
-	2
-};
+	char first_name[10];
+	char last_name[10];
+	int32_t age;
+	int32_t salary;
+	bool male;
+	char bio[256];
+} AdminData ;
 
-static const char ADMIN_FIRSTNAME[][10] =
-{
-	"Debbie",
-	"Dennis",
-	"Helen"
-};
-
-static const char ADMIN_LASTNAME[][10] =
-{
-	"Inkwell",
-	"Ritch",
-	"McLain"
-};
-
-static const int32_t ADMIN_AGE[] =
-{
-	25,
-	33,
-	63
-};
-
-static const bool ADMIN_MALE[] =
-{
-	false,
-	true,
-	false
-};
-
-static const char ADMIN_BIO[][256] =
-{
+static const AdminData DATA_ADMINS[] = {
+	{"Debbie", "Inkwell", 25, 10, false,
 	"Nerdy new-coming assistant.\n" \
 	"She just began and thus focuses on doing her job correctly.\n" \
-	"Because of that she brings a stable environment, in which to work with no surprises.",
+	"Because of that she brings a stable environment, in which to work with no surprises."},
 
+	{"Dennis", "Ritch", 33, true, 11,
 	"Suited business oriented guy.\n" \
 	"Focuses on thorough planning and preparation.\n" \
-	"His execution is slow but once things get going, it will pay off.",
+	"His execution is slow but once things get going, it will pay off."},
 
+	{"Helen", "McLain", 63, false, 12,
 	"Old chainsmoking lady.\n" \
 	"Experienced, inducing fear amongst enemies and allies alike and should not be disappointed.\n" \
-	"For the right payment, she can effectively turn tides in dire situations, with her methods of motivation."
+	"For the right payment, she can effectively turn tides in dire situations, with her methods of motivation."},
 };
 
-static const int32_t ADMIN_SALARY[] =
-{
-	10,
-	11,
-	12
-};
-
-#endif /* DEF_ADMINS_H */
+#endif /* ADMINS_H */

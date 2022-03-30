@@ -16,10 +16,10 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef DEF_MESSAGES_H
-#define DEF_MESSAGES_H
+#ifndef MESSAGES_H
+#define MESSAGES_H
 
-#include "def_commands.h"
+#include "commands.h"
 
 /* help text */
 static const char HELP_1ST_STEPS[] = "\n" \
@@ -179,4 +179,4 @@ static const char MSG_PLAYER_FAILURE[] =
 static const char MSG_FAILURE_COST[] =
 	"Your headquarter reported critical financial instabilities.\n";
 
-#endif /* DEF_MESSAGES_H */
+#endif /* MESSAGES_H */

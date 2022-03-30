@@ -26,7 +26,6 @@
 #include <SGUI_menu.h>
 #include <SGUI_entry.h>
 #include <SGUI_label.h>
-#include "definitions/def_gameplay.h"
 #include "town.h"
 
 typedef struct Game Game;
@@ -57,7 +56,7 @@ static const char *PATH_TEXTURE_FIELDS[] = {
 };
 #define FIELD_SPRITE_OFFSET 2
 #define FIELD_SPRITE_COUNT \
-	(sizeof(PATH_TEXTURE_FIELDS) / sizeof(PATH_TEXTURE_FIELDS[0])) - FIELD_SPRITE_OFFSET
+	(sizeof(PATH_TEXTURE_FIELDS) / sizeof(PATH_TEXTURE_FIELDS[0]))
 
 typedef struct Hud
 {
@@ -69,10 +68,11 @@ typedef struct Hud
 
 	/* bars */
 	SDL_Rect rect_bar_top;
-	SDL_Rect rect_bar_side;
 
 	/* hud widgets */
 	SGUI_Menu mnu_hud;
+	SGUI_Label lbl_hover_x;
+	SGUI_Label lbl_hover_y;
 	SGUI_Label lbl_time_day;
 	SGUI_Label lbl_time_day_val;
 	SGUI_Label lbl_time_hour;
@@ -105,6 +105,8 @@ typedef struct Hud
 
 Hud Hud_new( SDL_Renderer *renderer, char *path_font );
 
+void Hud_update_hover( Hud *hud, SDL_Point coord );
+
 void Hud_update_time( Hud *hud, uint32_t round );
 
 void Hud_update_money( Hud *hud, uint32_t money );
@@ -119,10 +121,6 @@ void Hud_map_textures(
 	Field fields_content[TOWN_WIDTH][TOWN_HEIGHT] );
 
 void Hud_draw( Hud *hud, Town *town );
-
-SDL_Point Hud_mouse_to_field( Hud *hud, SDL_Point mouse );
-
-void Hud_handle_hover( Hud *hud, SDL_Point mouse );
 
 void Hud_set_field( Hud *hud, SDL_Point field, SDL_Texture *texture );
 

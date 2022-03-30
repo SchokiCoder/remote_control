@@ -26,10 +26,10 @@
 #include <time.h>
 #endif
 
-#include "definitions/def_commands.h"
-#include "definitions/def_messages.h"
-#include "definitions/def_files.h"
-#include "definitions/def_admins.h"
+#include "commands.h"
+#include "messages.h"
+#include "path.h"
+#include "admins.h"
 #include "town.h"
 #include "config.h"
 #include "hud.h"
@@ -63,7 +63,7 @@ void Game_end_round( Game *game, Hud *hud )
 	uint32_t cost = 0;
 
 	/* get running cost for admin */
-	cost += ADMIN_SALARY[game->town->admin_id];
+	cost += DATA_ADMINS[game->town->admin_id].salary;
 
 	/* for each building, add cost */
 	for (uint32_t x = 0; x < TOWN_WIDTH; x++)
@@ -169,26 +169,15 @@ int32_t Game_main( Game *game )
 {
 	SDL_Window *window;
 	SDL_Renderer *renderer;
-
-	uint32_t ts_now = 0;
-	uint32_t ts_render = 0;
-
-	SDL_Event event;
-	int32_t border_t, border_l;
-	int32_t window_x, window_y;
-	int32_t window_w, window_h;
-	SDL_Point mouse;
-
 	Hud hud;
-
 	SGUI_Sprite spr_icon;
 
 #ifdef _DEBUG
 	// init random gen
 	srand(time(NULL));
-#endif /* _DEBUG */
+#endif // _DEBUG
 
-	/* init SDL */
+	// init SDL
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 	{
 		printf(MSG_ERR_SDL_INIT, MSG_ERR, SDL_GetError());
@@ -196,7 +185,7 @@ int32_t Game_main( Game *game )
 		return 1;
 	}
 
-	/* create window */
+	// create window
 	window = SDL_CreateWindow(
 		game->town_name,
 		game->cfg->gfx_window_x,
@@ -212,7 +201,7 @@ int32_t Game_main( Game *game )
 		return 2;
 	}
 
-	/* create renderer */
+	// create renderer
 	renderer = SDL_CreateRenderer(window, -1, 0);
 
 	if (renderer == NULL)
@@ -222,10 +211,10 @@ int32_t Game_main( Game *game )
 		return 3;
 	}
 
-	/* set alpha channel */
+	// set alpha channel
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
-	/* init ttf */
+	// init ttf
 	if (TTF_Init() != 0)
 	{
 		printf(MSG_ERR_TTF_INIT, MSG_ERR);
@@ -264,7 +253,18 @@ int32_t Game_main( Game *game )
 	SDL_SetWindowIcon(window, spr_icon.surface);
 	SGUI_Sprite_clear(&spr_icon);
 
-	/* mainloop */
+	// mainloop
+	uint32_t ts_now = 0;
+	uint32_t ts_render = 0;
+
+	SDL_Point mouse;
+	SDL_Event event;
+
+	int32_t border_t, border_l;
+	int32_t window_x, window_y;
+	int32_t window_w, window_h;
+	SDL_Point hover;
+
 	while (game->game_state == GS_ACTIVE)
 	{
 		if (ts_now > (ts_render + (1000.0f / game->cfg->gfx_framerate)))
@@ -296,51 +296,13 @@ int32_t Game_main( Game *game )
 		{
 			switch (event.type)
 			{
-/*
-			// mouse
-			case SDL_MOUSEBUTTONUP:
-				Hud_handle_click(&hud, mouse, game);
-				break;
-
+			// mouse hover
 			case SDL_MOUSEMOTION:
-				Hud_handle_hover(&hud, mouse);
+				hover.x = (mouse.x - hud.rect_area.x) / hud.field_width;
+				hover.y = (mouse.y - hud.rect_area.y) / hud.field_height;
+
+				Hud_update_hover(&hud, hover);
 				break;
-
-			// keyboard
-			case SDL_KEYUP:
-				if (event.key.keysym.sym == game->cfg->kb_pass)
-				{
-					Game_end_round(game, &hud);
-				}
-
-#ifdef _DEBUG
-				//in case of debug mode, add debug keybinds
-				else if (event.key.keysym.sym == SDLK_o)
-				{
-					// spawn random friendly merc
-					struct Mercenary merc = {
-						.id = rand() % MERCENARY_COUNT,
-						.hp = DATA_MERCENARIES[merc.id].max_hp,
-						.coords = {.x = 8, .y = 7},
-						.fraction = MF_PURPLE
-					};
-
-					Game_spawn_merc(game, &hud, merc);
-				}
-#endif // _DEBUG
-
-				else if (event.key.keysym.sym == game->cfg->kb_build_quarry)
-				{
-					Hud_construct_mode(&hud, FIELD_QUARRY, hud.spr_fields[FIELD_QUARRY].texture);
-					Hud_handle_hover(&hud, mouse);
-				}
-				else if (event.key.keysym.sym == game->cfg->kb_deconstruct)
-				{
-					Hud_deconstruct_mode(&hud);
-					Hud_handle_hover(&hud, mouse);
-				}
-				break;
-*/
 
 			// window
 			case SDL_WINDOWEVENT:
