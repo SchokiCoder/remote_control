@@ -223,7 +223,7 @@ int32_t Game_main( Game *game )
 	}
 
 	// init hud
-	hud = Hud_new(renderer, game->cfg->path_font);
+	hud = Hud_new(renderer, game->cfg);
 
 	if (hud.invalid)
 	{
@@ -244,14 +244,17 @@ int32_t Game_main( Game *game )
 		return 6;
 	}
 
-	/* calculate ui sizes and positions */
-	Hud_calc(&hud, game->cfg->gfx_window_w, game->cfg->gfx_window_h);
+	// handle hud field textures
 	Hud_generate_flips(&hud);
 	Hud_map_textures(&hud, game->town->hidden, game->town->field);
 
-	/* set window icon, and clear icon sprite */
+	// set window icon, and clear icon sprite
 	SDL_SetWindowIcon(window, spr_icon.surface);
 	SGUI_Sprite_clear(&spr_icon);
+
+	// set hud values
+	Hud_update_time(&hud, game->town->round);
+	Hud_update_money(&hud, game->town->money);
 
 	// mainloop
 	uint32_t ts_now = 0;

@@ -29,6 +29,7 @@
 #include "town.h"
 
 typedef struct Game Game;
+typedef struct Config Config;
 
 static const char PATH_TEXTURE_GROUND[] =		PATH_TEXTURES "ground.png";
 static const char PATH_TEXTURE_HIDDEN[] =		PATH_TEXTURES "hidden.png";
@@ -103,7 +104,7 @@ typedef struct Hud
 	SGUI_Sprite spr_fields[FIELD_SPRITE_COUNT];
 } Hud ;
 
-Hud Hud_new( SDL_Renderer *renderer, char *path_font );
+Hud Hud_new( SDL_Renderer *renderer, Config *cfg );
 
 void Hud_update_hover( Hud *hud, SDL_Point coord );
 
@@ -111,7 +112,7 @@ void Hud_update_time( Hud *hud, uint32_t round );
 
 void Hud_update_money( Hud *hud, uint32_t money );
 
-void Hud_calc( Hud *hud,	int32_t window_w, int32_t window_h );
+void Hud_calc( Hud *hud, int32_t window_w, int32_t window_h );
 
 void Hud_generate_flips( Hud *hud );
 
