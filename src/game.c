@@ -18,6 +18,7 @@
 
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <SDL_image.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <SGUI_sprite.h>
@@ -34,29 +35,6 @@
 #include "config.h"
 #include "hud.h"
 #include "game.h"
-
-void Game_exit( SDL_Window *window, SDL_Renderer *renderer, Hud *hud )
-{
-	/* clear hud */
-	Hud_clear(hud);
-
-	/* if given, destroy window and renderer */
-	if (window != NULL)
-	{
-		SDL_DestroyWindow(window);
-	}
-
-	if (renderer != NULL)
-	{
-		SDL_DestroyRenderer(renderer);
-	}
-
-	/* quit sdl ttf */
-	TTF_Quit();
-
-	/* quit sdl */
-	SDL_Quit();
-}
 
 void Game_end_round( Game *game, Hud *hud )
 {
@@ -125,7 +103,7 @@ void Game_end_round( Game *game, Hud *hud )
 	Hud_update_money(hud, game->town->money);
 }
 
-void Game_construct( Game *game, SDL_Point coords, Field field, Hud *hud )
+void Game_construct( Game *game, const SDL_Point coords, const Field field, Hud *hud )
 {
 	/* change field */
 	game->town->field[coords.x][coords.y] = FIELD_CONSTRUCTION;
@@ -143,7 +121,7 @@ void Game_construct( Game *game, SDL_Point coords, Field field, Hud *hud )
 	Hud_update_money(hud, game->town->money);
 }
 
-void Game_spawn_merc( Game *game, Hud *hud, Mercenary merc )
+void Game_spawn_merc( Game *game, Hud *hud, const Mercenary merc )
 {
 	// if merc already exists, stop
 	for (uint32_t i = 0; i < game->town->merc_count; i++)
@@ -170,7 +148,6 @@ int32_t Game_main( Game *game )
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 	Hud hud;
-	SGUI_Sprite spr_icon;
 
 #ifdef _DEBUG
 	// init random gen
@@ -181,8 +158,7 @@ int32_t Game_main( Game *game )
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 	{
 		printf(MSG_ERR_SDL_INIT, MSG_ERR, SDL_GetError());
-		Game_exit(NULL, NULL, NULL);
-		return 1;
+		goto game_clear;
 	}
 
 	// create window
@@ -197,8 +173,7 @@ int32_t Game_main( Game *game )
 	if (window == NULL)
 	{
 		printf(MSG_ERR_SDL_WINDOW, MSG_ERR, SDL_GetError());
-		Game_exit(NULL, NULL, NULL);
-		return 2;
+		goto game_clear;
 	}
 
 	// create renderer
@@ -207,8 +182,7 @@ int32_t Game_main( Game *game )
 	if (renderer == NULL)
 	{
 		printf(MSG_ERR_SDL_RENDERER, MSG_ERR, SDL_GetError());
-		Game_exit(window, NULL, NULL);
-		return 3;
+		goto game_clear;
 	}
 
 	// set alpha channel
@@ -218,43 +192,43 @@ int32_t Game_main( Game *game )
 	if (TTF_Init() != 0)
 	{
 		printf(MSG_ERR_TTF_INIT, MSG_ERR);
-		Game_exit(window, renderer, NULL);
-		return 4;
+		goto game_clear;
 	}
 
 	// init hud
-	hud = Hud_new(renderer, game->cfg);
+	Hud_new(&hud, renderer, game->cfg);
 
 	if (hud.invalid)
-	{
-		Game_exit(window, renderer, &hud);
-		return 5;
-	}
+		goto game_clear;
 
 	// update some widgets
 	Hud_update_time(&hud, game->town->round);
 	Hud_update_money(&hud, game->town->money);
 
 	// load window icon
-	spr_icon = SGUI_Sprite_from_file(renderer, PATH_TEXTURE_ICON);
+	SDL_Surface *win_icon = NULL;
 
-	if (spr_icon.invalid)
+	win_icon = IMG_Load(PATH_TEXTURE_ICON);
+
+	// if icon loaded, set for window
+	if (win_icon != NULL)
 	{
-		Game_exit(window, renderer, &hud);
-		return 6;
+		SDL_SetWindowIcon(window, win_icon);
+	}
+	else
+	{
+		printf(MSG_WARN_WIN_ICON, MSG_WARN);
 	}
 
 	// handle hud field textures
 	Hud_generate_flips(&hud);
 	Hud_map_textures(&hud, game->town->hidden, game->town->field);
 
-	// set window icon, and clear icon sprite
-	SDL_SetWindowIcon(window, spr_icon.surface);
-	SGUI_Sprite_clear(&spr_icon);
-
-	// set hud values
+	// set hud values and recalculate ui sizes
 	Hud_update_time(&hud, game->town->round);
 	Hud_update_money(&hud, game->town->money);
+
+	Hud_calc(&hud, game->cfg->gfx_window_w, game->cfg->gfx_window_h);
 
 	// mainloop
 	uint32_t ts_now = 0;
@@ -272,7 +246,7 @@ int32_t Game_main( Game *game )
 	{
 		if (ts_now > (ts_render + (1000.0f / game->cfg->gfx_framerate)))
 		{
-			/* clear screen */
+			// clear screen
 			SDL_SetRenderDrawColor(renderer,
 				game->cfg->bg_red,
 				game->cfg->bg_green,
@@ -280,18 +254,18 @@ int32_t Game_main( Game *game )
 				255);
 			SDL_RenderClear(renderer);
 
-			/* draw hud */
+			// draw hud
 			Hud_draw(&hud, game->town);
 
-			/* show image, save time */
+			// show image, save time
 			SDL_RenderPresent(renderer);
 			ts_render = ts_now;
 		}
 
-		/* update time */
+		// update time
 		ts_now = SDL_GetTicks();
 
-		/* update mouse coords */
+		// update mouse coords
 		SDL_GetMouseState(&mouse.x, &mouse.y);
 
 		// handle sdl-events
@@ -340,11 +314,29 @@ int32_t Game_main( Game *game )
 		}
 	}
 
-	/* save config */
+	// save config
 	Config_save(game->cfg);
 
-	/* quit routine */
-	Game_exit(window, renderer, &hud);
+	game_clear:
+
+	// clear hud
+	Hud_clear(&hud);
+
+	// if given, destroy window and renderer
+	if (window != NULL)
+		SDL_DestroyWindow(window);
+
+	if (renderer != NULL)
+		SDL_DestroyRenderer(renderer);
+
+	// free win icon
+	SDL_FreeSurface(win_icon);
+
+	// quit sdl ttf
+	TTF_Quit();
+
+	// quit sdl
+	SDL_Quit();
 
 	return 0;
 }

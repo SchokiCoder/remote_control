@@ -88,9 +88,6 @@ typedef struct Config
 	uint8_t field_border_green;
 	uint8_t field_border_blue;
 	uint8_t field_border_alpha;
-	SDL_Keycode kb_pass;
-	SDL_Keycode kb_build_quarry;
-	SDL_Keycode kb_deconstruct;
 } Config ;
 
 Config Config_new( void );

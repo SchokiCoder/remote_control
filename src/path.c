@@ -25,21 +25,30 @@
 #include "app.h"
 #include "path.h"
 
-int32_t get_base_path( char *out )
+int32_t get_base_path( SM_String *out )
 {
+	SM_String appendage;
 	int32_t rc;
 
-	/* get path */
-	sprintf(out, PATH_BASE, getenv("HOME"), SLASH, APP_NAME);
-	strncat(out, SLASH, (FILEPATH_MAX_LEN - strlen(out)));
+	// get path
+	appendage = SM_String_contain(getenv("HOME"));
+	SM_String_append(out, &appendage);
+	appendage = SM_String_contain(SLASH);
+	SM_String_append(out, &appendage);
+	appendage = SM_String_contain(".");
+	SM_String_append(out, &appendage);
+	appendage = SM_String_contain(APP_NAME);
+	SM_String_append(out, &appendage);
+	appendage = SM_String_contain(SLASH);
+	SM_String_append(out, &appendage);
 
 	/* in case, create dir */
 	errno = 0;
 
 	#ifdef _WIN32
-		rc = mkdir(out);
+		rc = mkdir(out->str);
 	#else
-		rc = mkdir(out, S_IRWXU);
+		rc = mkdir(out->str, S_IRWXU);
 	#endif
 
 	if (rc == -1)
@@ -54,8 +63,9 @@ int32_t get_base_path( char *out )
 	return 0;
 }
 
-int32_t get_town_path( char *out )
+int32_t get_town_path( SM_String *out )
 {
+	SM_String appendage;
 	int32_t rc;
 
 	/* get base path */
@@ -65,16 +75,18 @@ int32_t get_town_path( char *out )
 		return rc;
 
 	/* get path */
-	strncat(out, PATH_TOWNS, (FILEPATH_MAX_LEN - strlen(out)));
-	strncat(out, SLASH, (FILEPATH_MAX_LEN - strlen(out)));
+	appendage = SM_String_contain(PATH_TOWNS);
+	SM_String_append(out, &appendage);
+	appendage = SM_String_contain(SLASH);
+	SM_String_append(out, &appendage);
 
 	/* in case, create dir */
 	errno = 0;
 
 	#ifdef _WIN32
-		rc = mkdir(out);
+		rc = mkdir(out->str);
 	#else
-		rc = mkdir(out, S_IRWXU);
+		rc = mkdir(out->str, S_IRWXU);
 	#endif
 
 	if (rc == -1)
@@ -89,8 +101,9 @@ int32_t get_town_path( char *out )
 	return 0;
 }
 
-int32_t get_config_path( char *out )
+int32_t get_config_path( SM_String *out )
 {
+	SM_String appendage;
 	int32_t rc;
 
 	/* get base path */
@@ -100,7 +113,8 @@ int32_t get_config_path( char *out )
 		return rc;
 
 	/* get path */
-	strncat(out, PATH_CONFIG, (FILEPATH_MAX_LEN - strlen(out)));
+	appendage = SM_String_contain(PATH_CONFIG);
+	SM_String_append(out, &appendage);
 
 	return 0;
 }

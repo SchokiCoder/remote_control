@@ -20,6 +20,7 @@
 #define PATH_H
 
 #include <stdint.h>
+#include <SM_string.h>
 
 #ifdef _WIN32
 	static const char SLASH[] = "\\";
@@ -27,9 +28,6 @@
 	static const char SLASH[] = "/";
 #endif /* _WIN32 */
 
-#define FILEPATH_MAX_LEN 1024
-
-static const char PATH_BASE[] = "%s%s.%s";
 static const char PATH_TOWNS[] = "towns";
 static const char PATH_CONFIG[] = "config.cfg";
 static const char PATH_TEXTURE_ICON[] =	PATH_TEXTURES "icon.png";
@@ -37,10 +35,10 @@ static const char PATH_TEXTURE_ICON[] =	PATH_TEXTURES "icon.png";
 static const char FILETYPE_TOWN[] = "twn";
 static const char FILETYPE_BACKUP[] = "bkp";
 
-int32_t get_base_path( char *out );
+int32_t get_base_path( SM_String *out );
 
-int32_t get_town_path( char *out );
+int32_t get_town_path( SM_String *out );
 
-int32_t get_config_path( char *out );
+int32_t get_config_path( SM_String *out );
 
 #endif /* PATH_H */

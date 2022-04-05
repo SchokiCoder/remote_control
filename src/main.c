@@ -24,13 +24,22 @@
 #include "commands.h"
 #include "messages.h"
 
+static const uint_fast32_t MAX_ANSWER_LEN = 64;
+
+void get_answer( char *str, const size_t len )
+{
+	// get answer and remove '\n' char
+	fgets(str, len, stdin);
+	str[strlen(str) - 1] = '\0';
+}
+
 int main( int argc, char **argv )
 {
 	/* if no args given */
 	if (argc < 2)
 	{
 		uint32_t option = 0;
-		char input[64];
+		char input[MAX_ANSWER_LEN];
 		int32_t num_arg;
 
 		printf("Welcome to duty overseer, ");
@@ -46,7 +55,7 @@ int main( int argc, char **argv )
 				"5) connect to a town\n"
 				"6) delete a town's documents\n"
 				"7) exit\n");
-			scanf("%s", input);
+			fgets(input, MAX_ANSWER_LEN, stdin);
 
 			/* parse */
 			option = strtol(input, NULL, 10);
@@ -63,11 +72,11 @@ int main( int argc, char **argv )
 
 			case 3:
 				printf("Please enter the admin-id now: ");
-				scanf("%s", input);
+				get_answer(input, MAX_ANSWER_LEN);
 				num_arg = strtol(input, NULL, 10);
 
 				printf("Please enter the town name now: ");
-				scanf("%s", input);
+				get_answer(input, MAX_ANSWER_LEN);
 
 				cmd_hire_admin(num_arg, input);
 				break;
@@ -78,8 +87,7 @@ int main( int argc, char **argv )
 
 			case 5:
 				printf("Please enter the town name now: ");
-				scanf("%s", input);
-				while (getchar() != '\n');
+				get_answer(input, MAX_ANSWER_LEN);
 
 				cmd_connect(input);
 				break;
@@ -87,14 +95,14 @@ int main( int argc, char **argv )
 			case 6:
 				/* confirm deletion */
 				printf("Are you sure, to delete the town's files? (y)\n");
-				scanf("%s", input);
+				get_answer(input, MAX_ANSWER_LEN);
 
 				if (input[0] != 'y')
 					break;
 
 				/* delete */
 				printf("Please enter the town name now: ");
-				scanf("%s", input);
+				get_answer(input, MAX_ANSWER_LEN);
 
 				cmd_delete(input);
 				break;

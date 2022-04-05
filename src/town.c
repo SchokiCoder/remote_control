@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <SM_string.h>
 #include "messages.h"
 #include "app.h"
 #include "path.h"
@@ -39,7 +40,7 @@ Town Town_new( void )
 	return result;
 }
 
-void Town_print( Town *town, char *town_name )
+void Town_print( const Town *town, const char *town_name )
 {
 	/* name */
 	printf("%s\n\n", town_name);
@@ -69,36 +70,40 @@ void Town_print( Town *town, char *town_name )
 	}
 }
 
-void Town_save( Town *town, char *town_name )
+void Town_save( Town *town, const char *town_name )
 {
-	char filepath_save[FILEPATH_MAX_LEN] = "";
-	char filepath_bkp[FILEPATH_MAX_LEN] = "";
+	SM_String filepath_save = SM_String_new(16);
+	SM_String filepath_bkp = SM_String_new(16);
+	SM_String appendage;
 	FILE *f;
 	uint32_t town_width = TOWN_WIDTH;
 	uint32_t town_height = TOWN_HEIGHT;
 
 	/* get path */
-	if (get_town_path(filepath_save) != 0)
+	if (get_town_path(&filepath_save) != 0)
 	{
 		town->invalid = true;
 		return;
 	}
 
 	/* glue file part to path */
-	strncat(filepath_save, town_name, (FILEPATH_MAX_LEN - strlen(filepath_save)));
-	strncat(filepath_save, ".", (FILEPATH_MAX_LEN - strlen(filepath_save)));
+	appendage = SM_String_contain(town_name);
+	SM_String_append(&filepath_save, &appendage);
+	appendage = SM_String_contain(".");
+	SM_String_append(&filepath_save, &appendage);
 
-	strncpy(filepath_bkp, filepath_save, FILEPATH_MAX_LEN);
-
-	strncat(filepath_save, FILETYPE_TOWN, (FILEPATH_MAX_LEN - strlen(filepath_save)));
-	strncat(filepath_bkp, FILETYPE_BACKUP, (FILEPATH_MAX_LEN - strlen(filepath_save)));
+	SM_String_copy(&filepath_bkp, &filepath_save);
+	appendage = SM_String_contain(FILETYPE_TOWN);
+	SM_String_append(&filepath_save, &appendage);
+	appendage = SM_String_contain(FILETYPE_BACKUP);
+	SM_String_append(&filepath_bkp, &appendage);
 
 	/* if save already exists, move to backup */
-	f = fopen(filepath_save, "r");
+	f = fopen(filepath_save.str, "r");
 
 	if (f != NULL)
 	{
-		if (rename(filepath_save, filepath_bkp) != 0)
+		if (rename(filepath_save.str, filepath_bkp.str) != 0)
 		{
 			printf(MSG_WARN_FILE_TOWN_BACKUP, MSG_WARN);
 		}
@@ -107,7 +112,7 @@ void Town_save( Town *town, char *town_name )
 	}
 
 	/* open file */
-	f = fopen(filepath_save, "w");
+	f = fopen(filepath_save.str, "w");
 
 	if (f == NULL)
 	{
@@ -176,29 +181,35 @@ void Town_save( Town *town, char *town_name )
 	}
 
 	fclose(f);
+	SM_String_clear(&filepath_save);
+	SM_String_clear(&filepath_bkp);
 }
 
-void Town_load( Town *town, char *town_name )
+void Town_load( Town *town, const char *town_name )
 {
 	FILE *f;
-	char filepath[FILEPATH_MAX_LEN] = "";
+	SM_String filepath = SM_String_new(16);
+	SM_String appendage;
 	uint32_t town_width, town_height;
 	uint32_t file_major, file_minor, file_patch;
 
 	/* get path */
-	if (get_town_path(filepath) != 0)
+	if (get_town_path(&filepath) != 0)
 	{
 		town->invalid = true;
 		return;
 	}
 
 	/* glue file part to path */
-	strncat(filepath, town_name, (FILEPATH_MAX_LEN - strlen(filepath)));
-	strncat(filepath, ".", (FILEPATH_MAX_LEN - strlen(filepath)));
-	strncat(filepath, FILETYPE_TOWN, (FILEPATH_MAX_LEN - strlen(filepath)));
+	appendage = SM_String_contain(town_name);
+	SM_String_append(&filepath, &appendage);
+	appendage = SM_String_contain(".");
+	SM_String_append(&filepath, &appendage);
+	appendage = SM_String_contain(FILETYPE_TOWN);
+	SM_String_append(&filepath, &appendage);
 
 	/* open */
-	f = fopen(filepath, "r");
+	f = fopen(filepath.str, "r");
 
 	if (f == NULL)
 	{
@@ -275,9 +286,10 @@ void Town_load( Town *town, char *town_name )
 	}
 
 	fclose(f);
+	SM_String_clear(&filepath);
 }
 
-void Town_construction_list_remove( Town *town, uint32_t index )
+void Town_construction_list_remove( Town *town, const uint32_t index )
 {
 	/* beginning at index, for each entry overwrite with next entry */
 	for (uint32_t i = index; i < town->construction_count; i++)

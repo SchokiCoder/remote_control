@@ -23,6 +23,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <SDL.h>
+#include <SM_string.h>
 #include "admins.h"
 #include "messages.h"
 #include "app.h"
@@ -77,12 +78,13 @@ void cmd_list_admins( void )
 	}
 }
 
-void cmd_hire_admin( int32_t admin_id, char *town_name )
+void cmd_hire_admin( const int32_t admin_id, const char *town_name )
 {
 	Town new_town = Town_new();
 	uint32_t tree_chance;
 	uint32_t tree_variance;
-	char filepath[FILEPATH_MAX_LEN] = "";
+	SM_String filepath = SM_String_new(16);
+	SM_String appendage;
 	FILE *f;
 	char confirmation;
 
@@ -93,19 +95,26 @@ void cmd_hire_admin( int32_t admin_id, char *town_name )
 	if (admin_id < 0 ||
 		(uint32_t) admin_id > (sizeof(DATA_ADMINS) / sizeof(DATA_ADMINS[0])))
 	{
+		SM_String_clear(&filepath);
 		printf(MSG_ERR_ADMIN_ID, MSG_ERR, CMD_LIST_ADMINS_LONG);
 		return;
 	}
 
 	/* check if town file already exists (by trying to read it) */
-	if (get_town_path(filepath) != 0)
+	if (get_town_path(&filepath) != 0)
+	{
+		SM_String_clear(&filepath);
 		return;
+	}
 
-	strncat(filepath, town_name, (FILEPATH_MAX_LEN - strlen(filepath)));
-	strncat(filepath, ".", (FILEPATH_MAX_LEN - strlen(filepath)));
-	strncat(filepath, FILETYPE_TOWN, (FILEPATH_MAX_LEN - strlen(filepath)));
+	appendage = SM_String_contain(town_name);
+	SM_String_append(&filepath, &appendage);
+	appendage = SM_String_contain(".");
+	SM_String_append(&filepath, &appendage);
+	appendage = SM_String_contain(FILETYPE_TOWN);
+	SM_String_append(&filepath, &appendage);
 
-	f = fopen(filepath, "r");
+	f = fopen(filepath.str, "r");
 
 	if (f != NULL)
 	{
@@ -120,6 +129,7 @@ void cmd_hire_admin( int32_t admin_id, char *town_name )
 	if (confirmation != 'y')
 	{
 		printf(MSG_TOWN_CREATION_STOPPED);
+		SM_String_clear(&filepath);
 		return;
 	}
 
@@ -176,20 +186,26 @@ void cmd_hire_admin( int32_t admin_id, char *town_name )
 
 	if(new_town.invalid == false)
 		printf(MSG_FILE_TOWN_CREATE);
+
+	// clear
+	SM_String_clear(&filepath);
 }
 
 void cmd_list_towns( void )
 {
-	char path[FILEPATH_MAX_LEN] = "";
+	SM_String filepath = SM_String_new(16);
 	DIR *dir;
 	struct dirent *d_ent;
 	char *substr = NULL;
 
 	/* open town dir */
-	if (get_town_path(path) != 0)
+	if (get_town_path(&filepath) != 0)
+	{
+		SM_String_clear(&filepath);
 		return;
+	}
 
-	dir = opendir(path);
+	dir = opendir(filepath.str);
 
 	if (dir == NULL)
 	{
@@ -209,17 +225,22 @@ void cmd_list_towns( void )
 			substr = NULL;
 		}
 	}
+	printf("\n");
 
 	closedir(dir);
-
-	printf("\n");
+	SM_String_clear(&filepath);
 }
 
-void cmd_connect( char *town_name )
+void cmd_connect( const char *town_name )
 {
-	struct Game game;
 	Town town = Town_new();
 	Config cfg = Config_new();
+	Game game = {
+		.town_name = town_name,
+		.town = &town,
+		.cfg = &cfg,
+		.game_state = GS_ACTIVE
+	};
 
 	// load game
 	Town_load(&town, town_name);
@@ -229,12 +250,6 @@ void cmd_connect( char *town_name )
 
 	// read config
 	Config_load(&cfg);
-
-	/* prepare gameplay data */
-	game.town_name = town_name;
-	game.town = &town;
-	game.cfg = &cfg;
-	game.game_state = GS_ACTIVE;
 
 	/* start game part */
 	Game_main(&game);
@@ -256,22 +271,31 @@ void cmd_connect( char *town_name )
 	printf(MSG_CONNECTION_CLOSED);
 }
 
-void cmd_delete( char *town_name )
+void cmd_delete( const char *town_name )
 {
-	char filepath[FILEPATH_MAX_LEN] = "";
+	SM_String filepath = SM_String_new(16);
+	SM_String appendage;
 
-	/* get path */
-	if (get_town_path(filepath) != 0)
+	// get path
+	if (get_town_path(&filepath) != 0)
+	{
+		SM_String_clear(&filepath);
 		return;
+	}
 
-	/* glue file part to path */
-	strncat(filepath, town_name, (FILEPATH_MAX_LEN - strlen(filepath)));
-	strncat(filepath, ".", (FILEPATH_MAX_LEN - strlen(filepath)));
-	strncat(filepath, FILETYPE_TOWN, (FILEPATH_MAX_LEN - strlen(filepath)));
+	// glue file part to path
+	appendage = SM_String_contain(town_name);
+	SM_String_append(&filepath, &appendage);
+	appendage = SM_String_contain(".");
+	SM_String_append(&filepath, &appendage);
+	appendage = SM_String_contain(FILETYPE_TOWN);
+	SM_String_append(&filepath, &appendage);
 
-	if (remove(filepath) != 0)
+	// delete and check
+	if (remove(filepath.str) != 0)
 		printf(MSG_ERR_FILE_TOWN_DELETE, MSG_ERR);
-
 	else
 		printf(MSG_FILE_TOWN_DELETE);
+
+	SM_String_clear(&filepath);
 }

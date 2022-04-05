@@ -55,7 +55,7 @@ Config Config_new( void )
 void Config_load( Config *cfg )
 {
 	FILE *f;
-	char filepath[FILEPATH_MAX_LEN] = "";
+	SM_String filepath = SM_String_new(16);
 	int32_t buf;
 	uint32_t line = 0;
 	uint32_t setting_len = 0;
@@ -65,17 +65,19 @@ void Config_load( Config *cfg )
 	char cfg_values[CONFIG_MAX_LINES][CONFIG_MAX_VALUE_LEN];
 
 	/* get path */
-	if (get_config_path(filepath) != 0)
+	if (get_config_path(&filepath) != 0)
 	{
+		SM_String_clear(&filepath);
 		cfg->invalid = true;
 		return;
 	}
 
 	/* open file */
-	f = fopen(filepath, "r");
+	f = fopen(filepath.str, "r");
 
 	if (f == NULL)
 	{
+		SM_String_clear(&filepath);
 		cfg->invalid = true;
 		printf(MSG_WARN_CONFIG_LOAD, MSG_WARN);
 		return;
@@ -222,26 +224,29 @@ void Config_load( Config *cfg )
 	}
 
 	fclose(f);
+	SM_String_clear(&filepath);
 }
 
 void Config_save( Config *cfg )
 {
 	FILE *f;
-	char filepath[FILEPATH_MAX_LEN] = "";
+	SM_String filepath = SM_String_new(16);
 	const char *delim = " = ";
 
 	/* get path */
-	if (get_config_path(filepath) != 0)
+	if (get_config_path(&filepath) != 0)
 	{
+		SM_String_clear(&filepath);
 		cfg->invalid = true;
 		return;
 	}
 
 	/* open */
-	f = fopen(filepath, "w");
+	f = fopen(filepath.str, "w");
 
 	if (f == NULL)
 	{
+		SM_String_clear(&filepath);
 		cfg->invalid = true;
 		printf(MSG_WARN_CONFIG_SAVE, MSG_WARN);
 		return;
@@ -338,4 +343,5 @@ void Config_save( Config *cfg )
 	fputc('\n', f);
 
 	fclose(f);
+	SM_String_clear(&filepath);
 }

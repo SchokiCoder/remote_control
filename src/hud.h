@@ -56,8 +56,7 @@ static const char *PATH_TEXTURE_FIELDS[] = {
 	PATH_TEXTURES "quarry.png"
 };
 #define FIELD_SPRITE_OFFSET 2
-#define FIELD_SPRITE_COUNT \
-	(sizeof(PATH_TEXTURE_FIELDS) / sizeof(PATH_TEXTURE_FIELDS[0]))
+#define FIELD_SPRITE_COUNT (sizeof(PATH_TEXTURE_FIELDS) / sizeof(PATH_TEXTURE_FIELDS[0]))
 
 typedef struct Hud
 {
@@ -101,29 +100,29 @@ typedef struct Hud
 	SGUI_Sprite spr_merc_tint_purple;
 	SGUI_Sprite spr_mercs[MERCENARY_SPRITE_COUNT];
 
-	SGUI_Sprite spr_fields[FIELD_SPRITE_COUNT];
+	SGUI_Sprite spr_fields[FIELD_SPRITE_COUNT + FIELD_SPRITE_OFFSET];
 } Hud ;
 
-Hud Hud_new( SDL_Renderer *renderer, Config *cfg );
+void Hud_new( Hud *hud, const SDL_Renderer *renderer, const Config *cfg );
 
-void Hud_update_hover( Hud *hud, SDL_Point coord );
+void Hud_update_hover( Hud *hud, const SDL_Point coord );
 
-void Hud_update_time( Hud *hud, uint32_t round );
+void Hud_update_time( Hud *hud, const uint32_t round );
 
-void Hud_update_money( Hud *hud, uint32_t money );
+void Hud_update_money( Hud *hud, const uint32_t money );
 
-void Hud_calc( Hud *hud, int32_t window_w, int32_t window_h );
+void Hud_calc( Hud *hud, const int32_t window_w, const int32_t window_h );
 
 void Hud_generate_flips( Hud *hud );
 
 void Hud_map_textures(
 	Hud *hud,
-	bool fields_hidden[TOWN_WIDTH][TOWN_HEIGHT],
-	Field fields_content[TOWN_WIDTH][TOWN_HEIGHT] );
+	const bool fields_hidden[TOWN_WIDTH][TOWN_HEIGHT],
+	const Field fields_content[TOWN_WIDTH][TOWN_HEIGHT] );
 
-void Hud_draw( Hud *hud, Town *town );
+void Hud_draw( Hud *hud, const Town *town );
 
-void Hud_set_field( Hud *hud, SDL_Point field, SDL_Texture *texture );
+void Hud_set_field( Hud *hud, const SDL_Point field, const SDL_Texture *texture );
 
 void Hud_clear( Hud *hud );
 

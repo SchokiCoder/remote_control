@@ -109,12 +109,12 @@ typedef struct Town
 
 Town Town_new( void );
 
-void Town_print( Town *town, char *town_name );
+void Town_print( const Town *town, const char *town_name );
 
-void Town_save( Town *town, char *town_name );
+void Town_save( Town *town, const char *town_name );
 
-void Town_load( Town *town, char *town_name );
+void Town_load( Town *town, const char *town_name );
 
-void Town_construction_list_remove( Town *town, uint32_t index );
+void Town_construction_list_remove( Town *town, const uint32_t index );
 
 #endif /* TOWN_H */

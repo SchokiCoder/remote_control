@@ -36,7 +36,7 @@ enum GameState
 
 typedef struct Game
 {
-	char *town_name;
+	const char *town_name;
 	Town *town;
 	Config *cfg;
 
@@ -45,9 +45,9 @@ typedef struct Game
 
 void Game_end_round( Game *game, Hud *hud );
 
-void Game_construct( Game *game, SDL_Point field, Field building, Hud *hud );
+void Game_construct( Game *game, const SDL_Point field, const Field building, Hud *hud );
 
-void Game_spawn_merc( Game *game, Hud *hud, Mercenary merc );
+void Game_spawn_merc( Game *game, Hud *hud, const Mercenary merc );
 
 int32_t Game_main( Game *game );
 

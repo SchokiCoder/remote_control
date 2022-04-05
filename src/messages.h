@@ -169,6 +169,9 @@ static const char MSG_ERR_FONT_LOAD[] =
 static const char MSG_ERR_TEXTURE_CREATE[] =
 	"%sTexture \"%s\" can not be used.\n";
 
+static const char MSG_WARN_WIN_ICON[] =
+	"%sWindow icon could not be opened.\n";
+
 /* ingame messages */
 static const char MSG_CONNECTION_CLOSED[] =
 	"-- Connection terminated --\n";

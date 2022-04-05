@@ -39,12 +39,12 @@ void cmd_help_full( void );
 
 void cmd_list_admins( void );
 
-void cmd_hire_admin( int32_t admin_id, char *town_name );
+void cmd_hire_admin( const int32_t admin_id, const char *town_name );
 
 void cmd_list_towns( void );
 
-void cmd_connect( char *town_name );
+void cmd_connect( const char *town_name );
 
-void cmd_delete( char *town_name );
+void cmd_delete( const char *town_name );
 
 #endif /* COMMANDS_H */
