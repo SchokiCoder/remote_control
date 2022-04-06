@@ -59,55 +59,52 @@ static const char HELP_LICENSE[] = "%s %u.%u.%u is licensed under the %s.\n" \
 "The source code of this program is available at\n%s\n";
 
 /* messages */
-static const char MSG_ERR[] =		"ERROR: ";
-static const char MSG_WARN[] =		"WARNING: ";
-static const char MSG_SDL_ERR[] =	"SDL-Err: %s\n";
+#define MSG_ERR 	"ERROR: "
+#define MSG_WARN	"WARNING: "
+#define MSG_SDL_ERR	"SDL-Err: %s\n"
 
 /* outside of the game */
 static const char MSG_ERR_UNKNOWN_COMMAND[] =
-	"%sCommand not recognised.\nUse \"%s\" command for information on usage.\n";
+	MSG_ERR "Command not recognised.\nUse \"%s\" command for information on usage.\n";
 
 static const char MSG_ERR_ARG_MIN[] =
-	"%sToo few arguments passed.\nStopped.\n";
+	MSG_ERR "Too few arguments passed.\nStopped.\n";
 
 static const char MSG_WARN_ARG_MAX[] =
-	"%sToo many arguments passed.\nAdditional arguments will be ignored.\n";
+	MSG_WARN "Too many arguments passed.\nAdditional arguments will be ignored.\n";
 
 static const char MSG_ERR_FILE_SAVE[] =
-	"%sFile could not be saved.\nMake sure you have permissions to write and read.\n";
+	MSG_ERR "File could not be saved.\nMake sure you have permissions to write and read.\n";
 
 static const char MSG_ERR_FILE_LOAD[] =
-	"%sFile could not be loaded.\nMake sure the file exists and permissions to read are given.\n";
+	MSG_ERR "File could not be loaded.\nMake sure the file exists and permissions to read are given.\n";
 
 static const char MSG_ERR_DIR_BASE[] =
-	"%sGame file directory does not exist and could not be created.\n";
+	MSG_ERR "Game file directory does not exist and could not be created.\n";
 
 static const char MSG_ERR_DIR_TOWNS_CREATE[] =
-	"%sTown file directory does not exist and could not be created.\n";
+	MSG_ERR "Town file directory does not exist and could not be created.\n";
 
 static const char MSG_WARN_CONFIG_SAVE[] =
-	"%sConfig file could not be saved.\n";
+	MSG_WARN "Config file could not be saved.\n";
 
 static const char MSG_WARN_CONFIG_LOAD[] =
-	"%sConfig file could not be loaded.\n";
+	MSG_WARN "Config file could not be loaded.\n";
 
-static const char MSG_WARN_CONFIG_UNKNOWN_SETTING[] =
-	"%sUnrecognised setting in config \"%s\".\n";
-
-static const char MSG_ERR_UNKNOWN_SETTING[] =
-	"%sUnrecognised setting \"%s\".\n";
+static const char MSG_WARN_UNKNOWN_SETTING[] =
+	MSG_WARN "Unrecognised setting \"%s\".\n";
 
 static const char MSG_CONFIG_CREATED[] =
 	"The config was missing and a default config has been created.\n";
 
 static const char MSG_ERR_DIR_TOWNS[] =
-	"%sTown file directory does not exist.\n";
+	MSG_ERR "Town file directory does not exist.\n";
 
 static const char MSG_ERR_FILE_TOWN_CORRUPT[] =
-	"%sTown file has corrupt information.\n";
+	MSG_ERR "Town file has corrupt information.\n";
 
 static const char MSG_ERR_FILE_TOWN_SAVE[] =
-	"%sTown was not successfully saved.\n";
+	MSG_ERR "Town was not successfully saved.\n";
 
 static const char MSG_FILE_TOWN_SAVE[] =
 	"Town was successfully saved.\n";
@@ -122,57 +119,56 @@ static const char MSG_FILE_TOWN_DELETE[] =
 	"Depending on how bad this case was, you should also get rid of the physical drive.\n";
 
 static const char MSG_ERR_FILE_TOWN_DELETE[] =
-	"%sTown files couldn't be deleted.\n";
+	MSG_ERR "Town files couldn't be deleted.\n";
 
 static const char MSG_ERR_FILE_TOWN_LOAD[] =
-	"%sTown could not be loaded.\n";
+	MSG_ERR "Town could not be loaded.\n";
 
 static const char MSG_FILE_TOWN_LOAD[] =
 	"Town loaded.\n";
 
 static const char MSG_WARN_FILE_TOWN_EXIST[] =
-	"%sThe town already exists, type 'y' if you are sure to proceed.\n";
+	MSG_WARN "The town already exists, type 'y' if you are sure to proceed.\n";
 
 static const char MSG_WARN_FILE_TOWN_BACKUP[] =
-	"%sCreating backup files of this town failed.\n";
+	MSG_WARN "Creating backup files of this town failed.\n";
 
 static const char MSG_ERR_ADMIN_ID[] =
-	"%sGiven admin id does not exist.\nUse \"%s\" command to make your decision.\n";
+	MSG_ERR "Given admin id does not exist.\nUse \"%s\" command to make your decision.\n";
 
 static const char MSG_TOWN_CREATION_STOPPED[] =
 	"Town creation stopped.\n";
 
 static const char MSG_ERR_SDL_INIT[] =
-	"%sSDL could not be initialized.\n%s";
+	MSG_SDL_ERR "SDL could not be initialized.\n%s";
 
 static const char MSG_ERR_SDL_WINDOW[] =
-	"%sSDL could not open a window.\n%s";
+	MSG_SDL_ERR "SDL could not open a window.\n%s";
 
 static const char MSG_ERR_SDL_RENDERER[] =
-	"%sSDL could not create a renderer.\n%s";
+	MSG_SDL_ERR "SDL could not create a renderer.\n%s";
 
 static const char MSG_ERR_TTF_INIT[] =
-	"%sSDL_ttf could not be initialized.\n";
+	MSG_SDL_ERR "SDL_ttf could not be initialized.\n";
 
 static const char MSG_ERR_FILE_READ[] =
-	"%sFile \"%s\" could not be read.\n";
+	MSG_ERR "File \"%s\" could not be read.\n";
 
 static const char MSG_ERR_IMAGE_LOAD[] =
-	"%sTexture \"%s\" could not be loaded.\n";
+	MSG_ERR "Texture \"%s\" could not be loaded.\n";
 
 static const char MSG_ERR_TEXT_CREATE[] =
-	"%sTexture could no be created from text \"%s\".\n";
+	MSG_ERR "Texture could no be created from text \"%s\".\n";
 
 static const char MSG_ERR_FONT_LOAD[] =
-	"%sFont \"%s\" could not be loaded.\nYou should change your config.\n";
+	MSG_ERR "Font \"%s\" could not be loaded.\nYou should change your config.\n";
 
 static const char MSG_ERR_TEXTURE_CREATE[] =
-	"%sTexture \"%s\" can not be used.\n";
+	MSG_ERR "Texture \"%s\" can not be used.\n";
 
 static const char MSG_WARN_WIN_ICON[] =
-	"%sWindow icon could not be opened.\n";
+	MSG_WARN "Window icon could not be opened.\n";
 
-/* ingame messages */
 static const char MSG_CONNECTION_CLOSED[] =
 	"-- Connection terminated --\n";
 
@@ -181,5 +177,18 @@ static const char MSG_PLAYER_FAILURE[] =
 
 static const char MSG_FAILURE_COST[] =
 	"Your headquarter reported critical financial instabilities.\n";
+
+/* ingame messages */
+static const char GM_MSG_ERR_MIN_ARG[] =
+	MSG_ERR "Not enough arguments provided.";
+
+static const char GM_MSG_ERR_UNKNOWN_CMD[] =
+	MSG_ERR "Command not recognised.";
+
+static const char GM_MSG_CFG_SET[] =
+	"Config value set.";
+
+static const char GM_MSG_ERR_CONFIG_UNKNOWN_SETTING[] =
+	MSG_ERR "Unrecognised setting in config.";
 
 #endif /* MESSAGES_H */

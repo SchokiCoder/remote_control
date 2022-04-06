@@ -79,6 +79,8 @@ typedef struct Hud
 	SGUI_Label lbl_time_hour_val;
 	SGUI_Label lbl_money;
 	SGUI_Label lbl_money_val;
+	SGUI_Label lbl_feedback;
+	SGUI_Entry txt_command;
 
 	/* graphical data for area and fields */
 	SDL_Color field_border_color;
@@ -110,6 +112,8 @@ void Hud_update_hover( Hud *hud, const SDL_Point coord );
 void Hud_update_time( Hud *hud, const uint32_t round );
 
 void Hud_update_money( Hud *hud, const uint32_t money );
+
+void Hud_update_feedback( Hud *hud, const char *str );
 
 void Hud_calc( Hud *hud, const int32_t window_w, const int32_t window_h );
 

@@ -34,7 +34,130 @@
 #include "town.h"
 #include "config.h"
 #include "hud.h"
+#include "game_commands.h"
 #include "game.h"
+
+static const uint_fast8_t MAX_ARGS = 16;
+static const uint_fast8_t MAX_ARG_LEN = 32;
+
+void Game_issue_command( Game *game, Hud *hud, const char *str )
+{
+	const char *splits[2];
+	uint_fast32_t argc = 0;
+	char argv[MAX_ARGS][MAX_ARG_LEN];
+
+	// parse input
+	splits[0] = &str[0];
+
+	for (uint_fast32_t i = 0; i < MAX_ARGS; i++)
+	{
+		// increment arg counter
+		argc++;
+
+		// split
+		splits[1] = strchr(splits[0], ' ');
+
+		argv[i][0] = '\0';
+		strncat(argv[i], splits[0], (size_t) (splits[1] - splits[0]));
+
+		// if not end, move pointers, else stop
+		if (splits[1] != NULL)
+			splits[0] = splits[1] + 1;
+		else
+			break;
+	}
+
+	// parse command
+	/*if (strcmp(argv[0], GM_CMD_HELP) == 0)
+	{
+		//check arg max
+		if (argc > 1)
+		{
+			printf(MSG_WARN_ARG_MAX);
+		}
+
+		printf(HELP_TEXT_INGAME);
+	}
+	else*/
+
+	if (strcmp(argv[0], GM_CMD_SAVE) == 0)
+	{
+		/*// check arg max
+		if (argc > 1)
+		{
+			printf(MSG_WARN_ARG_MAX);
+		}*/
+
+		gm_cmd_save(hud, game->town_name, game->town);
+	}
+	else if (strcmp(argv[0], GM_CMD_SAVE_AS) == 0)
+	{
+		// check arg min
+		if (argc < 2)
+		{
+			Hud_update_feedback(hud, GM_MSG_ERR_MIN_ARG);
+			return;
+		}
+
+		/*// check arg max
+		else if (argc > 2)
+		{
+			printf(MSG_WARN_ARG_MAX);
+		}*/
+
+		gm_cmd_save_as(hud, argv[1], game->town);
+	}
+	else if (strcmp(argv[0], GM_CMD_EXIT) == 0)
+	{
+		/*// check arg max
+		if (argc > 1)
+		{
+			printf(MSG_WARN_ARG_MAX);
+		}*/
+
+		game->game_state = GS_CLOSE;
+	}
+	/*else if (strcmp(argv[0], GM_CMD_CONFIG_SHOW) == 0)
+	{
+		// check arg max
+		if (argc > 1)
+		{
+			printf(MSG_WARN_ARG_MAX);
+		}
+
+		gm_cmd_show_config(lbl_feedback, data->cfg);
+	}*/
+	else if (strcmp(argv[0], GM_CMD_CONFIG_SET) == 0)
+	{
+		// check arg min
+		if (argc < 3)
+		{
+			Hud_update_feedback(hud, GM_MSG_ERR_MIN_ARG);
+			return;
+		}
+
+		/*// check arg max
+		else if (argc > 3)
+		{
+			printf(MSG_WARN_ARG_MAX);
+		}*/
+
+		gm_cmd_config_set(hud, game->cfg, argv[1], argv[2]);
+	}
+	else if (strcmp(argv[0], GM_CMD_PASS) == 0)
+	{
+		/*// check arg max
+		if (argc > 3)
+		{
+			printf(MSG_WARN_ARG_MAX);
+		}*/
+
+		// end round
+		Game_end_round(game, hud);
+	}
+	else
+		Hud_update_feedback(hud, GM_MSG_ERR_UNKNOWN_CMD);
+}
 
 void Game_end_round( Game *game, Hud *hud )
 {
@@ -217,7 +340,7 @@ int32_t Game_main( Game *game )
 	}
 	else
 	{
-		printf(MSG_WARN_WIN_ICON, MSG_WARN);
+		printf(MSG_WARN_WIN_ICON);
 	}
 
 	// handle hud field textures
@@ -271,8 +394,17 @@ int32_t Game_main( Game *game )
 		// handle sdl-events
 		while (SDL_PollEvent(&event))
 		{
+			// menu
+			SGUI_Menu_handle_events(&hud.mnu_hud, &event);
+
 			switch (event.type)
 			{
+			// keyboard
+			case SDL_KEYDOWN:
+				if (event.key.keysym.sym == SDLK_RETURN)
+					Game_issue_command(game, &hud, hud.txt_command.text.str);
+				break;
+
 			// mouse hover
 			case SDL_MOUSEMOTION:
 				hover.x = (mouse.x - hud.rect_area.x) / hud.field_width;

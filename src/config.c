@@ -79,7 +79,7 @@ void Config_load( Config *cfg )
 	{
 		SM_String_clear(&filepath);
 		cfg->invalid = true;
-		printf(MSG_WARN_CONFIG_LOAD, MSG_WARN);
+		printf(MSG_WARN_CONFIG_LOAD);
 		return;
 	}
 
@@ -219,7 +219,7 @@ void Config_load( Config *cfg )
 		/* unknown option */
 		else
 		{
-			printf(MSG_WARN_CONFIG_UNKNOWN_SETTING, MSG_WARN, cfg_settings[i]);
+			printf(MSG_WARN_UNKNOWN_SETTING, cfg_settings[i]);
 		}
 	}
 
@@ -248,7 +248,7 @@ void Config_save( Config *cfg )
 	{
 		SM_String_clear(&filepath);
 		cfg->invalid = true;
-		printf(MSG_WARN_CONFIG_SAVE, MSG_WARN);
+		printf(MSG_WARN_CONFIG_SAVE);
 		return;
 	}
 

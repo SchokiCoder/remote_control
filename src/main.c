@@ -127,7 +127,7 @@ int main( int argc, char **argv )
 		/* check argc max */
 		if (argc > 2)
 		{
-			printf(MSG_WARN_ARG_MAX, MSG_WARN);
+			printf(MSG_WARN_ARG_MAX);
 		}
 
 		cmd_help_full();
@@ -138,7 +138,7 @@ int main( int argc, char **argv )
 		/* check argc max */
 		if (argc > 2)
 		{
-			printf(MSG_WARN_ARG_MAX, MSG_WARN);
+			printf(MSG_WARN_ARG_MAX);
 		}
 
 		cmd_list_admins();
@@ -149,14 +149,14 @@ int main( int argc, char **argv )
 		/* check argc min */
 		if (argc < 4)
 		{
-			printf(MSG_ERR_ARG_MIN, MSG_ERR);
+			printf(MSG_ERR_ARG_MIN);
 			return 0;
 		}
 
 		/* check argc max */
 		if (argc > 4)
 		{
-			printf(MSG_WARN_ARG_MAX, MSG_WARN);
+			printf(MSG_WARN_ARG_MAX);
 		}
 
 		/* parse args */
@@ -170,7 +170,7 @@ int main( int argc, char **argv )
 		/* check argc max */
 		if (argc > 2)
 		{
-			printf(MSG_WARN_ARG_MAX, MSG_WARN);
+			printf(MSG_WARN_ARG_MAX);
 		}
 
 		cmd_list_towns();
@@ -181,14 +181,14 @@ int main( int argc, char **argv )
 		/* check argc min */
 		if (argc < 3)
 		{
-			printf(MSG_ERR_ARG_MIN, MSG_ERR);
+			printf(MSG_ERR_ARG_MIN);
 			return 0;
 		}
 
 		/* check argc max */
 		if (argc > 3)
 		{
-			printf(MSG_WARN_ARG_MAX, MSG_WARN);
+			printf(MSG_WARN_ARG_MAX);
 		}
 
 		cmd_connect(argv[2]);
@@ -198,21 +198,21 @@ int main( int argc, char **argv )
 		/* check argc min */
 		if (argc < 3)
 		{
-			printf(MSG_ERR_ARG_MIN, MSG_ERR);
+			printf(MSG_ERR_ARG_MIN);
 			return 0;
 		}
 
 		/* check argc max */
 		if (argc > 3)
 		{
-			printf(MSG_WARN_ARG_MAX, MSG_WARN);
+			printf(MSG_WARN_ARG_MAX);
 		}
 
 		cmd_delete(argv[2]);
 	}
 	else
 	{
-		printf(MSG_ERR_UNKNOWN_COMMAND, MSG_ERR, CMD_HELP_LONG);
+		printf(MSG_ERR_UNKNOWN_COMMAND, CMD_HELP_LONG);
 	}
 
 	return 0;

@@ -55,7 +55,7 @@ int32_t get_base_path( SM_String *out )
 	{
 		if (errno != EEXIST)
 		{
-			printf(MSG_ERR_DIR_BASE, MSG_ERR);
+			printf(MSG_ERR_DIR_BASE);
 			return 1;
 		}
 	}
@@ -93,7 +93,7 @@ int32_t get_town_path( SM_String *out )
 	{
 		if (errno != EEXIST)
 		{
-			printf(MSG_ERR_DIR_TOWNS_CREATE, MSG_ERR);
+			printf(MSG_ERR_DIR_TOWNS_CREATE);
 			return 1;
 		}
 	}

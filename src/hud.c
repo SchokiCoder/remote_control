@@ -158,6 +158,8 @@ void Hud_new( Hud *hud, const SDL_Renderer *renderer, const Config *cfg )
 	SGUI_Label_new(&hud->lbl_time_hour_val, &hud->mnu_hud, font, THEME_RC.label);
 	SGUI_Label_new(&hud->lbl_money, &hud->mnu_hud, font, THEME_RC.label);
 	SGUI_Label_new(&hud->lbl_money_val, &hud->mnu_hud, font, THEME_RC.label);
+	SGUI_Label_new(&hud->lbl_feedback, &hud->mnu_hud, font, THEME_RC.label);
+	SGUI_Entry_new(&hud->txt_command, &hud->mnu_hud, font, THEME_RC.entry);
 
 	// define menu
 	hud->mnu_hud.rect.x = 0;
@@ -235,6 +237,14 @@ void Hud_update_money( Hud *hud, const uint32_t money )
 	hud->lbl_money_val.rect.h = hud->lbl_money_val.sprite.surface->h;
 }
 
+void Hud_update_feedback( Hud *hud, const char *str )
+{
+	SM_String temp = SM_String_contain(str);
+	SM_String_copy(&hud->lbl_feedback.text, &temp);
+	SGUI_Label_update_sprite(&hud->lbl_feedback);
+	hud->lbl_feedback.rect.w = hud->lbl_feedback.sprite.surface->w;
+}
+
 void Hud_calc( Hud *hud, const int32_t window_w, const int32_t window_h )
 {
 	// calc bar
@@ -284,6 +294,17 @@ void Hud_calc( Hud *hud, const int32_t window_w, const int32_t window_h )
 	hud->lbl_money_val.rect.x = (hud->lbl_money.rect.x + hud->lbl_money.rect.w) +
 		(window_w * HUD_LBL_MONEY_VAL_X_DIST);
 	hud->lbl_money_val.rect.y = window_h * HUD_LBL_MONEY_VAL_Y;
+
+	// command line widgets
+	hud->lbl_feedback.rect.x = 0;
+	hud->lbl_feedback.rect.y = window_h - (HUD_FONT_SIZE * 2);
+	hud->lbl_feedback.rect.w = window_w;
+	hud->lbl_feedback.rect.h = HUD_FONT_SIZE;
+
+	hud->txt_command.rect.x = 0;
+	hud->txt_command.rect.y = window_h - HUD_FONT_SIZE;
+	hud->txt_command.rect.w = window_w;
+	hud->txt_command.rect.h = HUD_FONT_SIZE;
 
 	/* calculate area pos and size
 		-as wide as high

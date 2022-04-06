@@ -105,7 +105,7 @@ void Town_save( Town *town, const char *town_name )
 	{
 		if (rename(filepath_save.str, filepath_bkp.str) != 0)
 		{
-			printf(MSG_WARN_FILE_TOWN_BACKUP, MSG_WARN);
+			printf(MSG_WARN_FILE_TOWN_BACKUP);
 		}
 
 		fclose(f);
@@ -117,7 +117,7 @@ void Town_save( Town *town, const char *town_name )
 	if (f == NULL)
 	{
 		town->invalid = true;
-		printf(MSG_ERR_FILE_SAVE, MSG_ERR);
+		printf(MSG_ERR_FILE_SAVE);
 		return;
 	}
 
@@ -177,7 +177,7 @@ void Town_save( Town *town, const char *town_name )
 	if (ferror(f))
 	{
 		town->invalid = true;
-		printf(MSG_ERR_FILE_TOWN_SAVE, MSG_ERR);
+		printf(MSG_ERR_FILE_TOWN_SAVE);
 	}
 
 	fclose(f);
@@ -214,7 +214,7 @@ void Town_load( Town *town, const char *town_name )
 	if (f == NULL)
 	{
 		town->invalid = true;
-		printf(MSG_ERR_FILE_LOAD, MSG_ERR);
+		printf(MSG_ERR_FILE_LOAD);
 		return;
 	}
 
@@ -233,7 +233,7 @@ void Town_load( Town *town, const char *town_name )
 	if ((town_width != TOWN_WIDTH) || (town_height != TOWN_HEIGHT))
 	{
 		town->invalid = true;
-		printf(MSG_ERR_FILE_TOWN_CORRUPT, MSG_ERR);
+		printf(MSG_ERR_FILE_TOWN_CORRUPT);
 		return;
 	}
 
@@ -281,7 +281,7 @@ void Town_load( Town *town, const char *town_name )
 	if (ferror(f))
 	{
 		town->invalid = true;
-		printf(MSG_ERR_FILE_TOWN_LOAD, MSG_ERR);
+		printf(MSG_ERR_FILE_TOWN_LOAD);
 		fclose(f);
 	}
 

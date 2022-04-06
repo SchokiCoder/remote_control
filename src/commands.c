@@ -96,7 +96,7 @@ void cmd_hire_admin( const int32_t admin_id, const char *town_name )
 		(uint32_t) admin_id > (sizeof(DATA_ADMINS) / sizeof(DATA_ADMINS[0])))
 	{
 		SM_String_clear(&filepath);
-		printf(MSG_ERR_ADMIN_ID, MSG_ERR, CMD_LIST_ADMINS_LONG);
+		printf(MSG_ERR_ADMIN_ID, CMD_LIST_ADMINS_LONG);
 		return;
 	}
 
@@ -118,7 +118,7 @@ void cmd_hire_admin( const int32_t admin_id, const char *town_name )
 
 	if (f != NULL)
 	{
-		printf(MSG_WARN_FILE_TOWN_EXIST, MSG_WARN);
+		printf(MSG_WARN_FILE_TOWN_EXIST);
 		confirmation = getchar();
 	}
 	else
@@ -209,7 +209,7 @@ void cmd_list_towns( void )
 
 	if (dir == NULL)
 	{
-		printf(MSG_ERR_DIR_TOWNS, MSG_ERR);
+		printf(MSG_ERR_DIR_TOWNS);
 	}
 
 	/* for all dirents */
@@ -293,7 +293,7 @@ void cmd_delete( const char *town_name )
 
 	// delete and check
 	if (remove(filepath.str) != 0)
-		printf(MSG_ERR_FILE_TOWN_DELETE, MSG_ERR);
+		printf(MSG_ERR_FILE_TOWN_DELETE);
 	else
 		printf(MSG_FILE_TOWN_DELETE);
 
