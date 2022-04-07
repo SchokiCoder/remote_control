@@ -40,14 +40,19 @@ static const uint8_t HUD_BAR_COLOR_A = 200;
 
 static const float HUD_BAR_TOP_X = 0.0f;
 static const float HUD_BAR_TOP_Y = 0.0f;
-static const float HUD_BAR_TOP_W = 100.0f;
+static const float HUD_BAR_TOP_W = 1.0f;
 static const float HUD_BAR_TOP_H_MARGIN = 0.001f;
+
+static const float HUD_BAR_CMD_W = 1.0f;
+static const float HUD_BAR_CMD_H_MARGIN = 0.001;
 
 // hover labels
 static const float HUD_LBL_HOVER_X_X = 0.01f;
 static const float HUD_LBL_HOVER_X_Y_DIST = 0.005f;
 
 static const float HUD_LBL_HOVER_Y_X_DIST = 0.04f;
+
+static const float HUD_LBL_HOVER_NAME_X_DIST = 0.04f;
 
 // top bar widgets
 static const char HUD_LBL_TIME_DAY_TEXT[] =		"day:";
@@ -92,8 +97,8 @@ static const SGUI_Theme THEME_RC = {
 
     .entry = {
     	.font_color = {.r = 200, .g = 200, .b = 200, .a = 255},
-    	.bg_color = {.r = 65, .g = 65, .b = 65, .a = 255},
-    	.border_color = {.r = 70, .g = 70, .b = 70, .a = 255},
+    	.bg_color = {.r = 65, .g = 65, .b = 65, .a = 0},
+    	.border_color = {.r = 70, .g = 70, .b = 70, .a = 0},
     	.disabled_color = {.r = 0, .g = 0, .b = 0, .a = 75},
 	},
 };
@@ -152,6 +157,7 @@ void Hud_new( Hud *hud, const SDL_Renderer *renderer, const Config *cfg )
 	hud->mnu_hud = SGUI_Menu_new((SDL_Renderer*) renderer, THEME_RC.menu);
 	SGUI_Label_new(&hud->lbl_hover_x, &hud->mnu_hud, font, THEME_RC.label);
 	SGUI_Label_new(&hud->lbl_hover_y, &hud->mnu_hud, font, THEME_RC.label);
+	SGUI_Label_new(&hud->lbl_hover_name, &hud->mnu_hud, font, THEME_RC.label);
 	SGUI_Label_new(&hud->lbl_time_day, &hud->mnu_hud, font, THEME_RC.label);
 	SGUI_Label_new(&hud->lbl_time_day_val, &hud->mnu_hud, font, THEME_RC.label);
 	SGUI_Label_new(&hud->lbl_time_hour, &hud->mnu_hud, font, THEME_RC.label);
@@ -159,6 +165,7 @@ void Hud_new( Hud *hud, const SDL_Renderer *renderer, const Config *cfg )
 	SGUI_Label_new(&hud->lbl_money, &hud->mnu_hud, font, THEME_RC.label);
 	SGUI_Label_new(&hud->lbl_money_val, &hud->mnu_hud, font, THEME_RC.label);
 	SGUI_Label_new(&hud->lbl_feedback, &hud->mnu_hud, font, THEME_RC.label);
+	SGUI_Label_new(&hud->lbl_pointer, &hud->mnu_hud, font, THEME_RC.label);
 	SGUI_Entry_new(&hud->txt_command, &hud->mnu_hud, font, THEME_RC.entry);
 
 	// define menu
@@ -166,6 +173,7 @@ void Hud_new( Hud *hud, const SDL_Renderer *renderer, const Config *cfg )
 	hud->mnu_hud.rect.y = 0;
 	hud->mnu_hud.rect.w = cfg->gfx_window_w;
 	hud->mnu_hud.rect.h = cfg->gfx_window_h;
+	hud->mnu_hud.focused_entry = &hud->txt_command;
 
 	temp = SM_String_contain(HUD_LBL_TIME_DAY_TEXT);
 	SM_String_copy(&hud->lbl_time_day.text, &temp);
@@ -178,36 +186,48 @@ void Hud_new( Hud *hud, const SDL_Renderer *renderer, const Config *cfg )
 	temp = SM_String_contain(HUD_LBL_MONEY_TEXT);
 	SM_String_copy(&hud->lbl_money.text, &temp);
 	SGUI_Label_update_sprite(&hud->lbl_money);
+
+	temp = SM_String_contain(">");
+	SM_String_copy(&hud->lbl_pointer.text, &temp);
+	SGUI_Label_update_sprite(&hud->lbl_pointer);
 }
 
-void Hud_update_hover( Hud *hud, const SDL_Point coord )
+void Hud_update_hover( Hud *hud, const SDL_Point coord, const char *name )
 {
+    SM_String tmp;
+
     // if hover values is out of town, make invisible and stop
     if (coord.x >= TOWN_WIDTH || coord.y >= TOWN_HEIGHT)
 	{
         hud->lbl_hover_x.visible = false;
         hud->lbl_hover_y.visible = false;
+        hud->lbl_hover_name.visible = false;
         return;
 	}
 	else
 	{
 		hud->lbl_hover_x.visible = true;
         hud->lbl_hover_y.visible = true;
+        hud->lbl_hover_name.visible = true;
 	}
 
     sprintf(hud->lbl_hover_x.text.str, "%i", coord.x);
     hud->lbl_hover_x.text.len = strlen(hud->lbl_hover_x.text.str);
     SGUI_Label_update_sprite(&hud->lbl_hover_x);
-
     hud->lbl_hover_x.rect.w = hud->lbl_hover_x.sprite.surface->w;
     hud->lbl_hover_x.rect.h = hud->lbl_hover_x.sprite.surface->h;
 
     sprintf(hud->lbl_hover_y.text.str, "%i", coord.y);
     hud->lbl_hover_y.text.len = strlen(hud->lbl_hover_y.text.str);
     SGUI_Label_update_sprite(&hud->lbl_hover_y);
-
     hud->lbl_hover_y.rect.w = hud->lbl_hover_y.sprite.surface->w;
     hud->lbl_hover_y.rect.h = hud->lbl_hover_y.sprite.surface->h;
+
+    tmp = SM_String_contain(name);
+    SM_String_copy(&hud->lbl_hover_name.text, &tmp);
+    SGUI_Label_update_sprite(&hud->lbl_hover_name);
+    hud->lbl_hover_name.rect.w = hud->lbl_hover_name.sprite.surface->w;
+    hud->lbl_hover_name.rect.h = hud->lbl_hover_name.sprite.surface->h;
 }
 
 void Hud_update_time( Hud *hud, const uint32_t round )
@@ -264,6 +284,10 @@ void Hud_calc( Hud *hud, const int32_t window_w, const int32_t window_h )
     	(window_w * HUD_LBL_HOVER_Y_X_DIST);
 	hud->lbl_hover_y.rect.y = hud->lbl_hover_x.rect.y;
 
+	hud->lbl_hover_name.rect.x = hud->lbl_hover_y.rect.x + hud->lbl_hover_y.rect.w +
+		(window_w * HUD_LBL_HOVER_NAME_X_DIST);
+	hud->lbl_hover_name.rect.y = hud->lbl_hover_y.rect.y;
+
 	// time widgets rect
 	hud->lbl_time_day.rect.x = window_w * HUD_LBL_TIME_DAY_X;
 	hud->lbl_time_day.rect.y = window_h * HUD_LBL_TIME_DAY_Y;
@@ -297,14 +321,27 @@ void Hud_calc( Hud *hud, const int32_t window_w, const int32_t window_h )
 
 	// command line widgets
 	hud->lbl_feedback.rect.x = 0;
-	hud->lbl_feedback.rect.y = window_h - (HUD_FONT_SIZE * 2);
+	hud->lbl_feedback.rect.y = window_h - ((HUD_FONT_SIZE + (0.01f * window_h)) * 2);
 	hud->lbl_feedback.rect.w = window_w;
-	hud->lbl_feedback.rect.h = HUD_FONT_SIZE;
+	hud->lbl_feedback.rect.h = HUD_FONT_SIZE + (0.01f * window_h);
 
-	hud->txt_command.rect.x = 0;
-	hud->txt_command.rect.y = window_h - HUD_FONT_SIZE;
+	hud->lbl_pointer.rect.x = 0;
+	hud->lbl_pointer.rect.y = window_h - (HUD_FONT_SIZE + (0.01f * window_h));
+	hud->lbl_pointer.rect.w = hud->lbl_pointer.sprite.surface->w;
+	hud->lbl_pointer.rect.h = HUD_FONT_SIZE + (0.01f * window_h);
+
+	hud->txt_command.rect.x = hud->lbl_pointer.rect.w + 0;
+	hud->txt_command.rect.y = window_h - (HUD_FONT_SIZE + (0.01f * window_h));
 	hud->txt_command.rect.w = window_w;
-	hud->txt_command.rect.h = HUD_FONT_SIZE;
+	hud->txt_command.rect.h = HUD_FONT_SIZE + (0.01f * window_h);
+
+	// cmd bar
+    hud->rect_bar_cmd.w = window_w * HUD_BAR_CMD_W;
+    hud->rect_bar_cmd.h =
+    	hud->lbl_feedback.rect.h + hud->txt_command.rect.h +
+    	(window_h * HUD_BAR_CMD_H_MARGIN);
+    hud->rect_bar_cmd.x = 0;
+    hud->rect_bar_cmd.y = window_h - hud->rect_bar_cmd.h;
 
 	/* calculate area pos and size
 		-as wide as high
@@ -482,6 +519,7 @@ void Hud_draw( Hud *hud, const Town *town )
 		HUD_BAR_COLOR_B,
 		HUD_BAR_COLOR_A);
 	SDL_RenderFillRect(hud->renderer, &hud->rect_bar_top);
+	SDL_RenderFillRect(hud->renderer, &hud->rect_bar_cmd);
 
 	// draw hud menu
 	SGUI_Menu_draw(&hud->mnu_hud);

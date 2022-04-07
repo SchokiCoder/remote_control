@@ -29,8 +29,8 @@ typedef struct Hud Hud;
 static const char GM_CMD_SAVE[] = "save";
 static const char GM_CMD_SAVE_AS[] = "save-as";
 static const char GM_CMD_EXIT[] = "exit";
-//static const char GM_CMD_CONFIG_SHOW[] = "config-show";
 static const char GM_CMD_CONFIG_SET[] = "config-set";
+//static const char GM_CMD_CONFIG_SHOW[] = "config-show";
 static const char GM_CMD_PASS[] = "pass";
 static const char GM_CMD_CONSTRUCT[] = "construct";
 static const char GM_CMD_DESTRUCT[] = "destruct";
@@ -42,5 +42,11 @@ void gm_cmd_save_as( Hud *hud, const char *town_name, Town *town );
 void gm_cmd_config_set(Hud *hud, Config *cfg, const char *setting_name, const char *setting_value );
 
 //void gm_cmd_config_show( const Config *p_cfg );
+
+void gm_cmd_pass( Game *game, Hud *hud );
+
+void gm_cmd_construct( Game *game, Hud *hud, const SDL_Point coord, const Field field );
+
+void gm_cmd_destruct( Game *game, Hud *hud, const SDL_Point coord );
 
 #endif /* GAME_COMMANDS_H */

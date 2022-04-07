@@ -191,4 +191,19 @@ static const char GM_MSG_CFG_SET[] =
 static const char GM_MSG_ERR_CONFIG_UNKNOWN_SETTING[] =
 	MSG_ERR "Unrecognised setting in config.";
 
+static const char GM_MSG_PASS[] =
+	"Round ended.";
+
+static const char GM_MSG_CONSTRUCT[] =
+	"Construction order accepted.";
+
+static const char GM_MSG_CONSTRUCT_INVALID[] =
+	"Construction order invalid. (Construction unknown)";
+
+static const char GM_MSG_CONSTRUCT_COORD_INVALID[] =
+	"Construction order invalid. (Coordinates invalid)";
+
+static const char GM_MSG_DESTRUCT[] =
+	"Destruction order accepted.";
+
 #endif /* MESSAGES_H */

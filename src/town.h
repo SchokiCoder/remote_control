@@ -52,28 +52,31 @@ typedef enum Field
 	FIELD_TREE_4,
 	FIELD_ADMINISTRATION,
 	FIELD_CONSTRUCTION,
-	FIELD_QUARRY
+	FIELD_QUARRY,
+	FIELD_FIRST = FIELD_EMPTY,
+	FIELD_LAST = FIELD_QUARRY
 } Field ;
 static const uint_fast32_t FIELD_TREE_COUNT = 5;
 
 typedef struct FieldData
 {
+	char name[15];
 	uint32_t construction_cost;
 	uint32_t construction_time;
 	uint32_t running_cost;
 } FieldData ;
 
 static const FieldData DATA_FIELDS[] = {
-	{0, 1, 0},		// empty
-	{0, 0, 10},		// merc
-	{0, 0, 0},		// trees
-	{0, 0, 0},
-	{0, 0, 0},
-	{0, 0, 0},
-	{0, 0, 0},		// trees
-	{0, 0, 20},		// administration
-	{0, 0, 0},		// construction
-	{20, 2, 10},	//quarry
+	{"empty", 0, 1, 0},
+	{"merc", 0, 0, 10},
+	{"tree0", 0, 0, 0},
+	{"tree1", 0, 0, 0},
+	{"tree2", 0, 0, 0},
+	{"tree3", 0, 0, 0},
+	{"tree4", 0, 0, 0},
+	{"administration", 0, 0, 20},
+	{"construct", 0, 0, 0},
+	{"quarry", 20, 2, 10},
 };
 
 typedef struct Construction
@@ -90,6 +93,8 @@ typedef struct Mercenary
 	uint32_t hp;
 	enum MercFraction fraction;
 } Mercenary ;
+
+bool str_to_field( const char *str, Field *field );
 
 typedef struct Town
 {

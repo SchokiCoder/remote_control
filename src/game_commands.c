@@ -25,6 +25,7 @@
 #include "town.h"
 #include "config.h"
 #include "game_commands.h"
+#include "game.h"
 
 void gm_cmd_save( Hud *hud, const char *town_name, Town *town )
 {
@@ -144,6 +145,7 @@ void gm_cmd_config_set( Hud *hud, Config *cfg, const char *setting_name, const c
 
 	Config_save(cfg);
 }
+
 /* due to technical limitations at the moment
 void gm_cmd_config_show( const Config *cfg )
 {
@@ -184,3 +186,24 @@ void gm_cmd_config_show( const Config *cfg )
 		cfg->field_border_alpha);
 }
 */
+
+void gm_cmd_pass( Game *game, Hud *hud )
+{
+	Game_end_round(game, hud);
+
+	Hud_update_feedback(hud, GM_MSG_PASS);
+}
+
+void gm_cmd_construct( Game *game, Hud *hud, const SDL_Point coord, const Field field )
+{
+	Game_construct(game, hud, coord, field);
+
+	Hud_update_feedback(hud, GM_MSG_CONSTRUCT);
+}
+
+void gm_cmd_destruct( Game *game, Hud *hud, const SDL_Point coord )
+{
+	Game_construct(game, hud, coord, FIELD_EMPTY);
+
+	Hud_update_feedback(hud, GM_MSG_DESTRUCT);
+}

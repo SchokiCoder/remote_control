@@ -62,17 +62,19 @@ typedef struct Hud
 {
 	SDL_Renderer *renderer;
 
-	/* data */
+	// data
 	bool invalid;
 	SDL_Point hover_field;
 
 	/* bars */
 	SDL_Rect rect_bar_top;
+	SDL_Rect rect_bar_cmd;
 
 	/* hud widgets */
 	SGUI_Menu mnu_hud;
 	SGUI_Label lbl_hover_x;
 	SGUI_Label lbl_hover_y;
+	SGUI_Label lbl_hover_name;
 	SGUI_Label lbl_time_day;
 	SGUI_Label lbl_time_day_val;
 	SGUI_Label lbl_time_hour;
@@ -80,6 +82,7 @@ typedef struct Hud
 	SGUI_Label lbl_money;
 	SGUI_Label lbl_money_val;
 	SGUI_Label lbl_feedback;
+	SGUI_Label lbl_pointer;
 	SGUI_Entry txt_command;
 
 	/* graphical data for area and fields */
@@ -107,7 +110,7 @@ typedef struct Hud
 
 void Hud_new( Hud *hud, const SDL_Renderer *renderer, const Config *cfg );
 
-void Hud_update_hover( Hud *hud, const SDL_Point coord );
+void Hud_update_hover( Hud *hud, const SDL_Point coord, const char *name );
 
 void Hud_update_time( Hud *hud, const uint32_t round );
 

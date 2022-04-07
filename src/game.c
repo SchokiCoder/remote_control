@@ -152,8 +152,63 @@ void Game_issue_command( Game *game, Hud *hud, const char *str )
 			printf(MSG_WARN_ARG_MAX);
 		}*/
 
-		// end round
-		Game_end_round(game, hud);
+		gm_cmd_pass(game, hud);
+	}
+	else if ((strcmp(argv[0], GM_CMD_CONSTRUCT) == 0) ||
+		(strcmp(argv[0], GM_CMD_DESTRUCT) == 0))
+	{
+		SDL_Point coord;
+		Field field;
+		bool valid_field;
+		uint_fast32_t min_args = 4;
+
+		if (strcmp(argv[0], GM_CMD_DESTRUCT) == 0)
+			min_args = 3;
+
+		// check arg min
+		if (argc < min_args)
+		{
+			Hud_update_feedback(hud, GM_MSG_ERR_MIN_ARG);
+			return;
+		}
+
+		/*// check arg max
+		else if (argc > 3)
+		{
+			printf(MSG_WARN_ARG_MAX);
+		}*/
+
+		// parse args
+		if (strcmp(argv[0], GM_CMD_DESTRUCT) == 0)
+		{
+			valid_field = true;
+			field = FIELD_EMPTY;
+			coord.x = strtol(argv[1], NULL, 10);
+			coord.y = strtol(argv[2], NULL, 10);
+		}
+		else
+		{
+			valid_field = str_to_field(argv[1], &field);
+			coord.x = strtol(argv[2], NULL, 10);
+			coord.y = strtol(argv[3], NULL, 10);
+		}
+
+		// check values
+		if (valid_field == false)
+		{
+			Hud_update_feedback(hud, GM_MSG_CONSTRUCT_INVALID);
+			return;
+		}
+
+		if (coord.x < 0 || coord.y < 0 ||
+			coord.x > TOWN_WIDTH || coord.y > TOWN_HEIGHT)
+		{
+			Hud_update_feedback(hud, GM_MSG_CONSTRUCT_COORD_INVALID);
+			return;
+		}
+
+		// exec
+		gm_cmd_construct(game, hud, coord, field);
 	}
 	else
 		Hud_update_feedback(hud, GM_MSG_ERR_UNKNOWN_CMD);
@@ -226,7 +281,7 @@ void Game_end_round( Game *game, Hud *hud )
 	Hud_update_money(hud, game->town->money);
 }
 
-void Game_construct( Game *game, const SDL_Point coords, const Field field, Hud *hud )
+void Game_construct( Game *game, Hud *hud, const SDL_Point coords, const Field field )
 {
 	/* change field */
 	game->town->field[coords.x][coords.y] = FIELD_CONSTRUCTION;
@@ -242,6 +297,7 @@ void Game_construct( Game *game, const SDL_Point coords, const Field field, Hud 
 
 	/* update hud */
 	Hud_update_money(hud, game->town->money);
+	Hud_set_field(hud, coords, hud->spr_fields[FIELD_CONSTRUCTION].texture);
 }
 
 void Game_spawn_merc( Game *game, Hud *hud, const Mercenary merc )
@@ -363,7 +419,8 @@ int32_t Game_main( Game *game )
 	int32_t border_t, border_l;
 	int32_t window_x, window_y;
 	int32_t window_w, window_h;
-	SDL_Point hover;
+	SDL_Point hover_coord;
+	Field hover_field;
 
 	while (game->game_state == GS_ACTIVE)
 	{
@@ -402,15 +459,25 @@ int32_t Game_main( Game *game )
 			// keyboard
 			case SDL_KEYDOWN:
 				if (event.key.keysym.sym == SDLK_RETURN)
+				{
 					Game_issue_command(game, &hud, hud.txt_command.text.str);
+					hud.txt_command.text.str[0] = '\0';
+					hud.txt_command.text.len = 0;
+				}
 				break;
 
 			// mouse hover
 			case SDL_MOUSEMOTION:
-				hover.x = (mouse.x - hud.rect_area.x) / hud.field_width;
-				hover.y = (mouse.y - hud.rect_area.y) / hud.field_height;
+				hover_coord.x = (mouse.x - hud.rect_area.x) / hud.field_width;
+				hover_coord.y = (mouse.y - hud.rect_area.y) / hud.field_height;
 
-				Hud_update_hover(&hud, hover);
+				if (hover_coord.x >= 0 && hover_coord.y >= 0 &&
+					hover_coord.x < TOWN_WIDTH && hover_coord.y < TOWN_HEIGHT)
+				{
+					hover_field = game->town->field[hover_coord.x][hover_coord.y];
+				}
+
+				Hud_update_hover(&hud, hover_coord, DATA_FIELDS[hover_field].name);
 				break;
 
 			// window

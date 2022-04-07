@@ -45,7 +45,7 @@ typedef struct Game
 
 void Game_end_round( Game *game, Hud *hud );
 
-void Game_construct( Game *game, const SDL_Point field, const Field building, Hud *hud );
+void Game_construct( Game *game, Hud *hud, const SDL_Point field, const Field building );
 
 void Game_spawn_merc( Game *game, Hud *hud, const Mercenary merc );
 

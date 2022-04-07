@@ -26,6 +26,20 @@
 #include "path.h"
 #include "town.h"
 
+bool str_to_field( const char *str, Field *field )
+{
+	for (uint_fast32_t i = 0; i <= FIELD_LAST; i++)
+	{
+		if (strcmp(str, DATA_FIELDS[i].name) == 0)
+		{
+			*field = i;
+			return true;
+		}
+	}
+
+	return false;
+}
+
 Town Town_new( void )
 {
 	Town result = {
@@ -122,9 +136,13 @@ void Town_save( Town *town, const char *town_name )
 	}
 
 	/* write header */
-	fwrite(&APP_MAJOR, sizeof(APP_MAJOR), 1, f);
-	fwrite(&APP_MINOR, sizeof(APP_MINOR), 1, f);
-	fwrite(&APP_PATCH, sizeof(APP_PATCH), 1, f);
+	const uint32_t app_major = APP_MAJOR;
+	const uint32_t app_minor = APP_MINOR;
+	const uint32_t app_patch = APP_PATCH;
+
+	fwrite(&app_major, sizeof(app_major), 1, f);
+	fwrite(&app_minor, sizeof(app_minor), 1, f);
+	fwrite(&app_patch, sizeof(app_patch), 1, f);
 	fwrite(&town->admin_id, sizeof(town->admin_id), 1, f);
 	fwrite(&town->round, sizeof(town->round), 1, f);
 	fwrite(&town->money, sizeof(town->money), 1, f);
