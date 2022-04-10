@@ -20,20 +20,54 @@
 #define GAME_COMMANDS_H
 
 #include <stdint.h>
+#include "commands.h"
 
 typedef struct Config Config;
 typedef struct Town Town;
 typedef struct Hud Hud;
 
-//static const char GM_CMD_HELP[] = "help";
-static const char GM_CMD_SAVE[] = "save";
-static const char GM_CMD_SAVE_AS[] = "save-as";
-static const char GM_CMD_EXIT[] = "exit";
-static const char GM_CMD_CONFIG_SET[] = "config-set";
-//static const char GM_CMD_CONFIG_SHOW[] = "config-show";
-static const char GM_CMD_PASS[] = "pass";
-static const char GM_CMD_CONSTRUCT[] = "construct";
-static const char GM_CMD_DESTRUCT[] = "destruct";
+typedef enum GameCommand
+{
+	//GM_CMD_HELP,
+	GM_CMD_SAVE,
+	GM_CMD_SAVE_AS,
+	GM_CMD_EXIT,
+	GM_CMD_CONFIG_SET,
+	//GM_CMD_CONFIG_SHOW,
+	GM_CMD_PASS,
+	GM_CMD_CONSTRUCT,
+	GM_CMD_DESTRUCT,
+
+	GM_CMD_FIRST = GM_CMD_SAVE,
+	GM_CMD_LAST = GM_CMD_DESTRUCT
+} GameCommand ;
+
+typedef enum GameCommandDJB2
+{
+	//DJB2_GM_HELP = ,
+	DJB2_GM_SAVE = 2900492925,
+	DJB2_GM_SAVE_AS = 3952009201,
+	DJB2_GM_EXIT = 2899968830,
+	DJB2_GM_CONFIG_SET = 1267258658,
+	//DJB2_GM_CONFIG_SHOW = ,
+	DJB2_GM_PASS = 2900374925,
+	DJB2_GM_CONSTRUCT = 2537986078,
+	DJB2_GM_CONSTRUCT_ABBR = 183053,
+	DJB2_GM_DESTRUCT = 1123813470,
+	DJB2_GM_DESTRUCT_ABBR = 183054,
+} GameCommandDJB2 ;
+
+static const CommandData DATA_GM_CMDS[] = {
+    //{"help", true, "h", "shows this message", false, ""},
+    {"save", false, "", "save current town file", false, ""},
+    {"save-as", false, "", "save current town with name", true, "TOWN_NAME"},
+    {"exit", false, "", "close connection to town", false, ""},
+    {"config-set", false, "", "set config value", true, "VARIABLE_NAME VALUE"},
+    //{"config-show", false, "", "show all current config values", false, ""},
+    {"pass", false, "", "pass time", false, ""},
+    {"construct", true, "c", "start construction", true, "X Y CONSTRUCTION"},
+    {"destruct", true, "d", "start destruction", true, "X Y"},
+};
 
 void gm_cmd_save( Hud *hud, const char *town_name, Town *town );
 

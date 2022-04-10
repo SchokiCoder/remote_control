@@ -58,11 +58,15 @@ static const char *PATH_TEXTURE_FIELDS[] = {
 #define FIELD_SPRITE_OFFSET 2
 #define FIELD_SPRITE_COUNT (sizeof(PATH_TEXTURE_FIELDS) / sizeof(PATH_TEXTURE_FIELDS[0]))
 
+#define HUD_CMD_HISTORY_LEN 10
+
 typedef struct Hud
 {
 	SDL_Renderer *renderer;
 
 	// data
+	int_fast32_t cmd_history_cursor;
+	SM_String cmd_history[HUD_CMD_HISTORY_LEN];
 	bool invalid;
 	SDL_Point hover_field;
 
@@ -130,6 +134,8 @@ void Hud_map_textures(
 void Hud_draw( Hud *hud, const Town *town );
 
 void Hud_set_field( Hud *hud, const SDL_Point field, const SDL_Texture *texture );
+
+void Hud_add_to_command_history( Hud *hud, const char *cmd );
 
 void Hud_clear( Hud *hud );
 

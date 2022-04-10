@@ -27,20 +27,14 @@
 
 int32_t get_base_path( SM_String *out )
 {
-	SM_String appendage;
 	int32_t rc;
 
 	// get path
-	appendage = SM_String_contain(getenv("HOME"));
-	SM_String_append(out, &appendage);
-	appendage = SM_String_contain(SLASH);
-	SM_String_append(out, &appendage);
-	appendage = SM_String_contain(".");
-	SM_String_append(out, &appendage);
-	appendage = SM_String_contain(APP_NAME);
-	SM_String_append(out, &appendage);
-	appendage = SM_String_contain(SLASH);
-	SM_String_append(out, &appendage);
+	SM_String_append_cstr(out, getenv("HOME"));
+	SM_String_append_cstr(out, SLASH);
+	SM_String_append_cstr(out, ".");
+	SM_String_append_cstr(out, APP_NAME);
+	SM_String_append_cstr(out, SLASH);
 
 	/* in case, create dir */
 	errno = 0;
@@ -65,7 +59,6 @@ int32_t get_base_path( SM_String *out )
 
 int32_t get_town_path( SM_String *out )
 {
-	SM_String appendage;
 	int32_t rc;
 
 	/* get base path */
@@ -75,10 +68,8 @@ int32_t get_town_path( SM_String *out )
 		return rc;
 
 	/* get path */
-	appendage = SM_String_contain(PATH_TOWNS);
-	SM_String_append(out, &appendage);
-	appendage = SM_String_contain(SLASH);
-	SM_String_append(out, &appendage);
+	SM_String_append_cstr(out, PATH_TOWNS);
+	SM_String_append_cstr(out, SLASH);
 
 	/* in case, create dir */
 	errno = 0;
@@ -103,7 +94,6 @@ int32_t get_town_path( SM_String *out )
 
 int32_t get_config_path( SM_String *out )
 {
-	SM_String appendage;
 	int32_t rc;
 
 	/* get base path */
@@ -113,8 +103,7 @@ int32_t get_config_path( SM_String *out )
 		return rc;
 
 	/* get path */
-	appendage = SM_String_contain(PATH_CONFIG);
-	SM_String_append(out, &appendage);
+	SM_String_append_cstr(out, PATH_CONFIG);
 
 	return 0;
 }

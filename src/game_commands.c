@@ -29,29 +29,36 @@
 
 void gm_cmd_save( Hud *hud, const char *town_name, Town *town )
 {
-	SM_String msg = SM_String_contain(MSG_FILE_TOWN_SAVE);
-
 	Town_save(town, town_name);
 
 	if (town->invalid)
+		Hud_update_feedback(hud, GM_MSG_ERR_TOWN_SAVE);
+	else
+	{
+		SM_String msg = SM_String_from(GM_MSG_TOWN_SAVE);
+		SM_String_append_cstr(&msg, ".");
+
 		Hud_update_feedback(hud, msg.str);
+		SM_String_clear(&msg);
+	}
 }
 
 void gm_cmd_save_as( Hud *hud, const char *town_name, Town *town )
 {
-	SM_String msg = SM_String_new(16);
-	SM_String temp = SM_String_contain(MSG_FILE_TOWN_SAVE_AS);
-
-	SM_String_copy(&msg, &temp);
-	temp = SM_String_contain(town_name);
-	SM_String_copy(&msg, &temp);
-
 	Town_save(town, town_name);
 
 	if (town->invalid)
-		Hud_update_feedback(hud, msg.str);
+		Hud_update_feedback(hud, GM_MSG_ERR_TOWN_SAVE);
+	else
+	{
+		SM_String msg = SM_String_from(GM_MSG_TOWN_SAVE);
+		SM_String_append_cstr(&msg, " as ");
+		SM_String_append_cstr(&msg, town_name);
+		SM_String_append_cstr(&msg, ".");
 
-	SM_String_clear(&msg);
+		Hud_update_feedback(hud, msg.str);
+		SM_String_clear(&msg);
+	}
 }
 
 void gm_cmd_config_set( Hud *hud, Config *cfg, const char *setting_name, const char *setting_value )

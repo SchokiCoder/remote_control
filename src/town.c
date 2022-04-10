@@ -88,7 +88,6 @@ void Town_save( Town *town, const char *town_name )
 {
 	SM_String filepath_save = SM_String_new(16);
 	SM_String filepath_bkp = SM_String_new(16);
-	SM_String appendage;
 	FILE *f;
 	uint32_t town_width = TOWN_WIDTH;
 	uint32_t town_height = TOWN_HEIGHT;
@@ -101,16 +100,12 @@ void Town_save( Town *town, const char *town_name )
 	}
 
 	/* glue file part to path */
-	appendage = SM_String_contain(town_name);
-	SM_String_append(&filepath_save, &appendage);
-	appendage = SM_String_contain(".");
-	SM_String_append(&filepath_save, &appendage);
+	SM_String_append_cstr(&filepath_save, town_name);
+	SM_String_append_cstr(&filepath_save, ".");
 
 	SM_String_copy(&filepath_bkp, &filepath_save);
-	appendage = SM_String_contain(FILETYPE_TOWN);
-	SM_String_append(&filepath_save, &appendage);
-	appendage = SM_String_contain(FILETYPE_BACKUP);
-	SM_String_append(&filepath_bkp, &appendage);
+	SM_String_append_cstr(&filepath_save, FILETYPE_TOWN);
+	SM_String_append_cstr(&filepath_bkp, FILETYPE_BACKUP);
 
 	/* if save already exists, move to backup */
 	f = fopen(filepath_save.str, "r");
@@ -207,7 +202,6 @@ void Town_load( Town *town, const char *town_name )
 {
 	FILE *f;
 	SM_String filepath = SM_String_new(16);
-	SM_String appendage;
 	uint32_t town_width, town_height;
 	uint32_t file_major, file_minor, file_patch;
 
@@ -219,12 +213,9 @@ void Town_load( Town *town, const char *town_name )
 	}
 
 	/* glue file part to path */
-	appendage = SM_String_contain(town_name);
-	SM_String_append(&filepath, &appendage);
-	appendage = SM_String_contain(".");
-	SM_String_append(&filepath, &appendage);
-	appendage = SM_String_contain(FILETYPE_TOWN);
-	SM_String_append(&filepath, &appendage);
+	SM_String_append_cstr(&filepath, town_name);
+	SM_String_append_cstr(&filepath, ".");
+	SM_String_append_cstr(&filepath, FILETYPE_TOWN);
 
 	/* open */
 	f = fopen(filepath.str, "r");

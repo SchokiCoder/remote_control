@@ -31,6 +31,6 @@ static const char APP_SOURCE[] = "https://github.com/SchokiCoder/remote_control"
 
 #define APP_MAJOR 0
 #define APP_MINOR 4
-#define APP_PATCH 0
+#define APP_PATCH 1
 
 #endif /* APP_H */

@@ -117,10 +117,15 @@ SGUI_Sprite Hud_load_sprite( Hud *hud, const char *filepath )
 
 void Hud_new( Hud *hud, const SDL_Renderer *renderer, const Config *cfg )
 {
-	SM_String temp;
-
+	// init values
 	hud->invalid = false;
 	hud->renderer = (SDL_Renderer*) renderer;
+	hud->cmd_history_cursor = -1;
+
+	for (uint_fast32_t i = 0; i < HUD_CMD_HISTORY_LEN; i++)
+	{
+        hud->cmd_history[i] = SM_String_new(8);
+	}
 
 	// get values from cfg
 	hud->field_border_color.r = cfg->field_border_red;
@@ -175,28 +180,22 @@ void Hud_new( Hud *hud, const SDL_Renderer *renderer, const Config *cfg )
 	hud->mnu_hud.rect.h = cfg->gfx_window_h;
 	hud->mnu_hud.focused_entry = &hud->txt_command;
 
-	temp = SM_String_contain(HUD_LBL_TIME_DAY_TEXT);
-	SM_String_copy(&hud->lbl_time_day.text, &temp);
+	SM_String_copy_cstr(&hud->lbl_time_day.text, HUD_LBL_TIME_DAY_TEXT);
 	SGUI_Label_update_sprite(&hud->lbl_time_day);
 
-	temp = SM_String_contain(HUD_LBL_TIME_HOUR_TEXT);
-	SM_String_copy(&hud->lbl_time_hour.text, &temp);
+	SM_String_copy_cstr(&hud->lbl_time_hour.text, HUD_LBL_TIME_HOUR_TEXT);
 	SGUI_Label_update_sprite(&hud->lbl_time_hour);
 
-	temp = SM_String_contain(HUD_LBL_MONEY_TEXT);
-	SM_String_copy(&hud->lbl_money.text, &temp);
+	SM_String_copy_cstr(&hud->lbl_money.text, HUD_LBL_MONEY_TEXT);
 	SGUI_Label_update_sprite(&hud->lbl_money);
 
-	temp = SM_String_contain(">");
-	SM_String_copy(&hud->lbl_pointer.text, &temp);
+	SM_String_copy_cstr(&hud->lbl_pointer.text, ">");
 	SGUI_Label_update_sprite(&hud->lbl_pointer);
 }
 
 void Hud_update_hover( Hud *hud, const SDL_Point coord, const char *name )
 {
-    SM_String tmp;
-
-    // if hover values is out of town, make invisible and stop
+    // if hover values are out of town, make invisible and stop
     if (coord.x >= TOWN_WIDTH || coord.y >= TOWN_HEIGHT)
 	{
         hud->lbl_hover_x.visible = false;
@@ -223,8 +222,7 @@ void Hud_update_hover( Hud *hud, const SDL_Point coord, const char *name )
     hud->lbl_hover_y.rect.w = hud->lbl_hover_y.sprite.surface->w;
     hud->lbl_hover_y.rect.h = hud->lbl_hover_y.sprite.surface->h;
 
-    tmp = SM_String_contain(name);
-    SM_String_copy(&hud->lbl_hover_name.text, &tmp);
+    SM_String_copy_cstr(&hud->lbl_hover_name.text, name);
     SGUI_Label_update_sprite(&hud->lbl_hover_name);
     hud->lbl_hover_name.rect.w = hud->lbl_hover_name.sprite.surface->w;
     hud->lbl_hover_name.rect.h = hud->lbl_hover_name.sprite.surface->h;
@@ -259,8 +257,7 @@ void Hud_update_money( Hud *hud, const uint32_t money )
 
 void Hud_update_feedback( Hud *hud, const char *str )
 {
-	SM_String temp = SM_String_contain(str);
-	SM_String_copy(&hud->lbl_feedback.text, &temp);
+	SM_String_copy_cstr(&hud->lbl_feedback.text, str);
 	SGUI_Label_update_sprite(&hud->lbl_feedback);
 	hud->lbl_feedback.rect.w = hud->lbl_feedback.sprite.surface->w;
 }
@@ -528,6 +525,18 @@ void Hud_draw( Hud *hud, const Town *town )
 void Hud_set_field( Hud *hud, const SDL_Point field, const SDL_Texture *texture )
 {
 	hud->textures_field_content[field.x][field.y] = (SDL_Texture*) texture;
+}
+
+void Hud_add_to_command_history( Hud *hud, const char *cmd )
+{
+    // push old ones back
+    for (uint_fast32_t i = HUD_CMD_HISTORY_LEN - 1; i > 0; i--)
+    {
+    	SM_String_copy(&hud->cmd_history[i], &hud->cmd_history[i - 1]);
+    }
+
+    // add new cmd
+    SM_String_copy_cstr(&hud->cmd_history[0], cmd);
 }
 
 void Hud_clear( Hud *hud )

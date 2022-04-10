@@ -20,18 +20,54 @@
 #define COMMANDS_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
-static const char CMD_HELP[] =				"h";
-static const char CMD_HELP_LONG[] =			"help";
-static const char CMD_LIST_ADMINS[] =		"la";
-static const char CMD_LIST_ADMINS_LONG[] =	"list-admins";
-static const char CMD_HIRE_ADMIN[] =		"ha";			/* (create new game) */
-static const char CMD_HIRE_ADMIN_LONG[] =	"hire-admin";
-static const char CMD_LIST_TOWNS[] =		"lt";
-static const char CMD_LIST_TOWNS_LONG[] =	"list-towns";
-static const char CMD_CONNECT[] =			"c";			/* start playing game, inits the mainloop */
-static const char CMD_CONNECT_LONG[] =		"connect";
-static const char CMD_DELETE_TOWN_LONG[] =	"delete";
+typedef struct CommandData
+{
+	char *name;
+	bool has_abbr;
+	char *abbr;
+	char *desc;
+	bool has_args;
+	char *args;
+} CommandData ;
+
+typedef enum Command
+{
+	CMD_HELP,
+	CMD_LIST_ADMINS,
+	CMD_HIRE_ADMIN,
+	CMD_LIST_TOWNS,
+	CMD_CONNECT,
+	CMD_DELETE_TOWN,
+
+	CMD_FIRST = CMD_HELP,
+	CMD_LAST = CMD_DELETE_TOWN,
+} Command ;
+
+typedef enum CommandDJB2
+{
+    DJB2_HELP = 2900064876,
+    DJB2_HELP_ABBR = 183058,
+    DJB2_LIST_ADMINS = 2152484539,
+    DJB2_LIST_ADMINS_ABBR = 6224205,
+    DJB2_HIRE_ADMIN = 1600892068,
+    DJB2_HIRE_ADMIN_ABBR = 6224069,
+    DJB2_LIST_TOWNS = 468110531,
+    DJB2_LIST_TOWNS_ABBR = 6224224,
+    DJB2_CONNECT = 1335798814,
+    DJB2_CONNECT_ABBR = 183053,
+    DJB2_DELETE = 2218755409,
+} CommandDJB2 ;
+
+static const CommandData DATA_CMDS[] = {
+	{"help", true, "h", "shows this message", false, ""},
+	{"list-admins", true, "la", "list all available administrators and their attributes", false, ""},
+	{"hire-admin", true, "ha", "hire an admin to watch over another place", true, "ADMIN_ID TOWN_NAME"},
+	{"list-towns", true, "lt", "list towns that are already controlled by you", false, ""},
+	{"connect", true, "c", "connect to a towns administrator and get to work", true, "TOWN_NAME"},
+	{"delete", false, "", "delete all files of a given town", true, "TOWN_NAME"},
+};
 
 void cmd_help_menu( void );
 

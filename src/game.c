@@ -22,6 +22,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <SGUI_sprite.h>
+#include <SM_crypto.h>
 
 #ifdef _DEBUG
 #include <time.h>
@@ -40,11 +41,45 @@
 static const uint_fast8_t MAX_ARGS = 16;
 static const uint_fast8_t MAX_ARG_LEN = 32;
 
+void print_gmcmd_djb2( void )
+{
+	FILE *file = fopen("djb2_gmhash.txt", "w");
+
+	fprintf(file, "%-32s| %-10s | %-10s\n", "cmd", "name", "abbr");
+
+	for (uint32_t i = 0; i <= GM_CMD_LAST; i++)
+	{
+		if (DATA_GM_CMDS[i].has_abbr)
+		{
+			fprintf(file,
+				"%-32s| %-10u | %-10u\n",
+				DATA_GM_CMDS[i].name,
+				SM_djb2_encode(DATA_GM_CMDS[i].name),
+				SM_djb2_encode(DATA_GM_CMDS[i].abbr));
+		}
+		else
+		{
+			fprintf(file,
+				"%-32s| %-10u |\n",
+				DATA_GM_CMDS[i].name,
+				SM_djb2_encode(DATA_GM_CMDS[i].name));
+		}
+	}
+
+	fclose(file);
+}
+
 void Game_issue_command( Game *game, Hud *hud, const char *str )
 {
+	uint32_t gm_cmd_djb2;
+	bool valid_gm_cmd = true;
 	const char *splits[2];
 	uint_fast32_t argc = 0;
 	char argv[MAX_ARGS][MAX_ARG_LEN];
+	SDL_Point coord;
+	Field field;
+	bool valid_field;
+	uint_fast32_t min_constr_args = 4;
 
 	// parse input
 	splits[0] = &str[0];
@@ -67,9 +102,13 @@ void Game_issue_command( Game *game, Hud *hud, const char *str )
 			break;
 	}
 
-	// parse command
-	/*if (strcmp(argv[0], GM_CMD_HELP) == 0)
+	gm_cmd_djb2 = SM_djb2_encode(argv[0]);
+
+	// exec command
+	switch (gm_cmd_djb2)
 	{
+	/*case DJB2_GM_HELP:
+	case DJB2_GM_HELP_ABBR:
 		//check arg max
 		if (argc > 1)
 		{
@@ -77,11 +116,9 @@ void Game_issue_command( Game *game, Hud *hud, const char *str )
 		}
 
 		printf(HELP_TEXT_INGAME);
-	}
-	else*/
+		break;*/
 
-	if (strcmp(argv[0], GM_CMD_SAVE) == 0)
-	{
+	case DJB2_GM_SAVE:
 		/*// check arg max
 		if (argc > 1)
 		{
@@ -89,9 +126,9 @@ void Game_issue_command( Game *game, Hud *hud, const char *str )
 		}*/
 
 		gm_cmd_save(hud, game->town_name, game->town);
-	}
-	else if (strcmp(argv[0], GM_CMD_SAVE_AS) == 0)
-	{
+		break;
+
+	case DJB2_GM_SAVE_AS:
 		// check arg min
 		if (argc < 2)
 		{
@@ -106,9 +143,9 @@ void Game_issue_command( Game *game, Hud *hud, const char *str )
 		}*/
 
 		gm_cmd_save_as(hud, argv[1], game->town);
-	}
-	else if (strcmp(argv[0], GM_CMD_EXIT) == 0)
-	{
+		break;
+
+	case DJB2_GM_EXIT:
 		/*// check arg max
 		if (argc > 1)
 		{
@@ -116,19 +153,9 @@ void Game_issue_command( Game *game, Hud *hud, const char *str )
 		}*/
 
 		game->game_state = GS_CLOSE;
-	}
-	/*else if (strcmp(argv[0], GM_CMD_CONFIG_SHOW) == 0)
-	{
-		// check arg max
-		if (argc > 1)
-		{
-			printf(MSG_WARN_ARG_MAX);
-		}
+		break;
 
-		gm_cmd_show_config(lbl_feedback, data->cfg);
-	}*/
-	else if (strcmp(argv[0], GM_CMD_CONFIG_SET) == 0)
-	{
+	case DJB2_GM_CONFIG_SET:
 		// check arg min
 		if (argc < 3)
 		{
@@ -143,9 +170,19 @@ void Game_issue_command( Game *game, Hud *hud, const char *str )
 		}*/
 
 		gm_cmd_config_set(hud, game->cfg, argv[1], argv[2]);
-	}
-	else if (strcmp(argv[0], GM_CMD_PASS) == 0)
-	{
+		break;
+
+	/*case DJB2_GM_CONFIG_SHOW:
+		// check arg max
+		if (argc > 1)
+		{
+			printf(MSG_WARN_ARG_MAX);
+		}
+
+		gm_cmd_show_config(lbl_feedback, data->cfg);
+		break;*/
+
+	case DJB2_GM_PASS:
 		/*// check arg max
 		if (argc > 3)
 		{
@@ -153,45 +190,40 @@ void Game_issue_command( Game *game, Hud *hud, const char *str )
 		}*/
 
 		gm_cmd_pass(game, hud);
-	}
-	else if ((strcmp(argv[0], GM_CMD_CONSTRUCT) == 0) ||
-		(strcmp(argv[0], GM_CMD_DESTRUCT) == 0))
-	{
-		SDL_Point coord;
-		Field field;
-		bool valid_field;
-		uint_fast32_t min_args = 4;
+		break;
 
-		if (strcmp(argv[0], GM_CMD_DESTRUCT) == 0)
-			min_args = 3;
+	case DJB2_GM_DESTRUCT:
+	case DJB2_GM_DESTRUCT_ABBR:
+		min_constr_args = 3;
+
+		// parse destr args
+		valid_field = true;
+		field = FIELD_EMPTY;
+		coord.x = strtol(argv[1], NULL, 10);
+		coord.y = strtol(argv[2], NULL, 10);
+		goto CONSTRUCT;
+
+	case DJB2_GM_CONSTRUCT:
+	case DJB2_GM_CONSTRUCT_ABBR:
+		CONSTRUCT:
 
 		// check arg min
-		if (argc < min_args)
+		if (argc < min_constr_args)
 		{
 			Hud_update_feedback(hud, GM_MSG_ERR_MIN_ARG);
 			return;
 		}
 
 		/*// check arg max
-		else if (argc > 3)
+		else if (argc > min_constr_args)
 		{
 			printf(MSG_WARN_ARG_MAX);
 		}*/
 
-		// parse args
-		if (strcmp(argv[0], GM_CMD_DESTRUCT) == 0)
-		{
-			valid_field = true;
-			field = FIELD_EMPTY;
-			coord.x = strtol(argv[1], NULL, 10);
-			coord.y = strtol(argv[2], NULL, 10);
-		}
-		else
-		{
-			valid_field = str_to_field(argv[1], &field);
-			coord.x = strtol(argv[2], NULL, 10);
-			coord.y = strtol(argv[3], NULL, 10);
-		}
+		// parse constr args
+		valid_field = str_to_field(argv[1], &field);
+		coord.x = strtol(argv[2], NULL, 10);
+		coord.y = strtol(argv[3], NULL, 10);
 
 		// check values
 		if (valid_field == false)
@@ -209,9 +241,20 @@ void Game_issue_command( Game *game, Hud *hud, const char *str )
 
 		// exec
 		gm_cmd_construct(game, hud, coord, field);
-	}
-	else
+		break;
+
+	default:
 		Hud_update_feedback(hud, GM_MSG_ERR_UNKNOWN_CMD);
+		valid_gm_cmd = false;
+		break;
+	}
+
+	// if issued command was valid
+	if (valid_gm_cmd)
+	{
+		// add to command history
+		Hud_add_to_command_history(hud, str);
+	}
 }
 
 void Game_end_round( Game *game, Hud *hud )
@@ -458,11 +501,41 @@ int32_t Game_main( Game *game )
 			{
 			// keyboard
 			case SDL_KEYDOWN:
-				if (event.key.keysym.sym == SDLK_RETURN)
+				switch (event.key.keysym.sym)
 				{
+				case SDLK_RETURN:
+					// isuue command
 					Game_issue_command(game, &hud, hud.txt_command.text.str);
 					hud.txt_command.text.str[0] = '\0';
 					hud.txt_command.text.len = 0;
+
+					// reset command history cursor
+					hud.cmd_history_cursor = -1;
+					break;
+
+				case SDLK_UP:
+					if (hud.cmd_history_cursor < (HUD_CMD_HISTORY_LEN - 1))
+					{
+						hud.cmd_history_cursor++;
+						SM_String_copy(&hud.txt_command.text, &hud.cmd_history[hud.cmd_history_cursor]);
+						SGUI_Entry_update_sprites(&hud.txt_command);
+					}
+					break;
+
+				case SDLK_DOWN:
+					if (hud.cmd_history_cursor > 0)
+					{
+						hud.cmd_history_cursor--;
+						SM_String_copy(&hud.txt_command.text, &hud.cmd_history[hud.cmd_history_cursor]);
+						SGUI_Entry_update_sprites(&hud.txt_command);
+					}
+					else
+					{
+						hud.cmd_history_cursor = -1;
+						SM_String_empty(&hud.txt_command.text);
+						SGUI_Entry_update_sprites(&hud.txt_command);
+					}
+					break;
 				}
 				break;
 

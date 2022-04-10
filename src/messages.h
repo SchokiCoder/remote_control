@@ -22,41 +22,23 @@
 #include "commands.h"
 
 /* help text */
-static const char HELP_1ST_STEPS[] = "\n" \
-"If you are new to this post, you should follow this 1st steps guide to quickly get started.\n" \
-"1. In the main menu list all administrators, " \
-"to take a glance at the characteristics of our loyal administrators.\n" \
-"   Remember them well and you should be good to go.\n" \
-"2. Use the hire admin option, to start a new town.\n" \
-"3. Use the connect option to begin your work in your town.\n" \
-"\n";
+static const char HELP_1ST_STEPS[] =
+	"\n" \
+	"If you are new to this post, you should follow this 1st steps guide to quickly get started.\n" \
+	"1. In the main menu list all administrators, " \
+	"to take a glance at the characteristics of our loyal administrators.\n" \
+	"   Remember them well and you should be good to go.\n" \
+	"2. Use the hire admin option, to start a new town.\n" \
+	"3. Use the connect option to begin your work in your town.\n" \
+	"\n";
 
-static const char HELP_COMMANDS[] = "\n" \
-"Usage %s [COMMAND] [ARGS]\n" \
-"\n" \
-"Commands to prepare your work:\n" \
-"  show this message:\n" \
-"  %s,\t%s\n" \
-"\n" \
-"  list all available administrators and their attributes:\n" \
-"  %s,\t%s\n" \
-"\n" \
-"  hire a new admin to assist you watching over another place:\n" \
-"  %s,\t%s\tADMIN_ID TOWN_NAME\n" \
-"\n" \
-"  list towns that are already controlled by you:\n" \
-"  %s,\t%s\n" \
-"\n" \
-"  connect to a towns administrator and get to work:\n" \
-"  %s,\t%s\tTOWN_NAME\n" \
-"\n" \
-"  delete all files of a given town:\n" \
-"  %s\t\tTOWN_NAME\n" \
-"\n";
+static const char HELP_APP[] =
+	"Usage:\n  %s [COMMAND] [ARGS]\n";
 
-static const char HELP_LICENSE[] = "%s %u.%u.%u is licensed under the %s.\n" \
-"%s" \
-"The source code of this program is available at\n%s\n";
+static const char HELP_LICENSE[] =
+	"%s %u.%u.%u is licensed under the %s.\n" \
+	"%s" \
+	"The source code of this program is available at\n%s\n";
 
 /* messages */
 #define MSG_ERR 	"ERROR: "
@@ -190,6 +172,12 @@ static const char GM_MSG_CFG_SET[] =
 
 static const char GM_MSG_ERR_CONFIG_UNKNOWN_SETTING[] =
 	MSG_ERR "Unrecognised setting in config.";
+
+static const char GM_MSG_ERR_TOWN_SAVE[] =
+	"Town could not be saved.";
+
+static const char GM_MSG_TOWN_SAVE[] =
+	"Town saved";
 
 static const char GM_MSG_PASS[] =
 	"Round ended.";

@@ -33,6 +33,25 @@
 #include "game.h"
 #include "commands.h"
 
+void print_cmd_help( const Command cmd )
+{
+	printf("  %s:\n", DATA_CMDS[cmd].desc);
+
+	SM_String cmd_naming = SM_String_from(DATA_CMDS[cmd].name);
+
+	if (DATA_CMDS[cmd].has_abbr)
+	{
+		SM_String_append_cstr(&cmd_naming, ", ");
+		SM_String_append_cstr(&cmd_naming, DATA_CMDS[cmd].abbr);
+	}
+
+	printf("  %-32s%s\n", cmd_naming.str, DATA_CMDS[cmd].args);
+
+	printf("\n");
+
+	SM_String_clear(&cmd_naming);
+}
+
 void cmd_help_menu( void )
 {
 	printf(HELP_1ST_STEPS);
@@ -42,15 +61,13 @@ void cmd_help_full( void )
 {
 	cmd_help_menu();
 
-	printf(
-		HELP_COMMANDS,
-		APP_NAME,
-		CMD_HELP_LONG, CMD_HELP,
-		CMD_LIST_ADMINS_LONG, CMD_LIST_ADMINS,
-		CMD_HIRE_ADMIN_LONG, CMD_HIRE_ADMIN,
-		CMD_LIST_TOWNS_LONG, CMD_LIST_TOWNS,
-		CMD_CONNECT_LONG, CMD_CONNECT,
-		CMD_DELETE_TOWN_LONG);
+	printf(HELP_APP, APP_NAME);
+	printf("\n");
+
+	for (uint_fast32_t i = 0; i <= CMD_LAST; i++)
+	{
+		print_cmd_help(i);
+	}
 
 	printf(
 		HELP_LICENSE,
@@ -84,7 +101,6 @@ void cmd_hire_admin( const int32_t admin_id, const char *town_name )
 	uint32_t tree_chance;
 	uint32_t tree_variance;
 	SM_String filepath = SM_String_new(16);
-	SM_String appendage;
 	FILE *f;
 	char confirmation;
 
@@ -96,7 +112,7 @@ void cmd_hire_admin( const int32_t admin_id, const char *town_name )
 		(uint32_t) admin_id > (sizeof(DATA_ADMINS) / sizeof(DATA_ADMINS[0])))
 	{
 		SM_String_clear(&filepath);
-		printf(MSG_ERR_ADMIN_ID, CMD_LIST_ADMINS_LONG);
+		printf(MSG_ERR_ADMIN_ID, DATA_CMDS[CMD_LIST_ADMINS].desc);
 		return;
 	}
 
@@ -107,12 +123,9 @@ void cmd_hire_admin( const int32_t admin_id, const char *town_name )
 		return;
 	}
 
-	appendage = SM_String_contain(town_name);
-	SM_String_append(&filepath, &appendage);
-	appendage = SM_String_contain(".");
-	SM_String_append(&filepath, &appendage);
-	appendage = SM_String_contain(FILETYPE_TOWN);
-	SM_String_append(&filepath, &appendage);
+	SM_String_append_cstr(&filepath, town_name);
+	SM_String_append_cstr(&filepath, ".");
+	SM_String_append_cstr(&filepath, FILETYPE_TOWN);
 
 	f = fopen(filepath.str, "r");
 
@@ -274,7 +287,6 @@ void cmd_connect( const char *town_name )
 void cmd_delete( const char *town_name )
 {
 	SM_String filepath = SM_String_new(16);
-	SM_String appendage;
 
 	// get path
 	if (get_town_path(&filepath) != 0)
@@ -284,12 +296,9 @@ void cmd_delete( const char *town_name )
 	}
 
 	// glue file part to path
-	appendage = SM_String_contain(town_name);
-	SM_String_append(&filepath, &appendage);
-	appendage = SM_String_contain(".");
-	SM_String_append(&filepath, &appendage);
-	appendage = SM_String_contain(FILETYPE_TOWN);
-	SM_String_append(&filepath, &appendage);
+	SM_String_append_cstr(&filepath, town_name);
+	SM_String_append_cstr(&filepath, ".");
+	SM_String_append_cstr(&filepath, FILETYPE_TOWN);
 
 	// delete and check
 	if (remove(filepath.str) != 0)
