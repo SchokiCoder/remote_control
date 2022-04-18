@@ -77,6 +77,8 @@ void Game_issue_command( Game *game, Hud *hud, const char *str )
 	uint_fast32_t argc = 0;
 	char argv[MAX_ARGS][MAX_ARG_LEN];
 	SDL_Point coord;
+	SDL_Point dest_coord;
+	uint_fast32_t weapon_slot;
 	Field field;
 	bool valid_field;
 	uint_fast32_t min_constr_args = 4;
@@ -190,6 +192,43 @@ void Game_issue_command( Game *game, Hud *hud, const char *str )
 		}*/
 
 		gm_cmd_pass(game, hud);
+		break;
+
+	case DJB2_GM_MERC_MOVE:
+	case DJB2_GM_MERC_MOVE_ABBR:
+		// check arg min
+		if (argc < 5)
+		{
+			Hud_update_feedback(hud, GM_MSG_ERR_MIN_ARG);
+			return;
+		}
+
+		// parse args
+		coord.x = strtol(argv[1], NULL, 10);
+		coord.y = strtol(argv[2], NULL, 10);
+		dest_coord.x = strtol(argv[3], NULL, 10);
+		dest_coord.y = strtol(argv[4], NULL, 10);
+
+		gm_cmd_merc_move(game, hud, coord, dest_coord);
+		break;
+
+	case DJB2_GM_MERC_ATTACK:
+	case DJB2_GM_MERC_ATTACK_ABBR:
+		// check arg min
+		if (argc < 6)
+		{
+			Hud_update_feedback(hud, GM_MSG_ERR_MIN_ARG);
+			return;
+		}
+
+		// parse args
+		coord.x = strtol(argv[1], NULL, 10);
+		coord.y = strtol(argv[2], NULL, 10);
+		weapon_slot = strtol(argv[3], NULL, 10);
+		dest_coord.x = strtol(argv[4], NULL, 10);
+		dest_coord.y = strtol(argv[5], NULL, 10);
+
+		gm_cmd_merc_attack(game, hud, coord, weapon_slot, dest_coord);
 		break;
 
 	case DJB2_GM_DESTRUCT:
@@ -343,7 +382,7 @@ void Game_construct( Game *game, Hud *hud, const SDL_Point coords, const Field f
 	Hud_set_field(hud, coords, hud->spr_fields[FIELD_CONSTRUCTION].texture);
 }
 
-void Game_spawn_merc( Game *game, Hud *hud, const Mercenary merc )
+void Game_spawn_merc( Game *game, Hud *hud, const TownMerc merc )
 {
 	// if merc already exists, stop
 	for (uint32_t i = 0; i < game->town->merc_count; i++)
@@ -365,8 +404,90 @@ void Game_spawn_merc( Game *game, Hud *hud, const Mercenary merc )
     Hud_set_field(hud, merc.coords, hud->spr_merc_base.texture);
 }
 
-int32_t Game_main( Game *game )
+bool Game_move_merc( Game *game, Hud *hud, const SDL_Point src_coord, const SDL_Point dest_coord )
 {
+	// check if src_coord has mercenary
+	if (game->town->field[src_coord.x][src_coord.y] != FIELD_MERC)
+		return false;
+
+    // check if destination is empty
+    if (game->town->field[dest_coord.x][dest_coord.y] != FIELD_EMPTY)
+    	return false;
+
+	// move merc field
+    game->town->field[src_coord.x][src_coord.y] = FIELD_EMPTY;
+    game->town->field[dest_coord.x][dest_coord.y] = FIELD_MERC;
+
+    // update merc list
+    for (uint_fast32_t i = 0; i < game->town->merc_count; i++)
+    {
+    	if (game->town->mercs[i].coords.x == src_coord.x &&
+    		game->town->mercs[i].coords.y == src_coord.y)
+    	{
+    		game->town->mercs[i].coords.x = dest_coord.x;
+    		game->town->mercs[i].coords.y = dest_coord.y;
+    		break;
+		}
+    }
+
+    // update hud
+    Hud_set_field(hud, src_coord, hud->spr_fields[FIELD_EMPTY].texture);
+    Hud_set_field(hud, dest_coord, hud->spr_merc_base.texture);
+
+	return true;
+}
+
+int_fast32_t Game_merc_attack(
+	Game *game,
+	const SDL_Point src_coord,
+	const uint_fast8_t weapon_slot,
+	const SDL_Point dest_coord )
+{
+	MercWeapon weapon;
+	int_fast32_t damage;
+	float dmg_falloff;
+
+	// check if src_coord has mercenary
+	if (game->town->field[src_coord.x][src_coord.y] != FIELD_MERC)
+		return 0;
+
+	// check if destination is valid target
+	if (game->town->field[dest_coord.x][dest_coord.y] != FIELD_MERC)
+		return 0;
+
+	// find used weapon
+	for (uint_fast32_t i = 0; i < game->town->merc_count; i++)
+    {
+    	if (game->town->mercs[i].coords.x == src_coord.x &&
+    		game->town->mercs[i].coords.y == src_coord.y)
+    	{
+			weapon = DATA_MERCENARIES[game->town->mercs[i].id].loadout[weapon_slot];
+			break;
+    	}
+	}
+
+    // calculate damage
+	damage = DATA_WEAPONS[weapon].damage;
+
+	if (DATA_WEAPONS[weapon].damage_falloff)
+		damage *= dmg_falloff;
+
+	// apply damage
+	for (uint_fast32_t i = 0; i < game->town->merc_count; i++)
+    {
+    	if (game->town->mercs[i].coords.x == dest_coord.x &&
+    		game->town->mercs[i].coords.y == dest_coord.y)
+    	{
+    		game->town->mercs[i].hp -= damage;
+    		break;
+		}
+	}
+
+	return damage;
+}
+
+int32_t Game_main( Game *game )
+{print_gmcmd_djb2();return 0;
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 	Hud hud;
@@ -495,7 +616,7 @@ int32_t Game_main( Game *game )
 		while (SDL_PollEvent(&event))
 		{
 			// menu
-			SGUI_Menu_handle_events(&hud.mnu_hud, &event);
+			SGUI_Menu_handle_event(&hud.mnu_hud, &event);
 
 			switch (event.type)
 			{

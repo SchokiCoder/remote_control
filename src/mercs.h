@@ -39,10 +39,38 @@ typedef enum MercWeapon {
 	MW_SWORD
 } MercWeapon ;
 
+typedef struct WeaponData
+{
+	char name[16];
+	int_fast32_t damage;
+	uint_fast32_t range;
+	bool damage_falloff;
+} WeaponData ;
+
+static const WeaponData DATA_WEAPONS[] = {
+	{"Fist", 10, 1, false},
+	{"Shotgun", 80, 3, true},
+	{"Grenade", 100, 3, false},
+	{"Knife", 60, 1, false},
+	{"Flamethrower", 90, 2, false},
+	{"Minigun", 140, 4, true},
+	{"Syringe Gun", -60, 3, false},
+	{"Pistol", 50, 4, true},
+	{"Sword", 80, 1, false},
+};
+
 typedef enum MercFraction {
 	MF_GREEN,
 	MF_PURPLE
 } MercFraction ;
+
+typedef enum Mercenary
+{
+	MERC_SOLDIER,
+	MERC_PYRO,
+	MERC_ANCHOR,
+	MERC_MEDIC
+} Mercenary ;
 
 typedef struct MercenaryData
 {

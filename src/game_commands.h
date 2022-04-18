@@ -35,6 +35,8 @@ typedef enum GameCommand
 	GM_CMD_CONFIG_SET,
 	//GM_CMD_CONFIG_SHOW,
 	GM_CMD_PASS,
+	GM_CMD_MERC_MOVE,
+	GM_CMD_MERC_ATTACK,
 	GM_CMD_CONSTRUCT,
 	GM_CMD_DESTRUCT,
 
@@ -51,6 +53,10 @@ typedef enum GameCommandDJB2
 	DJB2_GM_CONFIG_SET = 1267258658,
 	//DJB2_GM_CONFIG_SHOW = ,
 	DJB2_GM_PASS = 2900374925,
+	DJB2_GM_MERC_MOVE = 1817727845,
+	DJB2_GM_MERC_MOVE_ABBR = 6224251,
+	DJB2_GM_MERC_ATTACK = 515757909,
+	DJB2_GM_MERC_ATTACK_ABBR = 6224239,
 	DJB2_GM_CONSTRUCT = 2537986078,
 	DJB2_GM_CONSTRUCT_ABBR = 183053,
 	DJB2_GM_DESTRUCT = 1123813470,
@@ -65,6 +71,8 @@ static const CommandData DATA_GM_CMDS[] = {
     {"config-set", false, "", "set config value", true, "VARIABLE_NAME VALUE"},
     //{"config-show", false, "", "show all current config values", false, ""},
     {"pass", false, "", "pass time", false, ""},
+    {"merc-move", true, "mm", "move a mercenary", true, "SRC_X SRC_Y DEST_X DEST_Y"},
+    {"merc-attack", true, "ma", "attack a coordinate", true, "SRC_X SRC_Y SLOT DEST_Y DEST_Y"},
     {"construct", true, "c", "start construction", true, "X Y CONSTRUCTION"},
     {"destruct", true, "d", "start destruction", true, "X Y"},
 };
@@ -78,6 +86,14 @@ void gm_cmd_config_set(Hud *hud, Config *cfg, const char *setting_name, const ch
 //void gm_cmd_config_show( const Config *p_cfg );
 
 void gm_cmd_pass( Game *game, Hud *hud );
+
+void gm_cmd_merc_move( Game *game, Hud *hud, const SDL_Point src_coord, const SDL_Point dest_coord );
+
+void gm_cmd_merc_attack(
+	Game *game, Hud *hud,
+	const SDL_Point src_coord,
+	const uint_fast8_t weapon_slot,
+	const SDL_Point dest_coord );
 
 void gm_cmd_construct( Game *game, Hud *hud, const SDL_Point coord, const Field field );
 

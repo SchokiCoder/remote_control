@@ -201,6 +201,31 @@ void gm_cmd_pass( Game *game, Hud *hud )
 	Hud_update_feedback(hud, GM_MSG_PASS);
 }
 
+void gm_cmd_merc_move( Game *game, Hud *hud, const SDL_Point src_coord, const SDL_Point dest_coord )
+{
+    if (Game_move_merc(game, hud, src_coord, dest_coord) == true)
+    	Hud_update_feedback(hud, GM_MSG_MERC_MOVE);
+	else
+		Hud_update_feedback(hud, GM_MSG_MERC_NO_MOVE);
+}
+
+void gm_cmd_merc_attack(
+	Game *game, Hud *hud,
+	const SDL_Point src_coord,
+	const uint_fast8_t weapon_slot,
+	const SDL_Point dest_coord )
+{
+	char dmg_no[10];
+
+	SM_String msg = SM_String_from("Mercenary dealt ");
+	sprintf(dmg_no, "%li", Game_merc_attack(game, src_coord, weapon_slot, dest_coord));
+	SM_String_append_cstr(&msg, " damage.");
+
+	Hud_update_feedback(hud, msg.str);
+
+	SM_String_clear(&msg);
+}
+
 void gm_cmd_construct( Game *game, Hud *hud, const SDL_Point coord, const Field field )
 {
 	Game_construct(game, hud, coord, field);

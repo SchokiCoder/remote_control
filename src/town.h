@@ -53,6 +53,7 @@ typedef enum Field
 	FIELD_ADMINISTRATION,
 	FIELD_CONSTRUCTION,
 	FIELD_QUARRY,
+
 	FIELD_FIRST = FIELD_EMPTY,
 	FIELD_LAST = FIELD_QUARRY
 } Field ;
@@ -86,13 +87,13 @@ typedef struct Construction
 	uint32_t progress;
 } Construction ;
 
-typedef struct Mercenary
+typedef struct TownMerc
 {
-	uint32_t id;
+	Mercenary id;
 	SDL_Point coords;
 	uint32_t hp;
 	enum MercFraction fraction;
-} Mercenary ;
+} TownMerc ;
 
 bool str_to_field( const char *str, Field *field );
 
@@ -109,7 +110,7 @@ typedef struct Town
 	Construction constructions[TOWN_WIDTH * TOWN_HEIGHT];
 
 	uint32_t merc_count;
-	Mercenary mercs[MERCENARY_COUNT];
+	TownMerc mercs[MERCENARY_COUNT];
 } Town ;
 
 Town Town_new( void );

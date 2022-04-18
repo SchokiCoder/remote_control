@@ -47,7 +47,15 @@ void Game_end_round( Game *game, Hud *hud );
 
 void Game_construct( Game *game, Hud *hud, const SDL_Point field, const Field building );
 
-void Game_spawn_merc( Game *game, Hud *hud, const Mercenary merc );
+void Game_spawn_merc( Game *game, Hud *hud, const TownMerc merc );
+
+bool Game_move_merc( Game *game, Hud *hud, const SDL_Point src_coord, const SDL_Point dest_coord );
+
+int_fast32_t Game_merc_attack(
+	Game *game,
+	const SDL_Point src_coord,
+	const uint_fast8_t weapon_slot,
+	const SDL_Point dest_coord );
 
 int32_t Game_main( Game *game );
 

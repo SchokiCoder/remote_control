@@ -182,6 +182,12 @@ static const char GM_MSG_TOWN_SAVE[] =
 static const char GM_MSG_PASS[] =
 	"Round ended.";
 
+static const char GM_MSG_MERC_MOVE[] =
+	"Mercenary moved.";
+
+static const char GM_MSG_MERC_NO_MOVE[] =
+	"Mercenary could not move to destination.";
+
 static const char GM_MSG_CONSTRUCT[] =
 	"Construction order accepted.";
 
