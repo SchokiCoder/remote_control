@@ -20,6 +20,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <SM_string.h>
+#include <SM_crypto.h>
 #include "hud.h"
 #include "messages.h"
 #include "town.h"
@@ -201,6 +202,59 @@ void gm_cmd_pass( Game *game, Hud *hud )
 	Hud_update_feedback(hud, GM_MSG_PASS);
 }
 
+#ifdef _DEBUG
+void gm_cmd_print_djb2( void )
+{
+	FILE *file = fopen("djb2_gmhash.txt", "w");
+
+	fprintf(file, "%-32s| %-10s | %-10s\n", "cmd", "name", "abbr");
+
+	for (uint32_t i = 0; i <= GM_CMD_LAST; i++)
+	{
+		if (DATA_GM_CMDS[i].has_abbr)
+		{
+			fprintf(file,
+				"%-32s| %-10u | %-10u\n",
+				DATA_GM_CMDS[i].name,
+				SM_djb2_encode(DATA_GM_CMDS[i].name),
+				SM_djb2_encode(DATA_GM_CMDS[i].abbr));
+		}
+		else
+		{
+			fprintf(file,
+				"%-32s| %-10u |\n",
+				DATA_GM_CMDS[i].name,
+				SM_djb2_encode(DATA_GM_CMDS[i].name));
+		}
+	}
+
+	fclose(file);
+}
+
+void gm_cmd_spawn_merc(
+	Game *game, Hud *hud,
+	const SDL_Point coord,
+	const Mercenary merc_id,
+	const MercFraction frac_id )
+{
+	TownMerc merc = {
+		.id = merc_id,
+		.coords = coord,
+		.hp = DATA_MERCENARIES[merc_id].max_hp,
+		.fraction = frac_id,
+	};
+
+	if (Game_spawn_merc(game, hud, merc))
+		Hud_update_feedback(hud, GM_MSG_MERC_SPAWN);
+
+	else
+		Hud_update_feedback(hud, GM_MSG_MERC_NO_SPAWN);
+}
+
+void gm_cmd_hurt_merc( Game *game, Hud *hud, const SDL_Point coord, const uint_fast32_t hp )
+{}
+#endif // _DEBUG
+
 void gm_cmd_merc_move( Game *game, Hud *hud, const SDL_Point src_coord, const SDL_Point dest_coord )
 {
     if (Game_move_merc(game, hud, src_coord, dest_coord) == true)
@@ -228,14 +282,18 @@ void gm_cmd_merc_attack(
 
 void gm_cmd_construct( Game *game, Hud *hud, const SDL_Point coord, const Field field )
 {
-	Game_construct(game, hud, coord, field);
+	if (Game_construct(game, hud, coord, field))
+		Hud_update_feedback(hud, GM_MSG_CONSTRUCT);
 
-	Hud_update_feedback(hud, GM_MSG_CONSTRUCT);
+	else
+		Hud_update_feedback(hud, GM_MSG_NO_CONSTRUCT);
 }
 
 void gm_cmd_destruct( Game *game, Hud *hud, const SDL_Point coord )
 {
-	Game_construct(game, hud, coord, FIELD_EMPTY);
+	if (Game_construct(game, hud, coord, FIELD_EMPTY))
+		Hud_update_feedback(hud, GM_MSG_DESTRUCT);
 
-	Hud_update_feedback(hud, GM_MSG_DESTRUCT);
+	else
+		Hud_update_feedback(hud, GM_MSG_NO_DESTRUCT);
 }

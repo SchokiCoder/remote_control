@@ -97,6 +97,8 @@ typedef struct TownMerc
 
 bool str_to_field( const char *str, Field *field );
 
+uint_fast32_t get_distance( const SDL_Point pt1, const SDL_Point pt2 );
+
 typedef struct Town
 {
 	bool invalid;

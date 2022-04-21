@@ -41,34 +41,6 @@
 static const uint_fast8_t MAX_ARGS = 16;
 static const uint_fast8_t MAX_ARG_LEN = 32;
 
-void print_gmcmd_djb2( void )
-{
-	FILE *file = fopen("djb2_gmhash.txt", "w");
-
-	fprintf(file, "%-32s| %-10s | %-10s\n", "cmd", "name", "abbr");
-
-	for (uint32_t i = 0; i <= GM_CMD_LAST; i++)
-	{
-		if (DATA_GM_CMDS[i].has_abbr)
-		{
-			fprintf(file,
-				"%-32s| %-10u | %-10u\n",
-				DATA_GM_CMDS[i].name,
-				SM_djb2_encode(DATA_GM_CMDS[i].name),
-				SM_djb2_encode(DATA_GM_CMDS[i].abbr));
-		}
-		else
-		{
-			fprintf(file,
-				"%-32s| %-10u |\n",
-				DATA_GM_CMDS[i].name,
-				SM_djb2_encode(DATA_GM_CMDS[i].name));
-		}
-	}
-
-	fclose(file);
-}
-
 void Game_issue_command( Game *game, Hud *hud, const char *str )
 {
 	uint32_t gm_cmd_djb2;
@@ -81,7 +53,9 @@ void Game_issue_command( Game *game, Hud *hud, const char *str )
 	uint_fast32_t weapon_slot;
 	Field field;
 	bool valid_field;
-	uint_fast32_t min_constr_args = 4;
+	Mercenary merc_id;
+	MercFraction frac_id;
+	uint_fast32_t hp;
 
 	// parse input
 	splits[0] = &str[0];
@@ -194,6 +168,46 @@ void Game_issue_command( Game *game, Hud *hud, const char *str )
 		gm_cmd_pass(game, hud);
 		break;
 
+#ifdef _DEBUG
+	case DJB2_GM_PRINT_DJB2:
+		gm_cmd_print_djb2();
+		break;
+
+	case DJB2_GM_SPAWN_MERC:
+		// check arg min
+		if (argc < 4)
+		{
+			Hud_update_feedback(hud, GM_MSG_ERR_MIN_ARG);
+			return;
+		}
+
+		// parse args
+        coord.x = strtol(argv[1], NULL, 10);
+		coord.y = strtol(argv[2], NULL, 10);
+		merc_id = strtol(argv[3], NULL, 10);
+		frac_id = strtol(argv[4], NULL, 10);
+
+		gm_cmd_spawn_merc(game, hud, coord, merc_id, frac_id);
+		break;
+
+	case DJB2_GM_HURT_MERC:
+		// check arg min
+		if (argc < 4)
+		{
+			Hud_update_feedback(hud, GM_MSG_ERR_MIN_ARG);
+			return;
+		}
+
+		// parse args
+        coord.x = strtol(argv[1], NULL, 10);
+		coord.y = strtol(argv[2], NULL, 10);
+		hp = strtol(argv[3], NULL, 10);
+
+		gm_cmd_hurt_merc(game, hud, coord, hp);
+		break;
+
+#endif // _DEBUG
+
 	case DJB2_GM_MERC_MOVE:
 	case DJB2_GM_MERC_MOVE_ABBR:
 		// check arg min
@@ -233,7 +247,12 @@ void Game_issue_command( Game *game, Hud *hud, const char *str )
 
 	case DJB2_GM_DESTRUCT:
 	case DJB2_GM_DESTRUCT_ABBR:
-		min_constr_args = 3;
+		// check arg min
+		if (argc < 3)
+		{
+			Hud_update_feedback(hud, GM_MSG_ERR_MIN_ARG);
+			return;
+		}
 
 		// parse destr args
 		valid_field = true;
@@ -244,10 +263,8 @@ void Game_issue_command( Game *game, Hud *hud, const char *str )
 
 	case DJB2_GM_CONSTRUCT:
 	case DJB2_GM_CONSTRUCT_ABBR:
-		CONSTRUCT:
-
 		// check arg min
-		if (argc < min_constr_args)
+		if (argc < 4)
 		{
 			Hud_update_feedback(hud, GM_MSG_ERR_MIN_ARG);
 			return;
@@ -260,9 +277,11 @@ void Game_issue_command( Game *game, Hud *hud, const char *str )
 		}*/
 
 		// parse constr args
-		valid_field = str_to_field(argv[1], &field);
-		coord.x = strtol(argv[2], NULL, 10);
-		coord.y = strtol(argv[3], NULL, 10);
+		coord.x = strtol(argv[1], NULL, 10);
+		coord.y = strtol(argv[2], NULL, 10);
+		valid_field = str_to_field(argv[3], &field);
+
+		CONSTRUCT:
 
 		// check values
 		if (valid_field == false)
@@ -363,8 +382,23 @@ void Game_end_round( Game *game, Hud *hud )
 	Hud_update_money(hud, game->town->money);
 }
 
-void Game_construct( Game *game, Hud *hud, const SDL_Point coords, const Field field )
+bool Game_construct( Game *game, Hud *hud, const SDL_Point coords, const Field field )
 {
+	// if destruction wished
+	if (field == FIELD_EMPTY)
+	{
+		// if field is empty or headquarter, stop
+		if (game->town->field[coords.x][coords.y] == FIELD_EMPTY ||
+			game->town->field[coords.x][coords.y] == FIELD_ADMINISTRATION)
+			return false;
+	}
+	else // if construction wished
+	{
+		// if field is not empty, stop
+		if (game->town->field[coords.x][coords.y] != FIELD_EMPTY)
+			return false;
+	}
+
 	/* change field */
 	game->town->field[coords.x][coords.y] = FIELD_CONSTRUCTION;
 
@@ -380,16 +414,22 @@ void Game_construct( Game *game, Hud *hud, const SDL_Point coords, const Field f
 	/* update hud */
 	Hud_update_money(hud, game->town->money);
 	Hud_set_field(hud, coords, hud->spr_fields[FIELD_CONSTRUCTION].texture);
+
+	return true;
 }
 
-void Game_spawn_merc( Game *game, Hud *hud, const TownMerc merc )
+bool Game_spawn_merc( Game *game, Hud *hud, const TownMerc merc )
 {
+	// if field is not empty, stop
+	if (game->town->field[merc.coords.x][merc.coords.y] != FIELD_EMPTY)
+		return false;
+
 	// if merc already exists, stop
 	for (uint32_t i = 0; i < game->town->merc_count; i++)
 	{
 		if (merc.id == game->town->mercs[i].id)
 		{
-			return;
+			return false;
 		}
 	}
 
@@ -398,10 +438,12 @@ void Game_spawn_merc( Game *game, Hud *hud, const TownMerc merc )
 	game->town->mercs[game->town->merc_count - 1] = merc;
 
     // update town
-    game->town->field[merc.coords.x][merc.coords.y] = FIELD_MERC;
+	game->town->field[merc.coords.x][merc.coords.y] = FIELD_MERC;
 
     // update hud
-    Hud_set_field(hud, merc.coords, hud->spr_merc_base.texture);
+	Hud_set_field(hud, merc.coords, hud->spr_merc_base.texture);
+
+	return true;
 }
 
 bool Game_move_merc( Game *game, Hud *hud, const SDL_Point src_coord, const SDL_Point dest_coord )
@@ -466,11 +508,18 @@ int_fast32_t Game_merc_attack(
     	}
 	}
 
-    // calculate damage
+    // if not in range, stop
+	if (DATA_WEAPONS[weapon].range < get_distance(src_coord, dest_coord))
+		return 0;
+
+	// calculate damage
 	damage = DATA_WEAPONS[weapon].damage;
 
 	if (DATA_WEAPONS[weapon].damage_falloff)
+	{
+		dmg_falloff = (float) get_distance(src_coord, dest_coord) / (float) DATA_WEAPONS[weapon].range;
 		damage *= dmg_falloff;
+	}
 
 	// apply damage
 	for (uint_fast32_t i = 0; i < game->town->merc_count; i++)
@@ -487,7 +536,7 @@ int_fast32_t Game_merc_attack(
 }
 
 int32_t Game_main( Game *game )
-{print_gmcmd_djb2();return 0;
+{
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 	Hud hud;

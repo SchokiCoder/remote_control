@@ -191,6 +191,9 @@ static const char GM_MSG_MERC_NO_MOVE[] =
 static const char GM_MSG_CONSTRUCT[] =
 	"Construction order accepted.";
 
+static const char GM_MSG_NO_CONSTRUCT[] =
+	"Construction order declined.";
+
 static const char GM_MSG_CONSTRUCT_INVALID[] =
 	"Construction order invalid. (Construction unknown)";
 
@@ -199,5 +202,14 @@ static const char GM_MSG_CONSTRUCT_COORD_INVALID[] =
 
 static const char GM_MSG_DESTRUCT[] =
 	"Destruction order accepted.";
+
+static const char GM_MSG_NO_DESTRUCT[] =
+	"Destruction order declined.";
+
+static const char GM_MSG_MERC_SPAWN[] =
+	"Mercenary spawned.";
+
+static const char GM_MSG_MERC_NO_SPAWN[] =
+	"Mercenary could not spawn.";
 
 #endif /* MESSAGES_H */
