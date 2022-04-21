@@ -55,7 +55,6 @@ void Game_issue_command( Game *game, Hud *hud, const char *str )
 	bool valid_field;
 	Mercenary merc_id;
 	MercFraction frac_id;
-	uint_fast32_t hp;
 
 	// parse input
 	splits[0] = &str[0];
@@ -188,22 +187,6 @@ void Game_issue_command( Game *game, Hud *hud, const char *str )
 		frac_id = strtol(argv[4], NULL, 10);
 
 		gm_cmd_spawn_merc(game, hud, coord, merc_id, frac_id);
-		break;
-
-	case DJB2_GM_HURT_MERC:
-		// check arg min
-		if (argc < 4)
-		{
-			Hud_update_feedback(hud, GM_MSG_ERR_MIN_ARG);
-			return;
-		}
-
-		// parse args
-        coord.x = strtol(argv[1], NULL, 10);
-		coord.y = strtol(argv[2], NULL, 10);
-		hp = strtol(argv[3], NULL, 10);
-
-		gm_cmd_hurt_merc(game, hud, coord, hp);
 		break;
 
 #endif // _DEBUG
@@ -487,6 +470,7 @@ int_fast32_t Game_merc_attack(
 {
 	MercWeapon weapon;
 	int_fast32_t damage;
+	uint_fast32_t distance;
 	float dmg_falloff;
 
 	// check if src_coord has mercenary
@@ -509,7 +493,9 @@ int_fast32_t Game_merc_attack(
 	}
 
     // if not in range, stop
-	if (DATA_WEAPONS[weapon].range < get_distance(src_coord, dest_coord))
+    distance = get_distance(src_coord, dest_coord);
+
+	if (DATA_WEAPONS[weapon].range < distance)
 		return 0;
 
 	// calculate damage
@@ -517,7 +503,7 @@ int_fast32_t Game_merc_attack(
 
 	if (DATA_WEAPONS[weapon].damage_falloff)
 	{
-		dmg_falloff = (float) get_distance(src_coord, dest_coord) / (float) DATA_WEAPONS[weapon].range;
+		dmg_falloff = 1.5f - ((float) (distance) / (float) DATA_WEAPONS[weapon].range);
 		damage *= dmg_falloff;
 	}
 
@@ -540,11 +526,6 @@ int32_t Game_main( Game *game )
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 	Hud hud;
-
-#ifdef _DEBUG
-	// init random gen
-	srand(time(NULL));
-#endif // _DEBUG
 
 	// init SDL
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)

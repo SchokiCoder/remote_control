@@ -250,9 +250,6 @@ void gm_cmd_spawn_merc(
 	else
 		Hud_update_feedback(hud, GM_MSG_MERC_NO_SPAWN);
 }
-
-void gm_cmd_hurt_merc( Game *game, Hud *hud, const SDL_Point coord, const uint_fast32_t hp )
-{}
 #endif // _DEBUG
 
 void gm_cmd_merc_move( Game *game, Hud *hud, const SDL_Point src_coord, const SDL_Point dest_coord )
@@ -273,6 +270,7 @@ void gm_cmd_merc_attack(
 
 	SM_String msg = SM_String_from("Mercenary dealt ");
 	sprintf(dmg_no, "%li", Game_merc_attack(game, src_coord, weapon_slot, dest_coord));
+	SM_String_append_cstr(&msg, dmg_no);
 	SM_String_append_cstr(&msg, " damage.");
 
 	Hud_update_feedback(hud, msg.str);

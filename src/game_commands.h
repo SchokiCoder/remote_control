@@ -39,7 +39,6 @@ typedef enum GameCommand
 #ifdef _DEBUG
 	GM_CMD_PRINT_DJB2,
 	GM_CMD_SPAWN_MERC,
-	GM_CMD_HURT_MERC,
 #endif
 
 	GM_CMD_MERC_MOVE,
@@ -64,7 +63,6 @@ typedef enum GameCommandDJB2
 #ifdef _DEBUG
 	DJB2_GM_PRINT_DJB2 = 2572032878,
 	DJB2_GM_SPAWN_MERC = 2983389811,
-	DJB2_GM_HURT_MERC = 1484431347,
 #endif
 
 	DJB2_GM_MERC_MOVE = 1817727845,
@@ -89,7 +87,6 @@ static const CommandData DATA_GM_CMDS[] = {
 #ifdef _DEBUG
 	{"print_djb2", false, "", "", false, ""},
 	{"spawn_merc", false, "", "", true, "X Y MERC_ID FRACTION_ID"},
-	{"hurt_merc", false, "", "", true, "X Y HP"},
 #endif
 
     {"merc-move", true, "mm", "move a mercenary", true, "SRC_X SRC_Y DEST_X DEST_Y"},

@@ -83,7 +83,7 @@ typedef struct MercenaryData
 
 static const MercenaryData DATA_MERCENARIES[] = {
     {"Soldier",	MR_OFFENSE,	125, 	2,	{MW_SHOTGUN, MW_GRENADE, MW_KNIFE}},
-    {"Pyro",	MR_OFFENSE,	75,		3,	{MW_FLAMETHROWER, MW_NONE, MW_NONE}},
+    {"Pyro",	MR_OFFENSE,	75,		3,	{MW_FLAMETHROWER, MW_SHOTGUN, MW_NONE}},
     {"Anchor",	MR_DEFENSE, 300,	1,	{MW_MINIGUN, MW_NONE, MW_NONE}},
     {"Medic",	MR_SUPPORT, 75,		2,	{MW_SYRINGE_GUN, MW_PISTOL, MW_SWORD}}
 };

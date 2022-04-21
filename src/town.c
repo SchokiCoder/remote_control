@@ -42,7 +42,12 @@ bool str_to_field( const char *str, Field *field )
 
 uint_fast32_t get_distance( const SDL_Point pt1, const SDL_Point pt2 )
 {
-	return (pt1.x - pt2.x) + (pt1.y - pt2.y);
+	int_fast32_t val = (pt1.x - pt2.x) + (pt1.y - pt2.y);
+
+	if (val < 0)
+		val *= -1;
+
+	return val;
 }
 
 Town Town_new( void )
