@@ -93,6 +93,8 @@ typedef struct TownMerc
 	SDL_Point coords;
 	uint32_t hp;
 	enum MercFraction fraction;
+	uint_fast32_t moved;
+	bool attacked;
 } TownMerc ;
 
 bool str_to_field( const char *str, Field *field );

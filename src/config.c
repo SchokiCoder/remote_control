@@ -21,13 +21,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <SM_dict.h>
 #include "messages.h"
 #include "path.h"
 #include "config.h"
 
 Config Config_new( void )
 {
-	Config result = {
+	Config cfg = {
 		.invalid = false,
 		.gfx_framerate = CFG_STD_GFX_FRAMERATE,
 		.gfx_window_x = CFG_STD_GFX_WINDOW_X,
@@ -47,24 +48,16 @@ Config Config_new( void )
 		.field_border_alpha = CFG_STD_FIELD_BORDER_ALPHA,
 	};
 
-	strncpy(result.path_font, CFG_STD_PATH_FONT, CFG_SETTING_PATH_FONT_MAX_LEN);
+	strncpy(cfg.path_font, CFG_STD_PATH_FONT, CFG_SETTING_PATH_FONT_MAX_LEN);
 
-	return result;
+	return cfg;
 }
 
 void Config_load( Config *cfg )
 {
-	FILE *f;
 	SM_String filepath = SM_String_new(16);
-	int32_t buf;
-	uint32_t line = 0;
-	uint32_t setting_len = 0;
-	uint32_t value_len = 0;
-	bool read_setting = true;
-	char cfg_settings[CONFIG_MAX_LINES][CONFIG_MAX_SETTING_LEN];
-	char cfg_values[CONFIG_MAX_LINES][CONFIG_MAX_VALUE_LEN];
 
-	/* get path */
+	// get path
 	if (get_config_path(&filepath) != 0)
 	{
 		SM_String_clear(&filepath);
@@ -72,10 +65,10 @@ void Config_load( Config *cfg )
 		return;
 	}
 
-	/* open file */
-	f = fopen(filepath.str, "r");
+	// read file
+	SM_Dict dict = SM_Dict_from_file(filepath.str);
 
-	if (f == NULL)
+	if (!dict.valid)
 	{
 		SM_String_clear(&filepath);
 		cfg->invalid = true;
@@ -83,155 +76,76 @@ void Config_load( Config *cfg )
 		return;
 	}
 
-	/* read */
-	while ((buf = fgetc(f)) != EOF)
-	{
-		switch (buf)
-		{
-		case ' ':
-			/* ignore spaces */
-			break;
+	// convert dict into config
+    for (size_t i = 0; i < dict.len; i++)
+    {
+    	if (SM_strequal(dict.data[i].key.str, CFG_SETTING_PATH_FONT))
+			strncpy(cfg->path_font, dict.data[i].value.str, CFG_SETTING_PATH_FONT_MAX_LEN);
 
-		case '=':
-			/* start reading value, add '\0' to setting */
-			read_setting = false;
-			cfg_settings[line][setting_len] = '\0';
-			setting_len++;
-			break;
+		else if (SM_strequal(dict.data[i].key.str, CFG_SETTING_GFX_FRAMERATE))
+			cfg->gfx_framerate = strtof(dict.data[i].value.str, NULL);
 
-		case '\n':
-			/* add '\0' to value */
-			cfg_values[line][value_len] = '\0';
-			value_len++;
+		// window pos, size
+		else if (SM_strequal(dict.data[i].key.str, CFG_SETTING_GFX_WINDOW_X))
+			cfg->gfx_window_x = strtol(dict.data[i].value.str, NULL, 10);
 
-			/* jump to next line, reset values */
-			line++;
-			read_setting = true;
-			setting_len = 0;
-			value_len = 0;
-			break;
+		else if(SM_strequal(dict.data[i].key.str, CFG_SETTING_GFX_WINDOW_Y))
+			cfg->gfx_window_y = strtol(dict.data[i].value.str, NULL, 10);
 
-		default:
-			/* if comma did not yet occur */
-			if (read_setting == true)
-			{
-				/* read setting-name */
-				cfg_settings[line][setting_len] = (unsigned char) buf;
-				setting_len++;
-			}
-			else
-			{
-				/* else read value */
-				cfg_values[line][value_len] = (unsigned char) buf;
-				value_len++;
-			}
-			break;
-		}
-	}
+		else if(SM_strequal(dict.data[i].key.str, CFG_SETTING_GFX_WINDOW_W))
+			cfg->gfx_window_w = strtol(dict.data[i].value.str, NULL, 10);
 
-	/* if last line is empty, decrement line counter */
-	if (strcmp(cfg_settings[line], "") == 0)
-	{
-		line--;
-	}
+		else if(SM_strequal(dict.data[i].key.str, CFG_SETTING_GFX_WINDOW_H))
+			cfg->gfx_window_h = strtol(dict.data[i].value.str, NULL, 10);
 
-	/* convert strings into values */
-	for (uint32_t i = 0; i < (line + 1); i++)
-	{
-		/* etc */
-		if (strcmp(cfg_settings[i], CFG_SETTING_PATH_FONT) == 0)
-		{
-			strncpy(cfg->path_font, cfg_values[i], CFG_SETTING_PATH_FONT_MAX_LEN);
-		}
-		else if (strcmp(cfg_settings[i], CFG_SETTING_GFX_FRAMERATE) == 0)
-		{
-			cfg->gfx_framerate = strtof(cfg_values[i], NULL);
-		}
+		// bg color
+		else if (SM_strequal(dict.data[i].key.str, CFG_SETTING_BG_RED))
+			cfg->bg_red = strtoul(dict.data[i].value.str, NULL, 10);
 
-		/* window pos, size */
-		else if (strcmp(cfg_settings[i], CFG_SETTING_GFX_WINDOW_X) == 0)
-		{
-			cfg->gfx_window_x = strtol(cfg_values[i], NULL, 10);
-		}
-		else if(strcmp(cfg_settings[i], CFG_SETTING_GFX_WINDOW_Y) == 0)
-		{
-			cfg->gfx_window_y = strtol(cfg_values[i], NULL, 10);
-		}
-		else if(strcmp(cfg_settings[i], CFG_SETTING_GFX_WINDOW_W) == 0)
-		{
-			cfg->gfx_window_w = strtol(cfg_values[i], NULL, 10);
-		}
-		else if(strcmp(cfg_settings[i], CFG_SETTING_GFX_WINDOW_H) == 0)
-		{
-			cfg->gfx_window_h = strtol(cfg_values[i], NULL, 10);
-		}
+		else if (SM_strequal(dict.data[i].key.str, CFG_SETTING_BG_GREEN))
+			cfg->bg_green = strtoul(dict.data[i].value.str, NULL, 10);
 
-		/* bg color */
-		else if (strcmp(cfg_settings[i], CFG_SETTING_BG_RED) == 0)
-		{
-			cfg->bg_red = strtoul(cfg_values[i], NULL, 10);
-		}
-		else if (strcmp(cfg_settings[i], CFG_SETTING_BG_GREEN) == 0)
-		{
-			cfg->bg_green = strtoul(cfg_values[i], NULL, 10);
-		}
-		else if (strcmp(cfg_settings[i], CFG_SETTING_BG_BLUE) == 0)
-		{
-			cfg->bg_blue = strtoul(cfg_values[i], NULL, 10);
-		}
+		else if (SM_strequal(dict.data[i].key.str, CFG_SETTING_BG_BLUE))
+			cfg->bg_blue = strtoul(dict.data[i].value.str, NULL, 10);
 
-		/* font color */
-		else if (strcmp(cfg_settings[i], CFG_SETTING_FONT_RED) == 0)
-		{
-			cfg->font_red = strtoul(cfg_values[i], NULL, 10);
-		}
-		else if (strcmp(cfg_settings[i], CFG_SETTING_FONT_GREEN) == 0)
-		{
-			cfg->font_green = strtoul(cfg_values[i], NULL, 10);
-		}
-		else if (strcmp(cfg_settings[i], CFG_SETTING_FONT_BLUE) == 0)
-		{
-			cfg->font_blue = strtoul(cfg_values[i], NULL, 10);
-		}
-		else if (strcmp(cfg_settings[i], CFG_SETTING_FONT_ALPHA) == 0)
-		{
-			cfg->font_alpha = strtoul(cfg_values[i], NULL, 10);
-		}
+		// font color
+		else if (SM_strequal(dict.data[i].key.str, CFG_SETTING_FONT_RED))
+			cfg->font_red = strtoul(dict.data[i].value.str, NULL, 10);
 
-		/* field border color */
-		else if (strcmp(cfg_settings[i], CFG_SETTING_FIELD_BORDER_RED) == 0)
-		{
-			cfg->field_border_red = strtoul(cfg_values[i], NULL, 10);
-		}
-		else if (strcmp(cfg_settings[i], CFG_SETTING_FIELD_BORDER_GREEN) == 0)
-		{
-			cfg->field_border_green = strtoul(cfg_values[i], NULL, 10);
-		}
-		else if (strcmp(cfg_settings[i], CFG_SETTING_FIELD_BORDER_BLUE) == 0)
-		{
-			cfg->field_border_blue = strtoul(cfg_values[i], NULL, 10);
-		}
-		else if (strcmp(cfg_settings[i], CFG_SETTING_FIELD_BORDER_ALPHA) == 0)
-		{
-			cfg->field_border_alpha = strtoul(cfg_values[i], NULL, 10);
-		}
+		else if (SM_strequal(dict.data[i].key.str, CFG_SETTING_FONT_GREEN))
+			cfg->font_green = strtoul(dict.data[i].value.str, NULL, 10);
 
-		/* unknown option */
+		else if (SM_strequal(dict.data[i].key.str, CFG_SETTING_FONT_BLUE))
+			cfg->font_blue = strtoul(dict.data[i].value.str, NULL, 10);
+
+		else if (SM_strequal(dict.data[i].key.str, CFG_SETTING_FONT_ALPHA))
+			cfg->font_alpha = strtoul(dict.data[i].value.str, NULL, 10);
+
+		// field border color
+		else if (SM_strequal(dict.data[i].key.str, CFG_SETTING_FIELD_BORDER_RED))
+			cfg->field_border_red = strtoul(dict.data[i].value.str, NULL, 10);
+
+		else if (SM_strequal(dict.data[i].key.str, CFG_SETTING_FIELD_BORDER_GREEN))
+			cfg->field_border_green = strtoul(dict.data[i].value.str, NULL, 10);
+
+		else if (SM_strequal(dict.data[i].key.str, CFG_SETTING_FIELD_BORDER_BLUE))
+			cfg->field_border_blue = strtoul(dict.data[i].value.str, NULL, 10);
+
+		else if (SM_strequal(dict.data[i].key.str, CFG_SETTING_FIELD_BORDER_ALPHA))
+			cfg->field_border_alpha = strtoul(dict.data[i].value.str, NULL, 10);
+
+		// unknown option
 		else
-		{
-			printf(MSG_WARN_UNKNOWN_SETTING, cfg_settings[i]);
-		}
+			printf(MSG_WARN_UNKNOWN_SETTING, dict.data[i].key.str);
 	}
 
-	fclose(f);
 	SM_String_clear(&filepath);
+	SM_Dict_clear(&dict);
 }
 
 void Config_save( Config *cfg )
 {
-	FILE *f;
 	SM_String filepath = SM_String_new(16);
-	const char *delim = " = ";
 
 	/* get path */
 	if (get_config_path(&filepath) != 0)
@@ -241,107 +155,53 @@ void Config_save( Config *cfg )
 		return;
 	}
 
-	/* open */
-	f = fopen(filepath.str, "w");
+	// convert config into dict
+	SM_Dict dict = SM_Dict_new(1);
+	char temp[10];
 
-	if (f == NULL)
-	{
-		SM_String_clear(&filepath);
+	SM_Dict_add(&dict, CFG_SETTING_PATH_FONT, cfg->path_font);
+	sprintf(temp, "%f", cfg->gfx_framerate);
+	SM_Dict_add(&dict, CFG_SETTING_GFX_FRAMERATE, temp);
+
+	sprintf(temp, "%i", cfg->gfx_window_x);
+	SM_Dict_add(&dict, CFG_SETTING_GFX_WINDOW_X, temp);
+	sprintf(temp, "%i", cfg->gfx_window_y);
+	SM_Dict_add(&dict, CFG_SETTING_GFX_WINDOW_Y, temp);
+	sprintf(temp, "%i", cfg->gfx_window_w);
+	SM_Dict_add(&dict, CFG_SETTING_GFX_WINDOW_W, temp);
+	sprintf(temp, "%i", cfg->gfx_window_h);
+	SM_Dict_add(&dict, CFG_SETTING_GFX_WINDOW_H, temp);
+
+	sprintf(temp, "%u", cfg->bg_red);
+	SM_Dict_add(&dict, CFG_SETTING_BG_RED, temp);
+	sprintf(temp, "%u", cfg->bg_green);
+	SM_Dict_add(&dict, CFG_SETTING_BG_GREEN, temp);
+	sprintf(temp, "%u", cfg->bg_blue);
+	SM_Dict_add(&dict, CFG_SETTING_BG_BLUE, temp);
+
+	sprintf(temp, "%u", cfg->font_red);
+	SM_Dict_add(&dict, CFG_SETTING_FONT_RED, temp);
+	sprintf(temp, "%u", cfg->font_green);
+	SM_Dict_add(&dict, CFG_SETTING_FONT_GREEN, temp);
+	sprintf(temp, "%u", cfg->font_blue);
+	SM_Dict_add(&dict, CFG_SETTING_FONT_BLUE, temp);
+	sprintf(temp, "%u", cfg->font_alpha);
+	SM_Dict_add(&dict, CFG_SETTING_FONT_ALPHA, temp);
+
+	sprintf(temp, "%u", cfg->field_border_red);
+	SM_Dict_add(&dict, CFG_SETTING_FIELD_BORDER_RED, temp);
+	sprintf(temp, "%u", cfg->field_border_green);
+	SM_Dict_add(&dict, CFG_SETTING_FIELD_BORDER_GREEN, temp);
+	sprintf(temp, "%u", cfg->field_border_blue);
+	SM_Dict_add(&dict, CFG_SETTING_FIELD_BORDER_BLUE, temp);
+	sprintf(temp, "%u", cfg->field_border_alpha);
+	SM_Dict_add(&dict, CFG_SETTING_FIELD_BORDER_ALPHA, temp);
+
+	// save
+	if (!SM_Dict_write(&dict, filepath.str))
 		cfg->invalid = true;
-		printf(MSG_WARN_CONFIG_SAVE);
-		return;
-	}
 
-	/* write - etc */
-	fputs(CFG_SETTING_PATH_FONT, f);
-	fputs(delim, f);
-	fprintf(f, "%s", cfg->path_font);
-	fputc('\n', f);
-
-	fputs(CFG_SETTING_GFX_FRAMERATE, f);
-	fputs(delim, f);
-	fprintf(f, "%f", cfg->gfx_framerate);
-	fputc('\n', f);
-
-	/* window pos, size */
-	fputs(CFG_SETTING_GFX_WINDOW_X, f);
-	fputs(delim, f);
-	fprintf(f, "%i", cfg->gfx_window_x);
-	fputc('\n', f);
-
-	fputs(CFG_SETTING_GFX_WINDOW_Y, f);
-	fputs(delim, f);
-	fprintf(f, "%i", cfg->gfx_window_y);
-	fputc('\n', f);
-
-	fputs(CFG_SETTING_GFX_WINDOW_W, f);
-	fputs(delim, f);
-	fprintf(f, "%i", cfg->gfx_window_w);
-	fputc('\n', f);
-
-	fputs(CFG_SETTING_GFX_WINDOW_H, f);
-	fputs(delim, f);
-	fprintf(f, "%i", cfg->gfx_window_h);
-	fputc('\n', f);
-
-	/* bg color */
-	fputs(CFG_SETTING_BG_RED, f);
-	fputs(delim, f);
-	fprintf(f, "%u", cfg->bg_red);
-	fputc('\n', f);
-
-	fputs(CFG_SETTING_BG_GREEN, f);
-	fputs(delim, f);
-	fprintf(f, "%u", cfg->bg_green);
-	fputc('\n', f);
-
-	fputs(CFG_SETTING_BG_BLUE, f);
-	fputs(delim, f);
-	fprintf(f, "%u", cfg->bg_blue);
-	fputc('\n', f);
-
-	/* font color */
-	fputs(CFG_SETTING_FONT_RED, f);
-	fputs(delim, f);
-	fprintf(f, "%u", cfg->font_red);
-	fputc('\n', f);
-
-	fputs(CFG_SETTING_FONT_GREEN, f);
-	fputs(delim, f);
-	fprintf(f, "%u", cfg->font_green);
-	fputc('\n', f);
-
-	fputs(CFG_SETTING_FONT_BLUE, f);
-	fputs(delim, f);
-	fprintf(f, "%u", cfg->font_blue);
-	fputc('\n', f);
-
-	fputs(CFG_SETTING_FONT_ALPHA, f);
-	fputs(delim, f);
-	fprintf(f, "%u", cfg->font_alpha);
-	fputc('\n', f);
-
-	/* field border color */
-	fputs(CFG_SETTING_FIELD_BORDER_RED, f);
-	fputs(delim, f);
-	fprintf(f, "%u", cfg->field_border_red);
-	fputc('\n', f);
-
-	fputs(CFG_SETTING_FIELD_BORDER_GREEN, f);
-	fputs(delim, f);
-	fprintf(f, "%u", cfg->field_border_green);
-	fputc('\n', f);
-
-	fputs(CFG_SETTING_FIELD_BORDER_BLUE, f);
-	fputs(delim, f);
-	fprintf(f, "%u", cfg->field_border_blue);
-	fputc('\n', f);
-
-	fputs(CFG_SETTING_FIELD_BORDER_ALPHA, f);
-	fputs(delim, f);
-	fprintf(f, "%u", cfg->field_border_alpha);
-	fputc('\n', f);
-
-	fclose(f);
+	// clear
 	SM_String_clear(&filepath);
+	SM_Dict_clear(&dict);
 }

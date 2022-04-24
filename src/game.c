@@ -354,6 +354,13 @@ void Game_end_round( Game *game, Hud *hud )
 		}
 	}
 
+	// reset mercenaries move counter and attacked flag
+	for (uint32_t i = 0; i < game->town->merc_count; i++)
+	{
+		game->town->mercs[i].moved = 0;
+		game->town->mercs[i].attacked = false;
+	}
+
 	/* increment time */
 	game->town->round++;
 
@@ -431,6 +438,9 @@ bool Game_spawn_merc( Game *game, Hud *hud, const TownMerc merc )
 
 bool Game_move_merc( Game *game, Hud *hud, const SDL_Point src_coord, const SDL_Point dest_coord )
 {
+	uint32_t merc;
+	uint32_t distance;
+
 	// check if src_coord has mercenary
 	if (game->town->field[src_coord.x][src_coord.y] != FIELD_MERC)
 		return false;
@@ -439,21 +449,32 @@ bool Game_move_merc( Game *game, Hud *hud, const SDL_Point src_coord, const SDL_
     if (game->town->field[dest_coord.x][dest_coord.y] != FIELD_EMPTY)
     	return false;
 
-	// move merc field
-    game->town->field[src_coord.x][src_coord.y] = FIELD_EMPTY;
-    game->town->field[dest_coord.x][dest_coord.y] = FIELD_MERC;
-
-    // update merc list
+    // find merc in list
     for (uint_fast32_t i = 0; i < game->town->merc_count; i++)
     {
     	if (game->town->mercs[i].coords.x == src_coord.x &&
     		game->town->mercs[i].coords.y == src_coord.y)
     	{
-    		game->town->mercs[i].coords.x = dest_coord.x;
-    		game->town->mercs[i].coords.y = dest_coord.y;
-    		break;
-		}
-    }
+    		merc = i;
+    	}
+	}
+
+	// check if merc can travel so far
+	distance = get_distance(src_coord, dest_coord);
+
+	if (DATA_MERCENARIES[game->town->mercs[merc].id].range - game->town->mercs[merc].moved < distance)
+		return false;
+
+	else
+		game->town->mercs[merc].moved += distance;
+
+	// move merc field
+    game->town->field[src_coord.x][src_coord.y] = FIELD_EMPTY;
+    game->town->field[dest_coord.x][dest_coord.y] = FIELD_MERC;
+
+    // update merc in list
+	game->town->mercs[merc].coords.x = dest_coord.x;
+    game->town->mercs[merc].coords.y = dest_coord.y;
 
     // update hud
     Hud_set_field(hud, src_coord, hud->spr_fields[FIELD_EMPTY].texture);
@@ -463,7 +484,7 @@ bool Game_move_merc( Game *game, Hud *hud, const SDL_Point src_coord, const SDL_
 }
 
 int_fast32_t Game_merc_attack(
-	Game *game,
+	Game *game, Hud *hud,
 	const SDL_Point src_coord,
 	const uint_fast8_t weapon_slot,
 	const SDL_Point dest_coord )
@@ -472,6 +493,8 @@ int_fast32_t Game_merc_attack(
 	int_fast32_t damage;
 	uint_fast32_t distance;
 	float dmg_falloff;
+	uint32_t source_merc;
+	uint32_t target_merc;
 
 	// check if src_coord has mercenary
 	if (game->town->field[src_coord.x][src_coord.y] != FIELD_MERC)
@@ -507,16 +530,43 @@ int_fast32_t Game_merc_attack(
 		damage *= dmg_falloff;
 	}
 
-	// apply damage
+	// find source and target merc in list
 	for (uint_fast32_t i = 0; i < game->town->merc_count; i++)
     {
+    	if (game->town->mercs[i].coords.x == src_coord.x &&
+    		game->town->mercs[i].coords.y == src_coord.y)
+    	{
+    		source_merc = i;
+    	}
+
     	if (game->town->mercs[i].coords.x == dest_coord.x &&
     		game->town->mercs[i].coords.y == dest_coord.y)
     	{
-    		game->town->mercs[i].hp -= damage;
-    		break;
+    		target_merc = i;
 		}
 	}
+
+	// if source merc can not attack, stop
+	if (game->town->mercs[source_merc].attacked)
+		return 0;
+
+	// set attacked flag
+	game->town->mercs[source_merc].attacked = true;
+
+	// if damage is lethal
+	if (damage >= game->town->mercs[target_merc].hp)
+	{
+        // kill merc, update town
+        game->town->mercs[target_merc].hp = 0;
+        game->town->field[dest_coord.x][dest_coord.y] = FIELD_EMPTY;
+
+        // update hud
+        Hud_set_field(hud, dest_coord, hud->spr_fields[FIELD_EMPTY].texture);
+	}
+
+	// else apply damage
+	else
+		game->town->mercs[target_merc].hp -= damage;
 
 	return damage;
 }

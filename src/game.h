@@ -52,7 +52,7 @@ bool Game_spawn_merc( Game *game, Hud *hud, const TownMerc merc );
 bool Game_move_merc( Game *game, Hud *hud, const SDL_Point src_coord, const SDL_Point dest_coord );
 
 int_fast32_t Game_merc_attack(
-	Game *game,
+	Game *game, Hud *hud,
 	const SDL_Point src_coord,
 	const uint_fast8_t weapon_slot,
 	const SDL_Point dest_coord );

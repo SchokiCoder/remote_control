@@ -269,7 +269,7 @@ void gm_cmd_merc_attack(
 	char dmg_no[10];
 
 	SM_String msg = SM_String_from("Mercenary dealt ");
-	sprintf(dmg_no, "%li", Game_merc_attack(game, src_coord, weapon_slot, dest_coord));
+	sprintf(dmg_no, "%li", Game_merc_attack(game, hud, src_coord, weapon_slot, dest_coord));
 	SM_String_append_cstr(&msg, dmg_no);
 	SM_String_append_cstr(&msg, " damage.");
 

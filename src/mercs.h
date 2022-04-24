@@ -77,7 +77,7 @@ typedef struct MercenaryData
 	char name[10];
 	MercRole role;
 	uint32_t max_hp;
-	uint32_t speed;
+	uint32_t range;			// movement per round
 	MercWeapon loadout[3];
 } MercenaryData ;
 

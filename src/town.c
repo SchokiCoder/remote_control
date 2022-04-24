@@ -194,6 +194,8 @@ void Town_save( Town *town, const char *town_name )
 		fwrite(&town->mercs[i].coords.y, sizeof(town->mercs[i].coords.y), 1, f);
 		fwrite(&town->mercs[i].hp, sizeof(town->mercs[i].hp), 1, f);
 		fwrite(&town->mercs[i].fraction, sizeof(town->mercs[i].fraction), 1, f);
+		fwrite(&town->mercs[i].moved, sizeof(town->mercs[i].moved), 1, f);
+		fwrite(&town->mercs[i].attacked, sizeof(town->mercs[i].attacked), 1, f);
 	}
 
 	/* check and done */
@@ -294,6 +296,8 @@ void Town_load( Town *town, const char *town_name )
 		fread(&town->mercs[i].coords.y, sizeof(town->mercs[i].coords.y), 1, f);
 		fread(&town->mercs[i].hp, sizeof(town->mercs[i].hp), 1, f);
 		fread(&town->mercs[i].fraction, sizeof(town->mercs[i].fraction), 1, f);
+		fread(&town->mercs[i].moved, sizeof(town->mercs[i].moved), 1, f);
+		fread(&town->mercs[i].attacked, sizeof(town->mercs[i].attacked), 1, f);
 	}
 
 	/* check and done */

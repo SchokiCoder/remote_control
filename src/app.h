@@ -27,10 +27,10 @@ static const char APP_LICENSE_NOTICE[] =
 	"You should have received a copy of the GNU General Public License\n" \
 	"along with this program.  If not, see <https://www.gnu.org/licenses/>.\n";
 
-static const char APP_SOURCE[] = "https://github.com/SchokiCoder/remote_control";
+static const char APP_SOURCE[] = "https://github.com/SchokiCoder/remote_control.git";
 
 #define APP_MAJOR 0
-#define APP_MINOR 4
-#define APP_PATCH 1
+#define APP_MINOR 5
+#define APP_PATCH 0
 
 #endif /* APP_H */

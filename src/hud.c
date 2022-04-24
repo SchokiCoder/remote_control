@@ -475,6 +475,10 @@ void Hud_draw( Hud *hud, const Town *town )
 
 	for (uint32_t i = 0; i < town->merc_count; i++)
 	{
+		// if merc is dead, skip drawing
+		if (town->mercs[i].hp == 0)
+			continue;
+
 		// draw mercenary fields
 		SDL_RenderCopy(
 			hud->renderer,
