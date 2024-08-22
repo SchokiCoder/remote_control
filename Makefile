@@ -14,33 +14,28 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-CC = cc
-APP_NAME = remote_control
-CFLAGS = -std=c99 -Wall -Wextra -pedantic -O3
-INCLUDE = -I /usr/include/SDL2
-LIBS = -l SDL2 -l SDL2_image -l SDL2_ttf
+CC       := cc
+APP_NAME := remote_control
+CFLAGS   := -std=c99 -Wall -Wextra -pedantic -g
+INCLUDE  := -I /usr/include/schoki_misc -I /usr/include/SDL2 -I /usr/include/schoki_gui
+LIBS     := -l schoki_misc -l SDL2 -l SDL2_image -l SDL2_ttf -l schoki_gui
 
-INSTALL_BIN_DIR = /usr/bin
-INSTALL_ASSETS_DIR = /usr/share/${APP_NAME}
-INSTALL_TEXTURES_DIR = ${INSTALL_ASSETS_DIR}/textures
-INSTALL_DESKTOP_DIR = /usr/share/applications
-INSTALL_ICONS_DIR = /usr/share/icons/hicolor
+INSTALL_BIN_DIR      := /usr/bin
+INSTALL_ASSETS_DIR   := /usr/share/${APP_NAME}
+INSTALL_TEXTURES_DIR := ${INSTALL_ASSETS_DIR}/textures
+INSTALL_DESKTOP_DIR  := /usr/share/applications
+INSTALL_ICONS_DIR    := /usr/share/icons/hicolor
 
-DEFINES = -D PATH_ASSETS="\"${INSTALL_ASSETS_DIR}/\"" -D PATH_TEXTURES="\"${INSTALL_TEXTURES_DIR}/\""
+DEFINES:= -D _DEBUG\
+	-D PATH_ASSETS="\"${INSTALL_ASSETS_DIR}/\""\
+	-D PATH_TEXTURES="\"${INSTALL_TEXTURES_DIR}/\""
 
-options:
-	@echo ${APP_NAME} build options:
-	@echo "CFLAGS   = ${CFLAGS}"
-	@echo "CC       = ${CC}"
-	@echo "LIBS     = ${LIBS}"
+.PHONY: clean install uninstall
 
 clean:
 	rm -f ${APP_NAME} *.o
 
-install:
-	#compile
-	${CC} src/*.c ${CFLAGS} ${INCLUDE} ${LIBS} -o ${APP_NAME} ${DEFINES}
-
+install: remote_control
 	#move bin to install dir
 	mkdir -p ${INSTALL_BIN_DIR}
 	mv -f ${APP_NAME} ${INSTALL_BIN_DIR}
@@ -89,3 +84,6 @@ uninstall:
 	rm -f ${INSTALL_ICONS_DIR}/256x256/apps/${APP_NAME}.png
 	rm -f ${INSTALL_ICONS_DIR}/512x512/apps/${APP_NAME}.png
 	rm -f ${INSTALL_ICONS_DIR}/1024x1024/apps/${APP_NAME}.png
+
+remote_control: src/*.c
+	${CC} $^ ${CFLAGS} ${INCLUDE} ${LIBS} -o ${APP_NAME} ${DEFINES}
