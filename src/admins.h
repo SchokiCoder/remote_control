@@ -38,12 +38,12 @@ static const AdminData DATA_ADMINS[] = {
 	"She just began and thus focuses on doing her job correctly.\n" \
 	"Because of that she brings a stable environment, in which to work with no surprises."},
 
-	{"Dennis", "Ritch", 33, true, 11,
+	{"Dennis", "Ritch", 33, 11, true,
 	"Suited business oriented guy.\n" \
 	"Focuses on thorough planning and preparation.\n" \
 	"His execution is slow but once things get going, it will pay off."},
 
-	{"Helen", "McLain", 63, false, 12,
+	{"Helen", "McLain", 63, 12, false,
 	"Old chainsmoking lady.\n" \
 	"Experienced, inducing fear amongst enemies and allies alike and should not be disappointed.\n" \
 	"For the right payment, she can effectively turn tides in dire situations, with her methods of motivation."},
